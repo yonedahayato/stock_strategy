@@ -61,8 +61,8 @@ def main():
                 stock = TseStock(code)
 
             date, values = stock.Get(start_date, end_date, api_key)
-            print(date)
-            print(values)
+            #print(date)
+            #print(values)
 
             filename_code = re.sub(r'[\\|/|:|?|.|"|<|>|\|]', '-', str(code))
             f = open("code_" + filename_code + "_" + start_date + "_" + end_date + ".csv", 'w')
