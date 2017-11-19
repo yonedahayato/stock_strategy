@@ -6,8 +6,8 @@ from datetime import datetime as dt
 import datetime
 import random
 
-from get_stock_data import get_stock_data
-from get_new_stock_code import get_new_stock_code
+from .get_stock_data import get_stock_data
+from .get_new_stock_code import get_new_stock_code
 
 class move_average:
     def __init__(self, value_type, window=75):
