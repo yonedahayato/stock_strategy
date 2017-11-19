@@ -73,7 +73,7 @@ class move_average:
             try:
                 stock_data_df = get_stock_data(code, end_date_str, jst_now_str)
             except Exception as e:
-                print("get stock data error, {}".format(e))
+                print("get stock data error, code: {}, {}".format(code, e))
 
             bollinger_bands_df = self.bollinger_bands(stock_data_df)
 
@@ -83,9 +83,6 @@ class move_average:
                                         (bollinger_bands_df.ix[-1, self.value_type] < bollinger_bands_df.ix[-1, "rolling_mean"])
             flag_dive_lower_bound = (bollinger_bands_df.ix[-2, self.value_type] > bollinger_bands_df.ix[-2, "lower_bound"]) and \
                                         (bollinger_bands_df.ix[-1, self.value_type] < bollinger_bands_df.ix[-1, "lower_bound"])
-
-            print("move_average_change_rate > 0: {}, flag_dive_move_average: {}, flag_dive_lower_bound: {}".format(\
-                    (move_average_change_rate > 0), flag_dive_move_average, flag_dive_lower_bound))
 
             flag_list_macr.append(move_average_change_rate > 0)
             flag_list_dive_move_average.append(flag_dive_move_average)
