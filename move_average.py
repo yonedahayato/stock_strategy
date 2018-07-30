@@ -1,20 +1,25 @@
-import just_now
-jst_now = just_now.jst_now
-import pandas as pd
-import sys
-from datetime import datetime as dt
 import datetime
+from datetime import datetime as dt
+import pandas as pd
 import random
+import sys
+import traceback
 
-from .get_stock_data import get_stock_data
-from .get_new_stock_code import get_new_stock_code
+from get_new_stock_code import get_new_stock_code
+from get_stock_data import get_stock_data
+import just_now
+
+jst_now = just_now.jst_now
 
 class move_average:
     def __init__(self, value_type, window=75):
         if value_type.lower() in ["open", "low", "high", "close"]:
             self.value_type = value_type
         else:
-            print("value_type is invalid: '{}'".format(value_type))
+            error_msg = "value_type is invalid: '{}'".format(value_type)
+            print(error_msg)
+            with open("error.log", 'a') as f:
+                f.write(error_msg)
 
         self.window = window
 
@@ -73,7 +78,10 @@ class move_average:
             try:
                 stock_data_df = get_stock_data(code, end_date_str, jst_now_str)
             except Exception as e:
-                print("get stock data error, code: {}, {}".format(code, e))
+                error_msg = "get stock data error, code: {}, {}".format(code, e)
+                print(error_msg)
+                with open("error.log", 'a') as f:
+                    f.write(error_msg)
 
             bollinger_bands_df = self.bollinger_bands(stock_data_df)
 
