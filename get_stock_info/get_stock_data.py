@@ -1,9 +1,10 @@
-import quandl
+import csv
 import datetime
 import pandas as pd
+import quandl
 import re
 import sys
-import csv
+
 api_key = "c_MVftyir5vTKxyiuego"
 
 class Stock :
