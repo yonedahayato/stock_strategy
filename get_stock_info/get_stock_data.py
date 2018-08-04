@@ -216,5 +216,5 @@ if __name__ == "__main__":
     # stock_df = get_stock_data(1332, "2017-12-12", "2018-07-31")
     # print(stock_df)
     gsd = Get_Stock_Data(verbose=True)
-    data_df = gsd.get_stock_data_jsm(1606, "D", start=pd.Timestamp("20170101"), end=pd.Timestamp("20180731"))
+    data_df = gsd.get_stock_data_jsm(1332, "D", start=pd.Timestamp("20170101"), end=pd.Timestamp("20180731"))
     print(data_df)
