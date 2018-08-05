@@ -1,0 +1,17 @@
+FROM python:3.6-slim
+
+# RUN apt-get install -y \
+#   python3-lxml \
+#   libxml2-dev \
+#   libxslt-dev \
+#   python-dev
+
+RUN pip install --upgrade pip
+
+RUN pip install \
+  jsm\
+  numpy\
+  pandas\
+  Quandl\
+  lxml\
+  xlrd

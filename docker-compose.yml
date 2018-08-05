@@ -1,0 +1,11 @@
+version: "3"
+services:
+  get_stock_data:
+    image: get_stock_data
+    container_name: "get_stock_data"
+    environment:
+      LOG_DIR: log_dir
+      UPLOAD_DIR: upload_dir
+    volumes:
+      - ${LOG_DIR}:/get_stock_data/helper/log
+      - ${UPLOAD_DIR}:/get_stock_data/get_stock_info/stock_data
