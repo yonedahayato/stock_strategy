@@ -1,5 +1,6 @@
 *.csv
 */setting.py
+*environment.txt
 
 __pycache__
 log
