@@ -66,9 +66,12 @@ class Data_Uploader:
                         if get_stock_data_cnt == 3:
                             raise Exception(e)
                         else:
+                            get_stock_data_cnt += 1
                             continue
                     except:
                         raise Exception()
+                    else:
+                        break
             except Exception as e:
                 err_msg = msg.format("fail to get stock data, code: {}, {}".format(stock_code, e))
                 self.logging_error(err_msg)
