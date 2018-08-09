@@ -54,11 +54,21 @@ class Data_Uploader:
             self.logging_info(sccs_msg)
 
         for stock_code in stock_list:
+            get_stock_data_cnt = 0
             try:
-                stock_data_df = self.get_stock_data(stock_code)
-                save_file_path = self.save_stock_data(stock_data_df, stock_code)
-                self.request_uploader(save_file_path)
-                self.remove_file(save_file_path)
+                while True:
+                    try:
+                        stock_data_df = self.get_stock_data(stock_code)
+                        save_file_path = self.save_stock_data(stock_data_df, stock_code)
+                        self.request_uploader(save_file_path)
+                        self.remove_file(save_file_path)
+                    except jsm.exceptions.CCODENotFoundException as e:
+                        if get_stock_data_cnt == 3:
+                            raise Exception(e)
+                        else:
+                            continue
+                    except:
+                        raise Exception()
             except Exception as e:
                 err_msg = msg.format("fail to get stock data, code: {}, {}".format(stock_code, e))
                 self.logging_error(err_msg)
