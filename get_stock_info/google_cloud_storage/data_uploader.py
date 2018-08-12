@@ -89,7 +89,7 @@ class Data_Uploader:
 
     def get_stock_data(self, code):
         gsd = Get_Stock_Data(verbose=True)
-        data_df = gsd.get_stock_data_jsm(code, "D", end=pd.Timestamp.today(), periods=120)
+        data_df = gsd.get_stock_data_jsm(code, "D", end=pd.Timestamp.today(), periods=160)
         return data_df
 
     def save_stock_data(self, data_df, stock_code):
