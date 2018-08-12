@@ -70,6 +70,10 @@ class move_average:
         return rm_df
 
     def bollinger_bands(self, stock_data_df):
+        msg = "[move_average:bollinger_bands]: {}"
+        if len(stock_data_df) <= self.window:
+            raise Exception(msg.format("stock data < window"))
+
         stock_data_df = self.shape(stock_data_df)
         self.rm_df = self.move_average(stock_data_df)
         #self.rstd_df = pd.rolling_std(stock_data_df, window=self.window) # featre warning
@@ -120,12 +124,21 @@ class move_average:
                 continue
             except Exception as e:
                 error_msg = msg.format("get stock data error, code: {},\
-                    end_data_str: {}, jst_now_str: {}, {}".format(code, end_date_str, jst_now_str, e))
+                    end_data_str: {}, jst_now_str: {}, result_codes: {}, {}".format(\
+                    code, end_date_str, jst_now_str, self.result_codes, e))
                 logger.error(error_msg)
                 logger.exception(error_msg)
                 raise Exception(error_msg)
 
-            bollinger_bands_df = self.bollinger_bands(stock_data_df)
+            try:
+                bollinger_bands_df = self.bollinger_bands(stock_data_df)
+            except Exception as e:
+                error_msg = msg.format("fail to compute bollinger bands, result_codes:{}, {}".format(self.result_codes, e))
+                logger.error(error_msg)
+                logger.exception(error_msg)
+            else:
+                sccess_msg = "success to compute bollinger bands"
+                logger.info(sccess_msg)
 
             # 移動平均線の変化率
             move_average_change_rate = (bollinger_bands_df.ix[-1, "rolling_mean"] - bollinger_bands_df.ix[-2, "rolling_mean"]) /\
@@ -167,7 +180,7 @@ class move_average:
 if __name__ == "__main__":
     window = 75
     code = 1332
-    ma = move_average(value_type="Close", window=window, verbose=True, debug=False, back_test_return_date=10)
+    ma = move_average(value_type="Close", window=window, verbose=True, debug=False, back_test_return_date=5)
     buy_code = ma.get_buy_codes()
     print(ma.result_codes)
     print(buy_code)
