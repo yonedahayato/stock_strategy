@@ -155,7 +155,7 @@ class move_average:
             flag_list_dive_lower_bound.append(flag_dive_lower_bound)
 
             if (move_average_change_rate > 0) and (flag_dive_lower_bound or flag_dive_move_average):
-                self.result_codes.append(code)
+                self.result_codes.append(int(code))
 
         self.logging_info(msg.format("num_macr: {}, num_dive_move_average: {}, num_dive_lower_bound: {}".format(\
                 sum(flag_list_macr), sum(flag_list_dive_move_average), sum(flag_list_dive_lower_bound))))

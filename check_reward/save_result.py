@@ -45,10 +45,20 @@ class Save_Result:
         self.format[key] = value
 
     def save(self):
-        file_name = "{}_{}.json".format(self.format["method"], self.format["date"])
-        file_path = "{}/{}".format(self.save_path, file_name)
-        with open(file_path, "w") as file:
-            json.dump(self.format, file)
+        msg = "[Save_Result:save]: {}"
+        try:
+            file_name = "{}_{}.json".format(self.format["method"], self.format["date"])
+            file_path = "{}/{}".format(self.save_path, file_name)
+            with open(file_path, "w") as file:
+                json.dump(self.format, file)
+        except Exception as e:
+            error_msg = "failt to save to json, format: {}, {}".format(self.format, e)
+            logger.error(msg.format(error_msg))
+            logger.exception(error_msg)
+            raise Exception(e)
+        else:
+            sccess_msg = "success to save to json, format: {}".format(self.format)
+            logger.info(sccess_msg)
 
 def main():
     sr = Save_Result()
