@@ -102,7 +102,7 @@ class move_average:
         flag_list_dive_lower_bound = []
         flag_list_dive_move_average = []
         for i, code in enumerate(new_code_list):
-            self.logging_info(msg.format("no. {}, code: {}".format(i, code)))
+            self.logging_info(msg.format("no. {}/{}, code: {}".format(i, len(new_code_list),code)))
 
             try:
                 # stock_data_df = get_stock_data(code, end_date_str, jst_now_str)
