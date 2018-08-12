@@ -9,19 +9,23 @@ import traceback
 
 abspath = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(abspath + "/get_stock_info")
+sys.path.append(abspath + "/get_stock_info/google_cloud_storage")
 sys.path.append(abspath + "/helper")
+sys.path.append(abspath + "/check_reward")
 
+from data_downloader import Data_Downloader
 from get_new_stock_code import Get_Code_List
 from get_stock_data import get_stock_data, Get_Stock_Data
 from helper import log
 import just_now
+from save_result import Save_Result
 
 jst_now = just_now.jst_now
 
 logger = log.logger
 
 class move_average:
-    def __init__(self, value_type, window=75, verbose=False, debug=False):
+    def __init__(self, value_type, window=75, verbose=False, debug=False, back_test_return_date=0):
         if value_type.lower() in ["open", "low", "high", "close"]:
             self.value_type = value_type
         else:
@@ -41,6 +45,8 @@ class move_average:
 
         self.verbose = verbose
         self.debug = debug
+
+        self.back_test_return_date = back_test_return_date
 
     def logging_info(self, msg):
         logger.info(msg)
@@ -100,8 +106,16 @@ class move_average:
 
             try:
                 # stock_data_df = get_stock_data(code, end_date_str, jst_now_str)
-                gsd = Get_Stock_Data()
-                stock_data_df = gsd.get_stock_data_jsm(code, 'D', start=pd.Timestamp(end_date_str), end=pd.Timestamp(jst_now_str))
+
+                # gsd = Get_Stock_Data()
+                # stock_data_df = gsd.get_stock_data_jsm(code, 'D', start=pd.Timestamp(end_date_str), end=pd.Timestamp(jst_now_str))
+
+                dd = Data_Downloader()
+                stock_data_df = dd.download(code)
+                stock_data_df = stock_data_df.set_index("Date")
+                if self.back_test_return_date != 0:
+                    stock_data_df = stock_data_df.iloc[:-self.back_test_return_date]
+
             except jsm.exceptions.CCODENotFoundException:
                 continue
             except Exception as e:
@@ -127,11 +141,21 @@ class move_average:
             flag_list_dive_move_average.append(flag_dive_move_average)
             flag_list_dive_lower_bound.append(flag_dive_lower_bound)
 
-            if (move_average_change_rate > 0) and (flag_dive_lower_bound and flag_dive_move_average):
+            if (move_average_change_rate > 0) and (flag_dive_lower_bound or flag_dive_move_average):
                 self.result_codes.append(code)
 
         self.logging_info(msg.format("num_macr: {}, num_dive_move_average: {}, num_dive_lower_bound: {}".format(\
                 sum(flag_list_macr), sum(flag_list_dive_move_average), sum(flag_list_dive_lower_bound))))
+
+        sr = Save_Result()
+
+        sr.add_info("result_code_list", self.result_codes)
+        sr.add_info("method", "move_average")
+        stock_data_df_index = stock_data_df.index
+        sr.add_info("data_range_start", stock_data_df_index[0])
+        sr.add_info("data_range_end", stock_data_df_index[-1])
+
+        sr.save()
 
         if random_choice:
             if len(self.result_codes) == 0:
@@ -143,7 +167,7 @@ class move_average:
 if __name__ == "__main__":
     window = 75
     code = 1332
-    ma = move_average(value_type="Close", window=window, verbose=True, debug=False)
+    ma = move_average(value_type="Close", window=window, verbose=True, debug=False, back_test_return_date=10)
     buy_code = ma.get_buy_codes()
     print(ma.result_codes)
     print(buy_code)
