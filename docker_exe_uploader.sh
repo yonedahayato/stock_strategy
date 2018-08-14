@@ -21,6 +21,7 @@ echo "LOG_DIR: " $LOG_DIR
 echo "UPLOAD_DIR: " $UPLOAD_DIR
 
 # get stock data
+export COMPOSE_FILE=dockerfile/docker-compose.get_stock_data.yml
 # docker run -it --rm get_stock_data python get_stock_info/get_stock_data.py
 docker-compose up
 
