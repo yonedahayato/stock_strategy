@@ -11,7 +11,7 @@ import log
 
 logger = log.logger
 
-result_path = abspath + "/result"
+result_path = abspath + "/result/selected_code"
 
 class Save_Result:
     def __init__(self, save_path=result_path):
