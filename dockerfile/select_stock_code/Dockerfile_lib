@@ -1,0 +1,9 @@
+FROM python:3.6-slim
+
+RUN pip install \
+  jsm\
+  numpy\
+  pandas\
+  Quandl\
+  lxml\
+  xlrd

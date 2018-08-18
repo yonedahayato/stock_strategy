@@ -1,0 +1,13 @@
+version: "3"
+services:
+  select_stock_code:
+    image: select_stock_code
+    container_name: "select_stock_code"
+    environment:
+      DOWNLOAD_DIR: download_dir
+      LOG_DIR: log_dir
+      SELECT_CODE_DIR: select_code_dir
+    volumes:
+      - ${DOWNLOAD_DIR}:/select_stock_code/get_stock_info/stock_data
+      - ${LOG_DIR}:/select_stock_code/helper/log
+      - ${SELECT_CODE_DIR}:/select_stock_code/check_reward/result/selected_code
