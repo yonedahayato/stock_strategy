@@ -1,6 +1,7 @@
 FROM python:3.6-slim
 
 RUN pip install \
+  joblib\
   jsm\
   numpy\
   pandas\
