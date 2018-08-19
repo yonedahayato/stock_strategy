@@ -239,7 +239,13 @@ class Move_Average(Stock_Storategy):
 
         sign_rising_Low_term = 20 # 10
         diff_Low_MoveAverage = diff_Low_MoveAverage.iloc[-sign_rising_Low_term:] > 0
-        sign_rising_Low = diff_Low_MoveAverage.all().values[0]
+
+        sign_rising_Low = False
+        for cnt in range(sign_rising_Low_term-1):
+            if (diff_Low_MoveAverage.iloc[cnt].values[0] == False) and \
+                (diff_Low_MoveAverage.iloc[cnt+1].values[0] == True):
+                sign_rising_Low = True
+                break
 
         if self.debug:
             print("sign_rising_Low: {}".format(sign_rising_Low))
