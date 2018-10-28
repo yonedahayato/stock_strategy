@@ -35,6 +35,6 @@ export COMPOSE_FILE=dockerfile/docker-compose.select_stock_code.yml
 docker-compose up
 
 # remove docker image
-# docker rmi get_stock_data_lib
-docker rmi get_stock_data
+# docker rmi select_stock_code_lib
+docker rmi select_stock_code
 docker-compose down -v
