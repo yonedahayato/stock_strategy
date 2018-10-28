@@ -3,6 +3,7 @@ import datetime
 import jsm
 import numpy as np
 import os
+import os.path as path
 import pandas as pd
 from pandas.core import common as com
 import quandl
@@ -10,9 +11,9 @@ import re
 import sys
 
 abs_dirname = os.path.dirname(os.path.abspath(__file__))
-parent_dirname = abs_dirname.split("/")
-parent_dirname = "/".join(parent_dirname[:-1])
-sys.path.append(parent_dirname + "/helper")
+parent_dirname = path.dirname(abs_dirname)
+helper_dirname = path.join(parent_dirname, "helper")
+sys.path.append(helper_dirname)
 
 import log
 
