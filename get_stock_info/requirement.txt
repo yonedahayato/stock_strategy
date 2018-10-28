@@ -1,0 +1,4 @@
+jsm
+numpy
+pandas
+quandl
