@@ -1,11 +1,20 @@
 from html.parser import HTMLParser
 from lxml import html
 import numpy as np
+import os.path as path
 import pandas as pd
+import re
 import sys
 import urllib
 import urllib.request as request
 import urllib.request
+
+abs_dirname = path.dirname(path.abspath(__file__))
+parent_dirname = path.dirname(abs_dirname)
+helper_dirname = path.join(parent_dirname, "helper")
+sys.path.append(helper_dirname)
+
+from setting import TOSHO_1ST_LIST_URL, NIKKEI_225_LIST_URL
 
 class Parser(HTMLParser):
     def __init__(self, tag, attr):
@@ -23,10 +32,10 @@ class Parser(HTMLParser):
 class Get_Code_List:
     def __init__(self, verbose=False):
         self.verbose = verbose
+        self.url = TOSHO_1ST_LIST_URL
 
-    def http_get(self):
-        url = "http://www.jpx.co.jp/markets/statistics-equities/misc/01.html"
-        with urllib.request.urlopen(url) as response:
+    def get_response(self):
+        with urllib.request.urlopen(self.url) as response:
             return response.read()
 
     def get_data_url(self, tag, attr, html):
@@ -43,18 +52,41 @@ class Get_Code_List:
         data_1st_df = df_all.ix[df_all["市場・商品区分"]=="市場第一部（内国株）", :]
 
         if self.verbose:
-            print("[Get_Code_list:get_data_from_url]: len(data_1st_df): {}".format(len(data_1st_df)))
+            print("[Get_Code_List:get_data_from_url]: len(data_1st_df): {}".format(len(data_1st_df)))
         return data_1st_df
 
     def get_new_stock_code(self):
-        link = self.get_data_url("a", "href", self.http_get())
+        link = self.get_data_url("a", "href", self.get_response())
         if self.verbose:
-            print("[Get_Code_list:get_new_stock_code]: data url link: {}".format(link))
+            print("[Get_Code_List:get_new_stock_code]: data url link: {}".format(link))
 
         data_df = self.get_data_from_url(link)
         return data_df
 
+class GetCodeListNikkei225(Get_Code_List):
+    def __init__(self, verbose=False, nikkei_225=False):
+        self.verbose = verbose
+        self.url = NIKKEI_225_LIST_URL
+
+    def get_new_stock_code(self):
+        response = self.get_response()
+        stock_list = self.parse_html(response)
+
+    def parse_html(response)
+        response = response.decode("utf-8")
+
+        pattern = r'<div class="col-xs-3 col-sm-1_5">([0-9]+)<\/div>'
+
+        repattern = re.compile(pattern)
+        search_obj = repattern.findall(response)
+
+        return search_obj
+
 if __name__ == "__main__":
     gcl = Get_Code_List(verbose=True)
     data_df = gcl.get_new_stock_code()
+    print(data_df)
+
+    gcl_nikkei_225 = GetCodeListNikkei225(verbose=True)
+    data_df = gcl_nikkei_225.get_new_stock_code()
     print(data_df)
