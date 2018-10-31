@@ -70,9 +70,12 @@ class GetCodeListNikkei225(Get_Code_List):
 
     def get_new_stock_code(self):
         response = self.get_response()
-        stock_list = self.parse_html(response)
+        code_list = self.parse_html(response)
+        code_list_df = pd.DataFrame.from_dict({"コード": code_list})
 
-    def parse_html(response)
+        return code_list_df
+
+    def parse_html(self, response):
         response = response.decode("utf-8")
 
         pattern = r'<div class="col-xs-3 col-sm-1_5">([0-9]+)<\/div>'
