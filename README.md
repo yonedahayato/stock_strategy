@@ -4,6 +4,12 @@
 # select stock code
 `./docker_exe_select_stock_code.sh`
 
-## get code nikkei 225
-(coding now)
+## get code list nikkei 225
+python get_stock_info/get_new_stock_code.py
+
+## get historical data
 python get_stock_info/get_stock_data.py
+
+## select trade code
+(coding now)
+python move_average.py
