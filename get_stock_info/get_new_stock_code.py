@@ -29,7 +29,7 @@ class Parser(HTMLParser):
                 if attr[0] == self.attr:
                     self.attrs.append(attr[1])
 
-class Get_Code_List:
+class GetCodeList:
     def __init__(self, verbose=False):
         self.verbose = verbose
         self.url = TOSHO_1ST_LIST_URL
