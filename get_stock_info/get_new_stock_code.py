@@ -86,10 +86,12 @@ class GetCodeListNikkei225(GetCodeList):
         return search_obj
 
 if __name__ == "__main__":
-    gcl = GetCodeList(verbose=True)
-    data_df = gcl.get_new_stock_code()
+    get_colde_list = GetCodeList(verbose=True)
+    data_df = get_colde_list.get_new_stock_code()
+    print("東証１部リスト")
     print(data_df)
 
     gcl_nikkei_225 = GetCodeListNikkei225(verbose=True)
     data_df = gcl_nikkei_225.get_new_stock_code()
+    print("日経２２５リスト")
     print(data_df)
