@@ -63,7 +63,7 @@ class GetCodeList:
         data_df = self.get_data_from_url(link)
         return data_df
 
-class GetCodeListNikkei225(Get_Code_List):
+class GetCodeListNikkei225(GetCodeList):
     def __init__(self, verbose=False, nikkei_225=False):
         self.verbose = verbose
         self.url = NIKKEI_225_LIST_URL
@@ -86,7 +86,7 @@ class GetCodeListNikkei225(Get_Code_List):
         return search_obj
 
 if __name__ == "__main__":
-    gcl = Get_Code_List(verbose=True)
+    gcl = GetCodeList(verbose=True)
     data_df = gcl.get_new_stock_code()
     print(data_df)
 
