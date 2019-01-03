@@ -1,4 +1,4 @@
-*.csv
+/get_stock_info/stock_data/*.csv
 */setting.py
 *environment.txt
 
