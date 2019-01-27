@@ -16,186 +16,16 @@ sys.path.append(abspath + "/check_reward")
 
 from data_downloader import Data_Downloader
 from get_new_stock_code import GetCodeList
-from get_stock_data import Get_Stock_Data
+from get_stock_data import GetStockData
 from helper import log
 import just_now
 from save_result import Save_Result
 from setting import HISTRICAL_DATA_PATH
+from stock_storategy import Stock_Storategy
 
 jst_now = just_now.jst_now
 
 logger = log.logger
-
-class Stock_Storategy:
-    def __init__(self, debug=False, back_test_return_date=0, method_name="method_name", multiprocess=False):
-        self.msg_tmpl = "[Stock_Storategy:{}]: "
-
-        self.debug = debug
-        self.back_test_return_date = back_test_return_date
-        self.method_name = method_name
-        self.multiprocess = multiprocess
-
-        self.result_codes = []
-
-    def get_code_list(self):
-        gcl = GetCodeList()
-        self.new_code_list = gcl.get_new_stock_code()
-        self.new_code_list = list(self.new_code_list["コード"])
-        if self.debug:
-            self.new_code_list = self.new_code_list[:10]
-
-        return self.new_code_list
-
-    def get_stock_data(self, code, method = "google_cloud_storage"):
-        msg = self.msg_tmpl.format("get_stock_data") + "{}"
-
-        if method == "google_cloud_storage":
-            dd = Data_Downloader()
-            stock_data_df = dd.download(code)
-            stock_data_df = stock_data_df.set_index("Date")
-            if self.back_test_return_date != 0:
-                stock_data_df = stock_data_df.iloc[:-self.back_test_return_date]
-        elif method == "local_data":
-            stock_data_df = pd.read_csv("{}/{}.csv".format(HISTRICAL_DATA_PATH, code))
-
-
-        if self.debug:
-            print(msg.format(stock_data_df))
-
-        return stock_data_df
-
-    def select_code(self, code, stock_data_df):
-        # example #
-        # stock code number : i
-        # stock data length : n
-        # close value : C[i]
-        # selected code list = argmax_{i} ( (C[n-1] - C[n-2]) / C[n-2] )
-
-        if len(self.result_codes) == 0:
-            self.result_codes.append(int(code))
-            self.max_close_rate = (stock_data_df.iloc[-1]["Close"] - stock_data_df.iloc[-2]["Close"]) / stock_data_df.iloc[-2]["Close"]
-        else:
-            max_close_rate_tmp = (stock_data_df.iloc[-1]["Close"] - stock_data_df.iloc[-2]["Close"]) / stock_data_df.iloc[-2]["Close"]
-
-            if max_close_rate_tmp > self.max_close_rate:
-                self.max_rate_close = max_close_rate_tmp
-                self.result_codes = [int(code)]
-
-    def get_stock_data_index(self):
-        code = self.new_code_list[0]
-        stock_data_df = self.get_stock_data(code)
-        return stock_data_df.index
-
-    def save_result(self):
-        sr = Save_Result()
-
-        sr.add_info("result_code_list", self.result_codes)
-        sr.add_info("method", self.method_name)
-
-        stock_data_df_index = self.get_stock_data_index()
-        sr.add_info("data_range_start", stock_data_df_index[0])
-        sr.add_info("data_range_end", stock_data_df_index[-1])
-
-        sr.save()
-
-    def check_select_code(self):
-        msg = self.msg_tmpl.format("check_select_code") + "{}"
-        logger.info(msg.format(self.result_codes))
-
-    def multiprocess_exect(self, code_cnt, code):
-        msg = self.msg_tmpl.format("multiprocess_exect") + "{}"
-
-        logger.info(msg.format("code {}, {} / {}".format(code, code_cnt+1, len(self.new_code_list))))
-
-        try:
-            stock_data_df = self.get_stock_data(code)
-        except:
-            err_msg = msg.format("fail to get stock histlical data.")
-            logger.error(err_msg)
-            logger.exception(err_msg)
-            raise Exception(err_msg)
-        else:
-            logger.info(msg.format("success to get stock histlical data."))
-
-        try:
-            self.select_code(code, stock_data_df)
-        except:
-            err_msg = msg.format("fail to select code.")
-            logger.error(err_msg)
-            logger.exception(err_msg)
-            raise Exception(err_msg)
-        else:
-            logger.info(msg.format("success to select code."))
-
-        return self.result_codes
-
-    def exect(self):
-        msg = self.msg_tmpl.format("exect") + "{}"
-
-        try:
-            code_list = self.get_code_list()
-        except:
-            err_msg = msg.format("fail to get code list.")
-            logger.error(err_msg)
-            logger.exception(err_msg)
-            raise Exception(err_msg)
-        else:
-            logger.info(msg.format("success to get code list."))
-
-        if not self.multiprocess:
-            for code_cnt, code in enumerate(code_list):
-                logger.info(msg.format("code {}, {} / {}".format(code, code_cnt+1, len(code_list))))
-                return
-
-                try:
-                    stock_data_df = self.get_stock_data(code)
-                except:
-                    err_msg = msg.format("fail to get stock histlical data.")
-                    logger.error(err_msg)
-                    logger.exception(err_msg)
-                    raise Exception(err_msg)
-                else:
-                    logger.info(msg.format("success to get stock histlical data."))
-
-                try:
-                    self.select_code(code, stock_data_df)
-                except:
-                    err_msg = msg.format("fail to select code.")
-                    logger.error(err_msg)
-                    logger.exception(err_msg)
-                    raise Exception(err_msg)
-                else:
-                    logger.info(msg.format("success to select code."))
-        elif self.multiprocess:
-            try:
-                processed = Parallel(n_jobs=-1)([delayed(self.multiprocess_exect)(code_cnt, code) for code_cnt, code in enumerate(code_list)])
-            except:
-                err_msg = msg.format("fail to exect multiprocess.")
-                logger.error(err_msg)
-                logger.exception(err_msg)
-                raise Exception(err_msg)
-            else:
-                logger.info(msg.format("success to ecect multiprocess."))
-
-        try:
-            self.check_select_code()
-        except:
-            err_msg = msg.format("fail to check select code.")
-            logger.error(err_msg)
-            logger.exception(err_msg)
-            raise Exception(err_msg)
-        else:
-            logger.info(msg.format("success to check select code."))
-
-        try:
-            self.save_result()
-        except:
-            err_msg = msg.format("fail to save result select code.")
-            logger.error(err_msg)
-            logger.exception(err_msg)
-            raise Exception(err_msg)
-        else:
-            logger.info(msg.format("success to save result select code."))
 
 
 class Move_Average(Stock_Storategy):
@@ -267,7 +97,7 @@ def main():
     # ss = Stock_Storategy(debug=True, back_test_return_date=5)
     # ss.exect()
 
-    ma = Move_Average(debug=True, back_test_return_date=5, method_name="MAMAM", multiprocess=False, window=75)
+    ma = Move_Average(debug=False, back_test_return_date=5, method_name="MAMAM", multiprocess=False, window=75)
     ma.exect()
 
 if __name__ == "__main__":

@@ -23,7 +23,7 @@ def request(code_list, result):
         try:
             get_stock_data = GetStockData(verbose=True)
             data_df = get_stock_data.get_stock_data_jsm(code, "D", start=pd.Timestamp("20170101"), end=pd.Timestamp("20180731"))
-            data_df.to_csv("{}/{}.csv".format(HISTRICAL_DATA_PATH, code))
+            data_df.to_csv(HISTRICAL_DATA_PATH.format(code=code))
         except Exception as e:
             logger.error("[{}]: ヒストリカルデータの取得に失敗しました。{}".format(code, e))
         else:

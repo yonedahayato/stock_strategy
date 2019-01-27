@@ -15,7 +15,7 @@ sys.path.append(helper_dir)
 
 from data_uploader import Data_Uploader
 from get_new_stock_code import GetCodeList
-from get_stock_data import Get_Stock_Data
+from get_stock_data import GetStockData
 import log
 import setting
 

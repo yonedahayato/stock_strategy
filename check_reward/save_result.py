@@ -11,10 +11,10 @@ import log
 
 logger = log.logger
 
-result_path = abspath + "/result/selected_code"
+from setting import *
 
 class Save_Result:
-    def __init__(self, save_path=result_path):
+    def __init__(self, save_path=RESULT_PATH):
         msg = "[Save_Result:__init__]: {}"
         self.save_path = save_path
         logger.info(msg.format("save_path: {}".format(save_path)))

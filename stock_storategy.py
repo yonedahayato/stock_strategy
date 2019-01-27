@@ -1,5 +1,37 @@
+import datetime
+from datetime import datetime as dt
+from joblib import Parallel, delayed
+import jsm
+import os
+import pandas as pd
+import random
+import sys
+import traceback
+
+abspath = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(abspath + "/get_stock_info")
+sys.path.append(abspath + "/get_stock_info/google_cloud_storage")
+sys.path.append(abspath + "/helper")
+sys.path.append(abspath + "/check_reward")
+
+from data_downloader import Data_Downloader
+from get_new_stock_code import GetCodeList, GetCodeListNikkei225
+from get_stock_data import GetStockData
+from helper import log
+import just_now
+from save_result import Save_Result
+from setting import HISTRICAL_DATA_PATH
+
+jst_now = just_now.jst_now
+
+logger = log.logger
+
+DOWNLOAD_METHODES = ["LOCAL", "CLOUD", "API"]
+CODE_LIST = ["1st_all", "1st_225"]
+
 class Stock_Storategy:
-    def __init__(self, debug=False, back_test_return_date=0, method_name="method_name", multiprocess=False):
+    def __init__(self, debug=False, back_test_return_date=0, method_name="method_name", multiprocess=False,
+                download_method="LOCAL", code_list = "1st_225"):
         self.msg_tmpl = "[Stock_Storategy:{}]: "
 
         self.debug = debug
@@ -9,10 +41,19 @@ class Stock_Storategy:
 
         self.result_codes = []
 
+        self.download_method = download_method
+        self.code_list = code_list
+
     def get_code_list(self):
-        gcl = Get_Code_List()
-        self.new_code_list = gcl.get_new_stock_code()
+        if self.code_list == "1st_all":
+            gettter = GetCodeList()
+
+        elif self.code_list == "1st_225":
+            getter = GetCodeListNikkei225()
+
+        self.new_code_list = getter.get_new_stock_code()
         self.new_code_list = list(self.new_code_list["コード"])
+
         if self.debug:
             self.new_code_list = self.new_code_list[:10]
 
@@ -21,12 +62,15 @@ class Stock_Storategy:
     def get_stock_data(self, code):
         msg = self.msg_tmpl.format("get_stock_data") + "{}"
 
-        dd = Data_Downloader()
-        print(code)
-        stock_data_df = dd.download(code)
-        stock_data_df = stock_data_df.set_index("Date")
-        if self.back_test_return_date != 0:
-            stock_data_df = stock_data_df.iloc[:-self.back_test_return_date]
+        if self.download_method == "CLOUD":
+            dd = Data_Downloader()
+            stock_data_df = dd.download(code)
+            stock_data_df = stock_data_df.set_index("Date")
+            if self.back_test_return_date != 0:
+                stock_data_df = stock_data_df.iloc[:-self.back_test_return_date]
+
+        elif self.download_method == "LOCAL":
+            stock_data_df = pd.read_csv(HISTRICAL_DATA_PATH.format(code=code))
 
         if self.debug:
             print(msg.format(stock_data_df))
@@ -121,7 +165,7 @@ class Stock_Storategy:
                     err_msg = msg.format("fail to get stock histlical data.")
                     logger.error(err_msg)
                     logger.exception(err_msg)
-                    raise Exception(err_msg)
+                    continue
                 else:
                     logger.info(msg.format("success to get stock histlical data."))
 

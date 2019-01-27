@@ -10,6 +10,7 @@
 ## get historical data
 `python get_stock_info/get_stock_data.py`
 
-## select trade code
-(coding now)
-python move_average.py
+# select code to buy or sell
+## move average
+coding now
+`python move_average.py`
