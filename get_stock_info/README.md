@@ -40,3 +40,9 @@ Date,Open,High,Low,Close,Adj_Close,Vloume
 2017-01-17,536,538,520,520,520,2814100
 2017-01-18,524,544,523,537,537,4200700
 ```
+
+# get historical data and save to local
+使用する前にスレッド数を設定
+```
+sudo python get_stock_data_to_local.py
+```

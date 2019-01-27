@@ -21,7 +21,7 @@ logger = log.logger
 
 api_key = "c_MVftyir5vTKxyiuego"
 
-class Get_Stock_Data:
+class GetStockData:
     def __init__(self, verbose=False):
         self.verbose = verbose
 
@@ -134,6 +134,6 @@ class Get_Stock_Data:
         return data_df
 
 if __name__ == "__main__":
-    gsd = Get_Stock_Data(verbose=True)
+    gsd = GetStockData(verbose=True)
     data_df = gsd.get_stock_data_jsm(1332, "D", start=pd.Timestamp("20170101"), end=pd.Timestamp("20180731"))
     print(data_df)
