@@ -1,6 +1,6 @@
 import os
 abspath = os.path.dirname(os.path.abspath(__file__))
-p_dirnam = os.path.dirname(abspath)
+p_dirname = os.path.dirname(abspath)
 
 
 # log
@@ -18,4 +18,4 @@ NIKKEI_225_LIST_URL = "https://indexes.nikkei.co.jp/nkave/index/component?idx=nk
 HISTRICAL_DATA_PATH = p_dirname + "/stock_strategy/get_stock_info/stock_data/{code}.csv"
 
 # path save result
-RESULT_PATH = p_dirnam + "/check_reward/result/selected_code"
+RESULT_PATH = p_dirname + "/check_reward/result/selected_code"
