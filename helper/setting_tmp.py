@@ -15,7 +15,7 @@ TOSHO_1ST_LIST_URL = "http://www.jpx.co.jp/markets/statistics-equities/misc/01.h
 NIKKEI_225_LIST_URL = "https://indexes.nikkei.co.jp/nkave/index/component?idx=nk225"
 
 # path save and get histrical data to local
-HISTRICAL_DATA_PATH = p_dirname + "/stock_strategy/get_stock_info/stock_data/{code}.csv"
+HISTRICAL_DATA_PATH = p_dirname + "/get_stock_info/stock_data/{code}.csv"
 
 # path save result
 RESULT_PATH = p_dirname + "/check_reward/result/selected_code"
