@@ -1,4 +1,7 @@
 import os
+abspath = os.path.dirname(os.path.abspath(__file__))
+p_dirnam = os.path.dirname(abspath)
+
 
 # log
 log_save_path = ""
