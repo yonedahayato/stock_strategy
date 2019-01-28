@@ -11,7 +11,7 @@ RUN pip install --upgrade pip
 RUN pip install \
   jsm\
   numpy\
-  pandas\
+  pandas==0.20.3\
   Quandl\
   lxml\
   xlrd
