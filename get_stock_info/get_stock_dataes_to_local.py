@@ -52,7 +52,6 @@ def GetStockDataesToLocal():
     gcl_nikkei_225 = GetCodeListNikkei225(verbose=True)
     code_list_df = gcl_nikkei_225.get_new_stock_code()
     code_list = code_list_df["コード"].values.tolist()
-    code_list = code_list[:10]
 
     thread_num = THREAD_NUM
     code_lists = list(split_list(code_list, int(len(code_list)/thread_num) + 1))
