@@ -19,3 +19,6 @@ HISTRICAL_DATA_PATH = p_dirname + "/stock_strategy/get_stock_info/stock_data/{co
 
 # path save result
 RESULT_PATH = p_dirname + "/check_reward/result/selected_code"
+
+# get stock data to local
+THREAD_NUM = 2
