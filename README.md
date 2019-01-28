@@ -5,6 +5,7 @@
 
 ## to local
 `./docker_exe_download_to_local.sh`
+作成中
 
 # select stock code to buy or sell
 
