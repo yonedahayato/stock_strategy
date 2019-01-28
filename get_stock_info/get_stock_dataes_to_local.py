@@ -14,7 +14,7 @@ sys.path.append(abs_dirname)
 from get_new_stock_code import GetCodeListNikkei225
 from get_stock_data import GetStockData
 import log
-from setting import HISTRICAL_DATA_PATH
+from setting import *
 
 logger = log.logger
 
@@ -52,7 +52,7 @@ def GetStockDataesToLocal():
     code_list = code_list_df["コード"].values.tolist()
     code_list = code_list[:10]
 
-    thread_num = 2
+    thread_num = THREAD_NUM
     code_lists = list(split_list(code_list, int(len(code_list)/thread_num) + 1))
 
     thread_list = []
@@ -74,16 +74,13 @@ def GetStockDataesToLocal():
     for thread in thread_list:
         while True:
             try:
-                print("xxx")
                 thread.join()
-                print("aaa")
             except Exception as e:
                 logger.exception("thredの処理の終了を失敗しました、再度行います, {}".format(e))
                 continue
             else:
                 break
 
-    print(result)
 
 if __name__ == "__main__":
     GetStockDataesToLocal()
