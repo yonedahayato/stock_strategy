@@ -47,6 +47,8 @@ def split_list(l, n):
 
 
 def GetStockDataesToLocal():
+    os.makedirs(HISTRICAL_DATA_PATH, exist_ok=True)
+
     gcl_nikkei_225 = GetCodeListNikkei225(verbose=True)
     code_list_df = gcl_nikkei_225.get_new_stock_code()
     code_list = code_list_df["コード"].values.tolist()
