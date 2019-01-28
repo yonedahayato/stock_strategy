@@ -4,7 +4,7 @@ p_dirname = os.path.dirname(abspath)
 
 
 # log
-log_save_path = ""
+log_save_path = p_dirname + "/helper/log"
 
 # stock data upload, download request url
 # request_url = "http://127.0.0.1:8090"
