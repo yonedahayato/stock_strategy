@@ -87,12 +87,12 @@ class MoveAverage(StockStrategy):
         if self.debug:
             print("sign_rising_Low: {}".format(sign_rising_Low))
 
-        # if sign_rising_MA and sign_rising_Low:
-        #     self.result_codes.append(code)
-        self.result_codes.append(code)
-        self.result_codes.reverse()
-        if len(self.result_codes) > 5:
-            self.result_codes = self.result_codes[:5]
+        if sign_rising_MA and sign_rising_Low:
+            self.result_codes.append(code)
+        # self.result_codes.append(code)
+        # self.result_codes.reverse()
+        # if len(self.result_codes) > 5:
+        #     self.result_codes = self.result_codes[:5]
 
 def main():
     # ss = Stock_Storategy(debug=True, back_test_return_date=5)
