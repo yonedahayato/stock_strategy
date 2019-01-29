@@ -98,8 +98,19 @@ def main():
     # ss = Stock_Storategy(debug=True, back_test_return_date=5)
     # ss.exect()
 
-    ma = MoveAverage(debug=False, back_test_return_date=5, method_name="MAMAM", multiprocess=False, window=75)
-    ma.execute()
+    move_average_window_75 = MoveAverage(debug=False, back_test_return_date=5,
+                        method_name="MAMAM_window=75", multiprocess=False, window=75)
+    move_average_window_50 = MoveAverage(debug=False, back_test_return_date=5,
+                        method_name="MAMAM_window=50", multiprocess=False, window=50)
+    move_average_window_25 = MoveAverage(debug=False, back_test_return_date=5,
+                        method_name="MAMAM_window=25", multiprocess=False, window=25)
+    move_average_window_10 = MoveAverage(debug=False, back_test_return_date=5,
+                        method_name="MAMAM_window=25", multiprocess=False, window=10)
+
+    move_average_window_75.execute()
+    move_average_window_50.execute()
+    move_average_window_25.execute()
+    move_average_window_10.execute()
 
 if __name__ == "__main__":
     main()
