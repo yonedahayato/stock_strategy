@@ -27,5 +27,5 @@ docker-compose up
 
 # remove docker image
 # docker rmi get_stock_data_lib
-docker rmi get_stock_data
 docker-compose down -v
+docker rmi get_stock_data
