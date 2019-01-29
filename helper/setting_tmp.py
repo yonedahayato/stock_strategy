@@ -1,4 +1,5 @@
 import os
+import pandas as pd
 abspath = os.path.dirname(os.path.abspath(__file__))
 p_dirname = os.path.dirname(abspath)
 
@@ -13,6 +14,10 @@ request_url = "http://192.168.100.101:8090"
 # tosho_1st_list_url
 TOSHO_1ST_LIST_URL = "http://www.jpx.co.jp/markets/statistics-equities/misc/01.html"
 NIKKEI_225_LIST_URL = "https://indexes.nikkei.co.jp/nkave/index/component?idx=nk225"
+
+# range date to get stock data
+HISTRICAL_DATA_RANGE_START = pd.Timestamp("20160101")
+HISTRICAL_DATA_RANGE_END = pd.Timestamp("20180101")
 
 # path save and get histrical data to local
 HISTRICAL_DATA_PATH = p_dirname + "/get_stock_info/stock_data/{code}.csv"
