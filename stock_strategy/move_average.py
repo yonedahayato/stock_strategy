@@ -22,18 +22,18 @@ import log
 import just_now
 from save_result import Save_Result
 from setting import HISTRICAL_DATA_PATH
-from stock_strategy import Stock_Storategy
+from stock_strategy import StockStrategy
 
 jst_now = just_now.jst_now
 
 logger = log.logger
 
 
-class Move_Average(Stock_Storategy):
+class MoveAverage(StockStrategy):
     def __init__(self, debug=True, back_test_return_date=5, \
                 method_name="move_average", multiprocess=False, window=75):
 
-        Stock_Storategy.__init__(self, debug=debug, back_test_return_date=back_test_return_date, \
+        StockStrategy.__init__(self, debug=debug, back_test_return_date=back_test_return_date, \
                                 method_name=method_name, multiprocess=multiprocess)
 
         self.window = window
@@ -98,7 +98,7 @@ def main():
     # ss = Stock_Storategy(debug=True, back_test_return_date=5)
     # ss.exect()
 
-    ma = Move_Average(debug=False, back_test_return_date=5, method_name="MAMAM", multiprocess=False, window=75)
+    ma = MoveAverage(debug=False, back_test_return_date=5, method_name="MAMAM", multiprocess=False, window=75)
     ma.execute()
 
 if __name__ == "__main__":
