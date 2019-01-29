@@ -1,3 +1,11 @@
+# get code list
+
+## get code list nikkei 225
+`python get_stock_info/get_new_stock_code.py`
+
+## get historical data
+`python get_stock_info/get_stock_data.py`
+
 # get stock data
 
 ## to cloud
@@ -5,7 +13,6 @@
 
 ## to local
 `./docker_exe_download_to_local.sh`
-作成中
 
 # select stock code to buy or sell
 
@@ -13,10 +20,4 @@
 `./docker_exe_select_stock_code.sh`
 
 ## python
-`python move_average.py`
-
-## get code list nikkei 225
-`python get_stock_info/get_new_stock_code.py`
-
-## get historical data
-`python get_stock_info/get_stock_data.py`
+`python stock_strategy/move_average.py`
