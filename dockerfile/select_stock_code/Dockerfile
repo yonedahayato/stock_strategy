@@ -4,4 +4,4 @@ WORKDIR /select_stock_code
 
 COPY . .
 
-CMD python move_average.py
+CMD python stock_strategy/move_average.py
