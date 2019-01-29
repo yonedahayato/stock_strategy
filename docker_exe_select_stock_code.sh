@@ -36,5 +36,5 @@ docker-compose up
 
 # remove docker image
 # docker rmi select_stock_code_lib
-docker rmi select_stock_code
 docker-compose down -v
+docker rmi select_stock_code
