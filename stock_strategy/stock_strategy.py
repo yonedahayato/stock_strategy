@@ -9,15 +9,16 @@ import sys
 import traceback
 
 abspath = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(abspath + "/get_stock_info")
-sys.path.append(abspath + "/get_stock_info/google_cloud_storage")
-sys.path.append(abspath + "/helper")
-sys.path.append(abspath + "/check_reward")
+p_path = os.path.dirname(abspath)
+sys.path.append(p_path + "/get_stock_info")
+sys.path.append(p_path + "/get_stock_info/google_cloud_storage")
+sys.path.append(p_path + "/helper")
+sys.path.append(p_path + "/check_reward")
 
 from data_downloader import Data_Downloader
 from get_new_stock_code import GetCodeList, GetCodeListNikkei225
 from get_stock_data import GetStockData
-from helper import log
+import log
 import just_now
 from save_result import Save_Result
 from setting import HISTRICAL_DATA_PATH
@@ -29,7 +30,7 @@ logger = log.logger
 DOWNLOAD_METHODES = ["LOCAL", "CLOUD", "API"]
 CODE_LIST = ["1st_all", "1st_225"]
 
-class Stock_Storategy:
+class StockStrategy:
     def __init__(self, debug=False, back_test_return_date=0, method_name="method_name", multiprocess=False,
                 download_method="LOCAL", code_list = "1st_225"):
         self.msg_tmpl = "[Stock_Storategy:{}]: "
