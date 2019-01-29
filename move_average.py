@@ -98,7 +98,7 @@ def main():
     # ss.exect()
 
     ma = Move_Average(debug=False, back_test_return_date=5, method_name="MAMAM", multiprocess=False, window=75)
-    ma.exect()
+    ma.execute()
 
 if __name__ == "__main__":
     main()

@@ -142,7 +142,7 @@ class Stock_Storategy:
 
         return self.result_codes
 
-    def exect(self):
+    def execute(self):
         msg = self.msg_tmpl.format("exect") + "{}"
 
         try:
