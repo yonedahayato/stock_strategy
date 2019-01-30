@@ -26,7 +26,7 @@ class Save_Result:
         now_str = dt.now().strftime("%Y_%m_%d_%H_%M_%S")
         self.format = {"result_code_list": [],
                         "method": "",
-                        "date": now_str,
+                        "creat_time": now_str,
                         "data_range_start": "",
                         "data_range_end": ""}
 
@@ -47,7 +47,7 @@ class Save_Result:
     def save(self):
         msg = "[Save_Result:save]: {}"
         try:
-            file_name = "{}_{}.json".format(self.format["method"], self.format["date"])
+            file_name = "{}_{}.json".format(self.format["method"], self.format["creat_time"])
             file_path = "{}/{}".format(self.save_path, file_name)
             with open(file_path, "w") as file:
                 json.dump(self.format, file)
