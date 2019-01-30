@@ -68,8 +68,7 @@ class MoveAverage(StockStrategy):
         move_average_diff_df = move_average_diff_df.iloc[-sign_rising_MA_term:]>0
         sign_rising_MA = move_average_diff_df.all().values[0]
 
-        if self.debug:
-            logger.debug("sign_rising_MA: {}".format(sign_rising_MA))
+        logger.debug("sign_rising_MA: {}".format(sign_rising_MA))
 
         stock_data_low_df = self.shape_stock_data(stock_data_df, value="Low")
         diff_Low_MoveAverage = stock_data_low_df - move_average_df
@@ -87,7 +86,8 @@ class MoveAverage(StockStrategy):
         if self.debug:
             print("sign_rising_Low: {}".format(sign_rising_Low))
 
-        if sign_rising_MA and sign_rising_Low:
+        # if sign_rising_MA and sign_rising_Low:
+        if sign_rising_MA:
             self.result_codes.append(code)
         # self.result_codes.append(code)
         # self.result_codes.reverse()
