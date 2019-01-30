@@ -69,7 +69,7 @@ class MoveAverage(StockStrategy):
         sign_rising_MA = move_average_diff_df.all().values[0]
 
         if self.debug:
-            print("sign_rising_MA: {}".format(sign_rising_MA))
+            logger.debug("sign_rising_MA: {}".format(sign_rising_MA))
 
         stock_data_low_df = self.shape_stock_data(stock_data_df, value="Low")
         diff_Low_MoveAverage = stock_data_low_df - move_average_df
@@ -108,9 +108,9 @@ def main():
                         method_name="MAMAM_window=10", multiprocess=False, window=10)
 
     move_average_window_75.execute()
-    move_average_window_50.execute()
-    move_average_window_25.execute()
-    move_average_window_10.execute()
+    # move_average_window_50.execute()
+    # move_average_window_25.execute()
+    # move_average_window_10.execute()
 
 if __name__ == "__main__":
     main()
