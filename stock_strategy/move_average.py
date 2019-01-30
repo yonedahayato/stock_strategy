@@ -64,7 +64,7 @@ class MoveAverage(StockStrategy):
         move_average_df = self.get_move_average(stock_data_df)
         move_average_diff_df = move_average_df.diff(periods=1)
 
-        sign_rising_MA_term = 20 # 10
+        sign_rising_MA_term = 100 # 10
         move_average_diff_df = move_average_diff_df.iloc[-sign_rising_MA_term:]>0
         sign_rising_MA = move_average_diff_df.all().values[0]
 
@@ -74,7 +74,7 @@ class MoveAverage(StockStrategy):
         stock_data_low_df = self.shape_stock_data(stock_data_df, value="Low")
         diff_Low_MoveAverage = stock_data_low_df - move_average_df
 
-        sign_rising_Low_term = 20 # 10
+        sign_rising_Low_term = 100 # 10
         diff_Low_MoveAverage = diff_Low_MoveAverage.iloc[-sign_rising_Low_term:] > 0
 
         sign_rising_Low = False
