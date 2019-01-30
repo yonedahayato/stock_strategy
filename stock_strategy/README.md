@@ -1,9 +1,17 @@
-# move average
+# move average with low value
 ## 入力
 - pandas dataframe の時系列データ（Open, Close, Highm Low, Volume）
 
 ## 出力
 - json data
+```
+{ "result_code_list": [検出した銘柄],
+    "method": method name,
+    "creat_time": 作成した時間,
+    "data_range_start": 使用したデータの範囲,
+    "data_range_end": 使用したデータの範囲
+  }
+```
 
 ## 戦略
 ### 買い
