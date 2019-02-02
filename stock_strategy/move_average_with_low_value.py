@@ -107,11 +107,15 @@ def main():
     move_average_window_10 = MoveAverage(debug=False, back_test_return_date=5,
                         method_name="MAMAM_window=10", multiprocess=False, window=10)
 
-    result_codes = move_average_window_75.execute()
-    print(result_codes)
-    # move_average_window_50.execute()
-    # move_average_window_25.execute()
-    # move_average_window_10.execute()
+    result_codes_window_75 = move_average_window_75.execute()
+    result_codes_window_50 = move_average_window_50.execute()
+    result_codes_window_25 = move_average_window_25.execute()
+    result_codes_window_10 = move_average_window_10.execute()
+
+    print("result_codes_window_75: {}".format(result_codes_window_75))
+    print("result_codes_window_50: {}".format(result_codes_window_50))
+    print("result_codes_window_25: {}".format(result_codes_window_25))
+    print("result_codes_window_10: {}".format(result_codes_window_10))
 
 if __name__ == "__main__":
     main()
