@@ -109,7 +109,8 @@ def main():
     move_average_window_10 = MoveAverage(debug=False, back_test_return_date=5,
                         method_name="MAMAM_window=10", multiprocess=False, window=10)
 
-    move_average_window_75.execute()
+    result_codes = move_average_window_75.execute()
+    print(result_codes)
     # move_average_window_50.execute()
     # move_average_window_25.execute()
     # move_average_window_10.execute()
