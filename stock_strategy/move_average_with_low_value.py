@@ -76,8 +76,8 @@ class MoveAverage(StockStrategy):
 
         sign_rising_Low_term = 100 # 10
         if sign_rising_MA:
-            print("diff_Low_MoveAverage")
-            print(diff_Low_MoveAverage)
+            logger.debug("diff_Low_MoveAverage")
+            logger.debug(diff_Low_MoveAverage)
         diff_Low_MoveAverage = diff_Low_MoveAverage.iloc[-sign_rising_Low_term:] > 0
 
         sign_rising_Low = False
