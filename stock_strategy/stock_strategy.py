@@ -71,7 +71,7 @@ class StockStrategy:
                 stock_data_df = stock_data_df.iloc[:-self.back_test_return_date]
 
         elif self.download_method == "LOCAL":
-            stock_data_df = pd.read_csv(HISTRICAL_DATA_PATH.format(code=code), header=None, index_col=0)
+            stock_data_df = pd.read_csv(HISTRICAL_DATA_PATH.format(code=code), index_col=0)
 
         if self.debug:
             print(msg.format(stock_data_df))
