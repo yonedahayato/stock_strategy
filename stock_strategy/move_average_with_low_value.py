@@ -77,7 +77,7 @@ class MoveAverage(StockStrategy):
             logger.debug(stock_data_low_df)
             logger.debug("move_average_df")
             logger.debug(move_average_df)
-        diff_Low_MoveAverage = stock_data_low_df - move_average_df
+        diff_Low_MoveAverage = stock_data_low_df["Low"] - move_average_df["rolling_mean"]
 
         sign_rising_Low_term = 100 # 10
         if sign_rising_MA:
