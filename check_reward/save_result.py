@@ -27,8 +27,9 @@ class Save_Result:
         self.format = {"result_code_list": [],
                         "method": "",
                         "creat_time": now_str,
-                        "data_range_start": "",
-                        "data_range_end": ""}
+                        "data_range_start_to_compute": "",
+                        "data_range_end_to_compute": "",
+                        "back_test_return_date": ""}
 
     def make_dir(self, dir_path):
         if not os.path.exists(dir_path):

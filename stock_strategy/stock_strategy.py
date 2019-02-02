@@ -109,10 +109,9 @@ class StockStrategy:
         sr.add_info("method", self.method_name)
 
         stock_data_df_index = self.get_stock_data_index()
-        sr.add_info("data_range_start", stock_data_df_index[0])
-        sr.add_info("data_range_end", stock_data_df_index[-1])
-
-        sr.save()
+        sr.add_info("data_range_start_to_compute", stock_data_df_index[0])
+        sr.add_info("data_range_end_to_compute", stock_data_df_index[-1])
+        sr.add_info("back_test_return_date", self.back_test_return_date)
 
     def check_select_code(self):
         msg = self.msg_tmpl.format("check_select_code") + "{}"
