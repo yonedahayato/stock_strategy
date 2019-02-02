@@ -87,8 +87,7 @@ class MoveAverage(StockStrategy):
         if self.debug:
             print("sign_rising_Low: {}".format(sign_rising_Low))
 
-        # if sign_rising_MA and sign_rising_Low:
-        if sign_rising_MA:
+        if sign_rising_MA and sign_rising_Low:
             self.result_codes.append(code)
         # self.result_codes.append(code)
         # self.result_codes.reverse()
