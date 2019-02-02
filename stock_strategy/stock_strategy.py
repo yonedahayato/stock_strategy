@@ -113,6 +113,8 @@ class StockStrategy:
         sr.add_info("data_range_end_to_compute", stock_data_df_index[-1])
         sr.add_info("back_test_return_date", self.back_test_return_date)
 
+        sr.save()
+
     def check_select_code(self):
         msg = self.msg_tmpl.format("check_select_code") + "{}"
         logger.info(msg.format(self.result_codes))
