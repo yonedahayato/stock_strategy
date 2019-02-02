@@ -28,6 +28,9 @@ jst_now = just_now.jst_now
 
 logger = log.logger
 
+# dataframe を表示させるときの行数数の指定
+pd.options.display.max_rows = 1000
+
 
 class MoveAverage(StockStrategy):
     def __init__(self, debug=True, back_test_return_date=5, \
@@ -68,14 +71,13 @@ class MoveAverage(StockStrategy):
         move_average_diff_df = move_average_diff_df.iloc[-sign_rising_MA_term:]>0
         sign_rising_MA = move_average_diff_df.all().values[0]
 
-        if sign_rising_MA:
-            logger.debug("move_average_df")
-            logger.debug(move_average_df)
-
         stock_data_low_df = self.shape_stock_data(stock_data_df, value="Low")
         diff_Low_MoveAverage = stock_data_low_df - move_average_df
 
         sign_rising_Low_term = 100 # 10
+        if sign_rising_MA:
+            print("diff_Low_MoveAverage")
+            print(diff_Low_MoveAverage)
         diff_Low_MoveAverage = diff_Low_MoveAverage.iloc[-sign_rising_Low_term:] > 0
 
         sign_rising_Low = False
