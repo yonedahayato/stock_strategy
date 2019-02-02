@@ -209,3 +209,5 @@ class StockStrategy:
             raise Exception(err_msg)
         else:
             logger.info(msg.format("success to save result select code."))
+
+        return self.result_codes
