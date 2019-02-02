@@ -72,6 +72,11 @@ class MoveAverage(StockStrategy):
         sign_rising_MA = move_average_diff_df.all().values[0]
 
         stock_data_low_df = self.shape_stock_data(stock_data_df, value="Low")
+        if sign_rising_MA:
+            logger.debug("stock_data_low_df")
+            logger.debug(stock_data_low_df)
+            logger.debug("move_average_df")
+            logger.debug(move_average_df)
         diff_Low_MoveAverage = stock_data_low_df - move_average_df
 
         sign_rising_Low_term = 100 # 10
