@@ -24,3 +24,6 @@
 
 ## shell script
 `./stock_strategy/strategies.sh`
+
+# check reward
+`./docker_exe_check_reward.sh`
