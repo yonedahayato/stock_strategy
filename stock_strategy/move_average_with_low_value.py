@@ -103,13 +103,14 @@ def main():
     # ss = Stock_Storategy(debug=True, back_test_return_date=5)
     # ss.exect()
 
-    move_average_window_75 = MoveAverage(debug=False, back_test_return_date=5,
+    back_test_return_date = 0
+    move_average_window_75 = MoveAverage(debug=False, back_test_return_date = back_test_return_date,
                         method_name="MoveAverageWithLowValue_window=75", multiprocess=False, window=75)
-    move_average_window_50 = MoveAverage(debug=False, back_test_return_date=5,
+    move_average_window_50 = MoveAverage(debug=False, back_test_return_date = back_test_return_date,
                         method_name="MoveAverageWithLowValue_window=50", multiprocess=False, window=50)
-    move_average_window_25 = MoveAverage(debug=False, back_test_return_date=5,
+    move_average_window_25 = MoveAverage(debug=False, back_test_return_date = back_test_return_date,
                         method_name="MoveAverageWithLowValue_window=25", multiprocess=False, window=25)
-    move_average_window_10 = MoveAverage(debug=False, back_test_return_date=5,
+    move_average_window_10 = MoveAverage(debug=False, back_test_return_date = back_test_return_date,
                         method_name="MoveAverageWithLowValue_window=10", multiprocess=False, window=10)
 
     result_codes_window_75 = move_average_window_75.execute()
