@@ -79,8 +79,10 @@ class MoveAverage(StockStrategy):
 
         sign_rising_Low = False
         for cnt in range(sign_rising_Low_term-1):
+            stock_data_df_limited = stock_data_df.iloc[-sign_rising_Low_term:]
             if (diff_Low_MoveAverage.iloc[cnt] == False) and \
-                (diff_Low_MoveAverage.iloc[cnt+1] == True):
+               (diff_Low_MoveAverage.iloc[cnt+1] == True) and \
+               (stock_data_df_limited["Close"].iloc[cnt+1] - stock_data_df_limited["Open"].iloc[cnt+1] > 0):
                 sign_rising_Low = True
                 break
 
