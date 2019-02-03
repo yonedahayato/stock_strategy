@@ -32,7 +32,7 @@ class Check_Reward(Save_Result):
 
 
     def make_format(self):
-        print("[Check_Reward:make_format]: not make format.")
+        print("[Check_Reward:make_format]: not need to make format.")
 
     def read_json_result(self):
         json_file_path = "{}/{}".format(save_result.result_path, self.selected_code_json_file)
