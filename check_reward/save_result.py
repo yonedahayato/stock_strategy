@@ -3,8 +3,8 @@ import json
 import os
 import sys
 
-abspath = os.path.dirname(os.path.abspath(__file__))
-p_dirnam = os.path.dirname(abspath)
+save_result_path = os.path.dirname(os.path.abspath(__file__))
+p_dirnam = os.path.dirname(save_result_path)
 
 sys.path.append(p_dirnam+"/helper")
 import log

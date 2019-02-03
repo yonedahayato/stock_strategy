@@ -4,14 +4,12 @@ import os
 import pandas as pd
 import sys
 
-import save_result
-from save_result import Save_Result
-sys.path.append(os.path.dirname(save_result.abspath))
+from save_result import Save_Result, save_result_path
 from check_list import *
 
 logger = save_result.logger
-result_path = save_result.abspath + "/result/reward"
-SELECTED_CODE_RESULT_PATH = save_result.abspath + "/result/selected_code"
+result_path = save_result_path + "/result/reward"
+SELECTED_CODE_RESULT_PATH = save_result_path + "/result/selected_code"
 
 class Check_Reward(Save_Result):
     def __init__(self, save_path=result_path):
