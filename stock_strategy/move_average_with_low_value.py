@@ -40,6 +40,7 @@ class MoveAverage(StockStrategy):
                                 method_name=method_name, multiprocess=multiprocess)
 
         self.window = window
+        self.result_dict_with_raising_rate_MA = {}
 
     def shape_stock_data(self, stock_data_df, value="Close"):
         shape = stock_data_df.shape
@@ -68,8 +69,12 @@ class MoveAverage(StockStrategy):
         move_average_diff_df = move_average_df.diff(periods=1)
 
         sign_rising_MA_term = 10 # 10
-        move_average_diff_df = move_average_diff_df.iloc[-sign_rising_MA_term:]>0
+        move_average_diff_df = move_average_diff_df.iloc[-sign_rising_MA_term:] > 0
         sign_rising_MA = move_average_diff_df.all().values[0]
+        if sign_rising_MA:
+            move_average_df_limited = move_average_df.iloc[-sign_rising_MA_term]
+            raising_rate_MA = (move_average_df_limited[-1] - move_average_df_limited[0]) / \
+                               move_average_df_limited[0]
 
         stock_data_low_df = self.shape_stock_data(stock_data_df, value="Low")
         diff_Low_MoveAverage = stock_data_low_df["Low"] - move_average_df["rolling_mean"]
@@ -90,11 +95,9 @@ class MoveAverage(StockStrategy):
             print("sign_rising_Low: {}".format(sign_rising_Low))
 
         if sign_rising_MA and sign_rising_Low:
-            self.result_codes.append(code)
-        # self.result_codes.append(code)
-        # self.result_codes.reverse()
-        # if len(self.result_codes) > 5:
-        #     self.result_codes = self.result_codes[:5]
+            self.result_dict_with_raising_rate_MA[code] = raising_rate_MA
+            result_codes_tmp = sorted(self.result_dict_with_raising_rate_MA.items(), key=lambda x: x[1], reverse=True)
+            self.result_codes = [code[1] for code in result_codes_tmp]
 
 def main():
     # ss = Stock_Storategy(debug=True, back_test_return_date=5)
