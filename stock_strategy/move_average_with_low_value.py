@@ -73,6 +73,8 @@ class MoveAverage(StockStrategy):
         sign_rising_MA = move_average_diff_df.all().values[0]
         if sign_rising_MA:
             move_average_df_limited = move_average_df.iloc[-sign_rising_MA_term:]
+            logger.debug(move_average_df_limited)
+            logger.debug(type(move_average_df_limited))
             raising_rate_MA = (move_average_df_limited[-1] - move_average_df_limited[0]) / \
                                move_average_df_limited[0]
 
