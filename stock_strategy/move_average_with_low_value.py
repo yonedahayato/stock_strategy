@@ -118,10 +118,10 @@ def main():
     result_codes_window_25 = move_average_window_25.execute()
     result_codes_window_10 = move_average_window_10.execute()
 
-    result_codes_window_75.sort()
-    result_codes_window_50.sort()
-    result_codes_window_25.sort()
-    result_codes_window_10.sort()
+    # result_codes_window_75.sort()
+    # result_codes_window_50.sort()
+    # result_codes_window_25.sort()
+    # result_codes_window_10.sort()
 
     print("result_codes_window_75: {}".format(result_codes_window_75))
     print("result_codes_window_50: {}".format(result_codes_window_50))
