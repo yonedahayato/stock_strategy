@@ -98,7 +98,7 @@ class MoveAverage(StockStrategy):
             self.result_dict_with_raising_rate_MA[code] = raising_rate_MA
             result_codes_tmp = sorted(self.result_dict_with_raising_rate_MA.items(), key=lambda x: x[1], reverse=True)
             logger.debug(result_codes_tmp)
-            self.result_codes = [code[1] for code in result_codes_tmp]
+            self.result_codes = [code[0] for code in result_codes_tmp]
 
 def main():
     # ss = Stock_Storategy(debug=True, back_test_return_date=5)
