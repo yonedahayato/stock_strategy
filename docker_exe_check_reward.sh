@@ -11,6 +11,7 @@ fi
 # environment
 SCRIPT_DIR=$(cd $(dirname $0); pwd)
 
+DOWNLOAD_DIR=$SCRIPT_DIR/get_stock_info/stock_data
 CHECK_REWARD_RESULT_DIR=$SCRIPT_DIR/check_reward/result/reward
 LOG_DIR=$SCRIPT_DIR/helper/log
 SELECT_CODE_DIR=$SCRIPT_DIR/check_reward/result/selected_code
