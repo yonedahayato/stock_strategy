@@ -18,8 +18,10 @@ class Check_Reward(Save_Result):
         files = []
         for method_name in CHECK_LIST:
             files = glob("{}/{}*".format(SELECTED_CODE_RESULT_PATH, method_name))
+            print(files)
             files.sort()
             print(files)
+            print(files[-1])
 
         sys.exit()
         self.selected_code_json_files = glob("{}/{}".format(result_path, "*"))
