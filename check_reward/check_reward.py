@@ -17,8 +17,8 @@ class Check_Reward(Save_Result):
         self.selected_code_json_file = "move_average_2018_08_14_08_55_08.json"
         files = []
         for method_name in CHECK_LIST:
-            print("{}/{}*".format(SELECTED_CODE_RESULT_PATH, method_name))
             files = glob("{}/{}*".format(SELECTED_CODE_RESULT_PATH, method_name))
+            files.sort()
             print(files)
 
         sys.exit()
