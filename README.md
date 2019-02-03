@@ -21,3 +21,6 @@
 
 ## python
 `python stock_strategy/move_average.py`
+
+## shell script
+`./stock_strategy/strategies.sh`
