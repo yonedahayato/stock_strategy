@@ -1,3 +1,4 @@
+from glob import glob
 import json
 import os
 import pandas as pd
@@ -7,17 +8,32 @@ import save_result
 from save_result import Save_Result
 sys.path.append(os.path.dirname(save_result.abspath))
 from move_average import Data_Downloader
+from check_list import *
 
 logger = save_result.logger
 result_path = save_result.abspath + "/result/reward"
+SELECTED_CODE_RESULT_PATH = save_result.abspath + "/result/selected_code"
 
 class Check_Reward(Save_Result):
     def __init__(self, save_path=result_path):
         Save_Result.__init__(self, save_path = save_path)
 
         self.selected_code_json_file = "move_average_2018_08_14_08_55_08.json"
+        files = []
+        for method_name in CHECK_LIST:
+            files = glob("{}/{}*".format(SELECTED_CODE_RESULT_PATH, method_name))
+            print(files)
+
+        sys.exit()
+        self.selected_code_json_files = glob("{}/{}".format(result_path, "*"))
+
+        print(self.selected_code_json_files)
+        sys.exit()
 
         self.date_index = []
+
+
+
 
     def make_format(self):
         print("[Check_Reward:make_format]: not make format.")
@@ -67,6 +83,7 @@ class Check_Reward(Save_Result):
             self.reward_result_dic[str(code)] = reward_list
 
         self.save_reward_result()
+
     def save_reward_result(self):
         self.format = {"code_json_file": self.selected_code_json_file,
                         "method": self.method,
