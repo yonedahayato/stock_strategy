@@ -7,7 +7,6 @@ import sys
 import save_result
 from save_result import Save_Result
 sys.path.append(os.path.dirname(save_result.abspath))
-from move_average import Data_Downloader
 from check_list import *
 
 logger = save_result.logger
