@@ -99,13 +99,13 @@ def main():
     # ss.exect()
 
     move_average_window_75 = MoveAverage(debug=False, back_test_return_date=5,
-                        method_name="MAMAM_window=75", multiprocess=False, window=75)
+                        method_name="MoveAverageWithLowValue_window=75", multiprocess=False, window=75)
     move_average_window_50 = MoveAverage(debug=False, back_test_return_date=5,
-                        method_name="MAMAM_window=50", multiprocess=False, window=50)
+                        method_name="MoveAverageWithLowValue_window=50", multiprocess=False, window=50)
     move_average_window_25 = MoveAverage(debug=False, back_test_return_date=5,
-                        method_name="MAMAM_window=25", multiprocess=False, window=25)
+                        method_name="MoveAverageWithLowValue_window=25", multiprocess=False, window=25)
     move_average_window_10 = MoveAverage(debug=False, back_test_return_date=5,
-                        method_name="MAMAM_window=10", multiprocess=False, window=10)
+                        method_name="MoveAverageWithLowValue_window=10", multiprocess=False, window=10)
 
     result_codes_window_75 = move_average_window_75.execute()
     result_codes_window_50 = move_average_window_50.execute()
