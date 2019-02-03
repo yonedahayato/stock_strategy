@@ -1,7 +1,7 @@
 version: "3"
 services:
   select_stock_code:
-    image: select_stock_code_lib
+    image: select_stock_code
     container_name: "check_reward"
     environment:
       CHECK_REWARD_RESULT_DIR: check_reward_result_dir
