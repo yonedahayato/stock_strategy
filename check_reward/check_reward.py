@@ -4,10 +4,9 @@ import os
 import pandas as pd
 import sys
 
-from save_result import Save_Result, save_result_path
+from save_result import Save_Result, save_result_path, logger
 from check_list import *
 
-logger = save_result.logger
 result_path = save_result_path + "/result/reward"
 SELECTED_CODE_RESULT_PATH = save_result_path + "/result/selected_code"
 
