@@ -14,37 +14,32 @@ class Check_Reward(Save_Result):
     def __init__(self, save_path=result_path):
         Save_Result.__init__(self, save_path = save_path)
 
-        self.selected_code_json_file = "move_average_2018_08_14_08_55_08.json"
-        json_files = []
+        # self.selected_code_json_file = "move_average_2018_08_14_08_55_08.json"
+        self.selected_code_json_files = []
         for method_name in CHECK_LIST:
             files_tmp = glob("{}/{}*".format(SELECTED_CODE_RESULT_PATH, method_name))
             files_tmp.sort()
-            json_files.append(files_tmp[-1])
+            self.selected_code_json_files.append(files_tmp[-1])
 
-        print(json_files)
-        sys.exit()
-        self.selected_code_json_files = glob("{}/{}".format(result_path, "*"))
-
-        print(self.selected_code_json_files)
-        sys.exit()
-
+        logger.info("selected_code_json_files: {}".format(self.selected_code_json_files))
         self.date_index = []
 
-
-
-
     def make_format(self):
-        print("[Check_Reward:make_format]: not need to make format.")
+        logger.info("[Check_Reward:make_format]: not need to make format.")
 
-    def read_json_result(self):
-        json_file_path = "{}/{}".format(save_result.result_path, self.selected_code_json_file)
+    def read_json_result(self, json_file_path):
+        # json_file_path = "{}/{}".format(save_result.result_path, self.selected_code_json_file)
         with open(json_file_path) as j_file:
             selected_code_dic = json.load(j_file)
             self.method = selected_code_dic["method"]
-            self.data_range_start = selected_code_dic["data_range_start"]
-            self.data_range_end = selected_code_dic["data_range_end"]
+            self.data_range_start_to_compute = selected_code_dic["data_range_start_to_compute"]
+            self.data_range_end_to_compute = selected_code_dic["data_range_end_to_compute"]
+            self.back_test_return_date = selected_code_dic["back_test_return_date"]
+
+            # self.data_range_start = selected_code_dic["data_range_start"]
+            # self.data_range_end = selected_code_dic["data_range_end"]
             self.stock_list = selected_code_dic["result_code_list"]
-            self.date = selected_code_dic["date"]
+            self.creat_time = selected_code_dic["creat_time"]
 
         return self.stock_list
 
@@ -69,18 +64,22 @@ class Check_Reward(Save_Result):
 
     def check_reward(self):
         msg = "[Check_Reward:check_reward]: {}"
-        stock_list = self.read_json_result()
 
-        self.reward_result_dic = {}
-        for code in stock_list:
-            msg_tmp = msg.format("code: {}".format(code))
-            logger.info(msg_tmp)
-            stock_data_df = self.get_stock_data(code)
+        for json_file_path in self.selected_code_json_files:
+            stock_list = self.read_json_result(json_file_path)
+            print(stock_list)
+            return
 
-            reward_list = self.compute_reward(stock_data_df)
-            self.reward_result_dic[str(code)] = reward_list
+            self.reward_result_dic = {}
+            for code in stock_list:
+                msg_tmp = msg.format("code: {}".format(code))
+                logger.info(msg_tmp)
+                stock_data_df = self.get_stock_data(code)
 
-        self.save_reward_result()
+                reward_list = self.compute_reward(stock_data_df)
+                self.reward_result_dic[str(code)] = reward_list
+
+            self.save_reward_result()
 
     def save_reward_result(self):
         self.format = {"code_json_file": self.selected_code_json_file,
