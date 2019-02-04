@@ -1,0 +1,4 @@
+# crontab cron_setting.txt
+
+# 毎週土曜日３時に ./docker_exe_select_stock_code.sh を実行
+00 3 * * 6 cd path/to/shell_script_dir; sudp ./docker_exe_select_stock_code.sh
