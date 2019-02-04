@@ -1,6 +1,7 @@
 /get_stock_info/stock_data/*.csv
 */setting.py
 *environment.txt
+*/cron_setting.txt
 
 __pycache__
 log
