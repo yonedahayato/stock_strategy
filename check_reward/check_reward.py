@@ -78,6 +78,7 @@ class Check_Reward(Save_Result):
                 logger.info(msg.format("stock list to check is empty."))
                 return
 
+            return
             self.reward_result_dic = {}
             for code in stock_list:
                 msg_tmp = msg.format("code: {}".format(code))
