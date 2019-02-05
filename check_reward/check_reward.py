@@ -5,7 +5,7 @@ import pandas as pd
 import sys
 
 abspath_check_reward = os.path.dirname(os.path.abspath(__file__))
-p_dirname = os.path.dirname(abspath)
+p_dirname = os.path.dirname(abspath_check_reward)
 sys.path.append(p_dirname+"/stock_strategy")
 
 from save_result import Save_Result, save_result_path, logger
