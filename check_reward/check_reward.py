@@ -110,16 +110,16 @@ class Check_Reward(Save_Result):
                 reward_result["code"] = str(code)
                 self.reward_results.append(reward_result)
 
-            self.save_reward_result()
+            self.save_reward_result(json_file_path)
 
-    def save_reward_result(self):
-        self.format = {"code_json_file": self.selected_code_json_file,
+    def save_reward_result(self, json_file_path):
+        self.format = {"code_json_file": json_file_path,
                         "method": self.method,
-                        "data_range_start": self.data_range_start,
-                        "data_range_end": self.data_range_end,
+                        "data_range_start": self.data_range_start_to_compute,
+                        "data_range_end": self.data_range_end_to_compute,
                         "stock_list": self.stock_list,
                         "reward_results": self.reward_results,
-                        "date": self.date
+                        "creat_time": self.creat_time
                         }
         self.save() # json save
         return
