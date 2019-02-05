@@ -66,8 +66,9 @@ class Check_Reward(Save_Result):
         msg = "[Check_Reward:check_reward]: {}"
 
         for json_file_path in self.selected_code_json_files:
+            logger.debug(msg.format("json_file_path: {}".format(json_file_path)))
             stock_list = self.read_json_result(json_file_path)
-            print(stock_list)
+            logger.debug("stock_list: {}".format(stock_list))
             return
 
             self.reward_result_dic = {}
