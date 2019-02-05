@@ -23,6 +23,9 @@ class Check_Reward(Save_Result):
                  compute_reward_methodes=["using_all_of_data_for_backtest_with_mean", "using_all_of_data_for_backtest"]):
         Save_Result.__init__(self, save_path = save_path)
 
+        self.compute_reward_methodes = compute_reward_methodes
+        self.stock_strategy = StockStrategy(download_method=download_method)
+
         # self.selected_code_json_file = "move_average_2018_08_14_08_55_08.json"
         self.selected_code_json_files = []
         for method_name in CHECK_LIST:
@@ -31,9 +34,11 @@ class Check_Reward(Save_Result):
             self.selected_code_json_files.append(files_tmp[-1])
 
         logger.info("selected_code_json_files: {}".format(self.selected_code_json_files))
-        self.date_indexes_for_backtest = []
+        self.make_new_format()
 
-        self.stock_strategy = StockStrategy(download_method="LOCAL")
+
+    def make_new_format()
+        self.date_indexes_for_backtest = []
 
         self.reward_results = []
         self.result_format = {
@@ -41,7 +46,6 @@ class Check_Reward(Save_Result):
                                 "reward_rates": [],
                                 "reward_rate_mean": 0
                             }
-        self.compute_reward_methodes = compute_reward_methodes
         self.date_indexes = []
 
     def make_format(self):
@@ -111,6 +115,7 @@ class Check_Reward(Save_Result):
                 self.reward_results.append(reward_result)
 
             self.save_reward_result(json_file_path)
+            self.make_new_format()
             return
 
     def save_reward_result(self, json_file_path):
