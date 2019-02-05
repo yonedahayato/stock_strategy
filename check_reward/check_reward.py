@@ -4,6 +4,10 @@ import os
 import pandas as pd
 import sys
 
+abspath_check_reward = os.path.dirname(os.path.abspath(__file__))
+p_dirname = os.path.dirname(abspath)
+sys.path.append(p_dirname+"/stock_strategy")
+
 from save_result import Save_Result, save_result_path, logger
 from check_list import *
 
@@ -67,9 +71,12 @@ class Check_Reward(Save_Result):
 
         for json_file_path in self.selected_code_json_files:
             logger.debug(msg.format("json_file_path: {}".format(json_file_path)))
+
             stock_list = self.read_json_result(json_file_path)
             logger.debug("stock_list: {}".format(stock_list))
-            return
+            if stock_list == []:
+                logger.info(msg.format("stock list to check is empty."))
+                return
 
             self.reward_result_dic = {}
             for code in stock_list:
