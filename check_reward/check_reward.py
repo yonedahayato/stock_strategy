@@ -10,6 +10,7 @@ sys.path.append(p_dirname+"/stock_strategy")
 
 from save_result import Save_Result, save_result_path, logger
 from check_list import *
+from stock_strategy import StockStrategy
 
 result_path = save_result_path + "/result/reward"
 SELECTED_CODE_RESULT_PATH = save_result_path + "/result/selected_code"
