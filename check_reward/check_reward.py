@@ -111,6 +111,7 @@ class Check_Reward(Save_Result):
                 self.reward_results.append(reward_result)
 
             self.save_reward_result(json_file_path)
+            return
 
     def save_reward_result(self, json_file_path):
         self.format = {"code_json_file": json_file_path,
