@@ -1,3 +1,4 @@
+import copy
 from glob import glob
 import json
 import os
@@ -15,10 +16,11 @@ from stock_strategy import StockStrategy
 result_path = save_result_path + "/result/reward"
 SELECTED_CODE_RESULT_PATH = save_result_path + "/result/selected_code"
 
-COMPUTE_REWARD_METHOD = ["using_all_of_data_for_backtest_with_mean"]
+COMPUTE_REWARD_METHOD = ["using_all_of_data_for_backtest_with_mean", "using_all_of_data_for_backtest"]
 
 class Check_Reward(Save_Result):
-    def __init__(self, save_path=result_path, download_method="LOCAL", compute_reward_method="using_all_of_data_for_backtest_with_mean"):
+    def __init__(self, save_path=result_path, download_method="LOCAL",
+                 compute_reward_methodes=["using_all_of_data_for_backtest_with_mean", "using_all_of_data_for_backtest"]):
         Save_Result.__init__(self, save_path = save_path)
 
         # self.selected_code_json_file = "move_average_2018_08_14_08_55_08.json"
@@ -32,6 +34,14 @@ class Check_Reward(Save_Result):
         self.date_indexes_for_backtest = []
 
         self.stock_strategy = StockStrategy(download_method="LOCAL")
+
+        self.reward_results = []
+        self.result_format = {
+                                "code": [],
+                                "reward_rates": [],
+                                "reward_rate_mean": 0
+                            }
+        self.compute_reward_methodes = compute_reward_methodes
 
     def make_format(self):
         logger.info("[Check_Reward:make_format]: not need to make format.")
@@ -58,27 +68,24 @@ class Check_Reward(Save_Result):
         # close_value = stock_data_df.loc[self.data_range_end]["Close"]
         # reward = stock_data_df.loc[self.data_range_end:].iloc[1:]["Close"]
 
+        result_format_tmp = copy.deepcopy(self.result_format)
+
         close_value_bought = stock_data_df.loc[self.data_range_end_to_compute]["Close"]
         close_values_for_backtest = stock_data_df.loc[self.data_range_end_to_compute:].iloc[1:]["Close"]
 
-        logger.debug(stock_data_df)
-        logger.debug("close_value_bought: {}".format(close_value_bought))
-        logger.debug("close_values_for_backtest: {}".format(close_values_for_backtest))
-        return
+        if len(self.date_indexes) == 0:
+            self.date_indexes_for_backtest = list(close_values_for_backtest.index)
 
-        if self.compute_reward_method == "using_all_of_data_for_backtest_with_mean":
-            pass
+        reward_rates = (close_values_for_backtest - close_value_bought) / close_value_bought
 
-        else:
+        if "using_all_of_data_for_backtest_with_mean" in self.compute_reward_methodes:
+            result_format_tmp["reward_rate_mean"] = reward_rates.mean()
 
-            if len(self.date_indexes) == 0:
-                self.date_indexes_for_backtest = list(reward.index)
 
-            reward = (reward - close) / close
+        elif "using_all_of_data_for_backtest" in self.compute_reward_methodes:
+            result_format_tmp["reward_rates"] = list(reward_rates)
 
-            reward_list = list(reward)
-
-        return reward_list
+        return result_format_tmp
 
     def check_reward(self):
         msg = "[Check_Reward:check_reward]: {}"
@@ -92,17 +99,15 @@ class Check_Reward(Save_Result):
                 logger.info(msg.format("stock list to check is empty."))
                 return
 
-            self.reward_result_dic = {}
             for code in stock_list:
                 msg_tmp = msg.format("code: {}".format(code))
                 logger.info(msg_tmp)
                 stock_data_df = self.get_stock_data(code)
                 logger.debug(stock_data_df)
 
-                reward_list = self.compute_reward(stock_data_df)
-                return
-
-                self.reward_result_dic[str(code)] = reward_list
+                reward_result = self.compute_reward(stock_data_df)
+                reward_result["code"] = str(code)
+                self.reward_results.append(reward_result)
 
             self.save_reward_result()
 
@@ -112,10 +117,11 @@ class Check_Reward(Save_Result):
                         "data_range_start": self.data_range_start,
                         "data_range_end": self.data_range_end,
                         "stock_list": self.stock_list,
-                        "reward_results": self.reward_result_dic,
+                        "reward_results": self.reward_results,
                         "date": self.date
                         }
         self.save() # json save
+        return
 
         summary_df = pd.DataFrame(self.reward_result_dic).T
 
