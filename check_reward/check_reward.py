@@ -16,7 +16,7 @@ result_path = save_result_path + "/result/reward"
 SELECTED_CODE_RESULT_PATH = save_result_path + "/result/selected_code"
 
 class Check_Reward(Save_Result):
-    def __init__(self, save_path=result_path):
+    def __init__(self, save_path=result_path, download_method="LOCAL"):
         Save_Result.__init__(self, save_path = save_path)
 
         # self.selected_code_json_file = "move_average_2018_08_14_08_55_08.json"
@@ -28,6 +28,8 @@ class Check_Reward(Save_Result):
 
         logger.info("selected_code_json_files: {}".format(self.selected_code_json_files))
         self.date_index = []
+
+        self.stock_strategy = StockStrategy(download_method="LOCAL")
 
     def make_format(self):
         logger.info("[Check_Reward:make_format]: not need to make format.")
@@ -49,9 +51,12 @@ class Check_Reward(Save_Result):
         return self.stock_list
 
     def get_stock_data(self, code):
-        dd = Data_Downloader()
-        stock_data_df = dd.download(code)
-        stock_data_df = stock_data_df.set_index("Date")
+        # dd = Data_Downloader()
+        # stock_data_df = dd.download(code)
+
+        stock_data_df = self.stock_strategy.get_stock_data(code)
+
+        # stock_data_df = stock_data_df.set_index("Date")
 
         return stock_data_df
 
@@ -79,12 +84,13 @@ class Check_Reward(Save_Result):
                 logger.info(msg.format("stock list to check is empty."))
                 return
 
-            return
             self.reward_result_dic = {}
             for code in stock_list:
                 msg_tmp = msg.format("code: {}".format(code))
                 logger.info(msg_tmp)
                 stock_data_df = self.get_stock_data(code)
+                logger.debug(stock_data_df)
+                return
 
                 reward_list = self.compute_reward(stock_data_df)
                 self.reward_result_dic[str(code)] = reward_list
