@@ -59,7 +59,7 @@ class Check_Reward(Save_Result):
         # reward = stock_data_df.loc[self.data_range_end:].iloc[1:]["Close"]
 
         close_value_bought = stock_data_df.loc[self.data_range_end_to_compute]["Close"]
-        close_values_for_backtest = stock_data_df.loc[self.data_range_end:].iloc[1:]["Close"]
+        close_values_for_backtest = stock_data_df.loc[self.data_range_end_to_compute:].iloc[1:]["Close"]
 
         logger.debug(stock_data_df)
         logger.debug("close_value_bought: {}".format(close_value_bought))
