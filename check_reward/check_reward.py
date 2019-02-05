@@ -42,6 +42,7 @@ class Check_Reward(Save_Result):
                                 "reward_rate_mean": 0
                             }
         self.compute_reward_methodes = compute_reward_methodes
+        self.date_indexes
 
     def make_format(self):
         logger.info("[Check_Reward:make_format]: not need to make format.")
