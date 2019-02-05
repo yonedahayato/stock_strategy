@@ -136,7 +136,7 @@ class Check_Reward(Save_Result):
         print(summary_df)
 
 def main():
-    cr = Check_Reward(download_method="LOCAL", compute_reward_method="using_all_of_data_for_backtest_with_mean")
+    cr = Check_Reward(download_method="LOCAL", compute_reward_methodes=["using_all_of_data_for_backtest_with_mean", "using_all_of_data_for_backtest"])
     cr.check_reward()
 
 if __name__ == "__main__":
