@@ -15,8 +15,10 @@ from stock_strategy import StockStrategy
 result_path = save_result_path + "/result/reward"
 SELECTED_CODE_RESULT_PATH = save_result_path + "/result/selected_code"
 
+COMPUTE_REWARD_METHOD = ["using_all_of_data_for_backtest_with_mean"]
+
 class Check_Reward(Save_Result):
-    def __init__(self, save_path=result_path, download_method="LOCAL"):
+    def __init__(self, save_path=result_path, download_method="LOCAL", compute_reward_method="using_all_of_data_for_backtest_with_mean"):
         Save_Result.__init__(self, save_path = save_path)
 
         # self.selected_code_json_file = "move_average_2018_08_14_08_55_08.json"
@@ -27,7 +29,7 @@ class Check_Reward(Save_Result):
             self.selected_code_json_files.append(files_tmp[-1])
 
         logger.info("selected_code_json_files: {}".format(self.selected_code_json_files))
-        self.date_index = []
+        self.date_indexes_for_backtest = []
 
         self.stock_strategy = StockStrategy(download_method="LOCAL")
 
@@ -43,33 +45,39 @@ class Check_Reward(Save_Result):
             self.data_range_end_to_compute = selected_code_dic["data_range_end_to_compute"]
             self.back_test_return_date = selected_code_dic["back_test_return_date"]
 
-            # self.data_range_start = selected_code_dic["data_range_start"]
-            # self.data_range_end = selected_code_dic["data_range_end"]
             self.stock_list = selected_code_dic["result_code_list"]
             self.creat_time = selected_code_dic["creat_time"]
 
         return self.stock_list
 
     def get_stock_data(self, code):
-        # dd = Data_Downloader()
-        # stock_data_df = dd.download(code)
-
         stock_data_df = self.stock_strategy.get_stock_data(code)
-
-        # stock_data_df = stock_data_df.set_index("Date")
-
         return stock_data_df
 
     def compute_reward(self, stock_data_df):
-        close = stock_data_df.loc[self.data_range_end]["Close"]
-        reward = stock_data_df.loc[self.data_range_end:].iloc[1:]["Close"]
+        # close_value = stock_data_df.loc[self.data_range_end]["Close"]
+        # reward = stock_data_df.loc[self.data_range_end:].iloc[1:]["Close"]
 
-        if len(self.date_index) == 0:
-            self.date_index = list(reward.index)
+        close_value_bought = stock_data_df.loc[self.data_range_end_to_compute]["Close"]
+        close_values_for_backtest = stock_data_df.loc[self.data_range_end:].iloc[1:]["Close"]
 
-        reward = (reward - close) / close
+        logger.debug(stock_data_df)
+        logger.debug("close_value_bought: {}".format(close_value_bought))
+        logger.debug("close_values_for_backtest: {}".format(close_values_for_backtest))
+        return
 
-        reward_list = list(reward)
+        if self.compute_reward_method == "using_all_of_data_for_backtest_with_mean":
+            pass
+
+        else:
+
+            if len(self.date_indexes) == 0:
+                self.date_indexes_for_backtest = list(reward.index)
+
+            reward = (reward - close) / close
+
+            reward_list = list(reward)
+
         return reward_list
 
     def check_reward(self):
@@ -90,9 +98,10 @@ class Check_Reward(Save_Result):
                 logger.info(msg_tmp)
                 stock_data_df = self.get_stock_data(code)
                 logger.debug(stock_data_df)
-                return
 
                 reward_list = self.compute_reward(stock_data_df)
+                return
+
                 self.reward_result_dic[str(code)] = reward_list
 
             self.save_reward_result()
@@ -121,7 +130,7 @@ class Check_Reward(Save_Result):
         print(summary_df)
 
 def main():
-    cr = Check_Reward()
+    cr = Check_Reward(download_method="LOCAL", compute_reward_method="using_all_of_data_for_backtest_with_mean")
     cr.check_reward()
 
 if __name__ == "__main__":
