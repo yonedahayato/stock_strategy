@@ -116,7 +116,6 @@ class Check_Reward(Save_Result):
 
             self.save_reward_result(json_file_path)
             self.make_new_format()
-            return
 
     def save_reward_result(self, json_file_path):
         self.format = {"code_json_file": json_file_path,
@@ -128,19 +127,7 @@ class Check_Reward(Save_Result):
                         "creat_time": self.creat_time
                         }
         self.save() # json save
-        return
 
-        summary_df = pd.DataFrame(self.reward_result_dic).T
-
-        summary_df = pd.concat([summary_df, summary_df.mean(axis=1)], axis=1)
-
-        summary_mean = summary_df.mean(axis=0).to_frame().T
-        summary_mean.index = ["mean"]
-
-        summary_df = pd.concat([summary_df, summary_mean], axis=0)
-        summary_df.columns = self.date_index + ["mean"]
-
-        print(summary_df)
 
 def main():
     cr = Check_Reward(download_method="LOCAL", compute_reward_methodes=["using_all_of_data_for_backtest_with_mean", "using_all_of_data_for_backtest"])
