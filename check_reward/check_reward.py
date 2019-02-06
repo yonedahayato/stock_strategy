@@ -114,16 +114,14 @@ class Check_Reward(Save_Result):
                 reward_result = self.compute_reward(stock_data_df)
                 reward_result["code"] = str(code)
                 self.reward_results.append(reward_result)
+                self.reward_rate_mean_in_method.append(reward_result["reward_rate_mean"])
 
-            self.reward_rate_mean_in_method.append(reward_result["reward_rate_mean"])
             self.save_reward_result(json_file_path)
             self.make_new_format()
             return
 
     def save_reward_result(self, json_file_path):
-        print(self.reward_rate_mean_in_method)
         count_winner = sum([ reward_rate > 0.0 for reward_rate in self.reward_rate_mean_in_method])
-        print([ reward_rate > 0.0 for reward_rate in self.reward_rate_mean_in_method])
         self.format = {"code_json_file": json_file_path,
                         "method": self.method,
                         "data_range_start": self.data_range_start_to_compute,
