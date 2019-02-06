@@ -118,10 +118,12 @@ class Check_Reward(Save_Result):
             self.reward_rate_mean_in_method.append(reward_result["reward_rate_mean"])
             self.save_reward_result(json_file_path)
             self.make_new_format()
+            return
 
     def save_reward_result(self, json_file_path):
 
         count_winner = sum([ reward_rate > 0.0 for reward_rate in self.reward_rate_mean_in_method])
+        print([ reward_rate > 0.0 for reward_rate in self.reward_rate_mean_in_method])
         self.format = {"code_json_file": json_file_path,
                         "method": self.method,
                         "data_range_start": self.data_range_start_to_compute,
