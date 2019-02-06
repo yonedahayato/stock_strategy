@@ -51,12 +51,14 @@ class Save_Result:
             file_name = "{}_{}.json".format(self.format["method"], self.format["creat_time"])
             file_path = "{}/{}".format(self.save_path, file_name)
             with open(file_path, "w") as file:
-                json.dump(self.format, file)
+                json.dump(self.format, file, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
+
         except Exception as e:
             error_msg = "failt to save to json, format: {}, {}".format(self.format, e)
             logger.error(msg.format(error_msg))
             logger.exception(error_msg)
             raise Exception(e)
+
         else:
             sccess_msg = "success to save to json, format: {}".format(self.format)
             logger.info(sccess_msg)
