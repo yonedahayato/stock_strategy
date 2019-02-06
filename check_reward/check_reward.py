@@ -3,6 +3,7 @@ from glob import glob
 import json
 import os
 import pandas as pd
+from statistics import mean
 import sys
 
 abspath_check_reward = os.path.dirname(os.path.abspath(__file__))
@@ -128,7 +129,7 @@ class Check_Reward(Save_Result):
                         "stock_list": self.stock_list,
                         "reward_results": self.reward_results,
                         "creat_time": self.creat_time,
-                        "reward_rate_mean_in_method": self.reward_rate_mean_in_method.mean(),
+                        "reward_rate_mean_in_method": mean(self.reward_rate_mean_in_method),
                         "count_winner_brand": "{} / {}".format(count_winner, len(self.stock_list))
                         }
         self.save() # json save
