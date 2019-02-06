@@ -88,6 +88,8 @@ class Check_Reward(Save_Result):
 
 
         elif "using_all_of_data_for_backtest" in self.compute_reward_methodes:
+            print("reward_rates: {}".format(reward_rates))
+            print("list(reward_rates): {}".format(list(reward_rates)))
             result_format_tmp["reward_rates"] = list(reward_rates)
 
         return result_format_tmp
@@ -108,11 +110,11 @@ class Check_Reward(Save_Result):
                 msg_tmp = msg.format("code: {}".format(code))
                 logger.info(msg_tmp)
                 stock_data_df = self.get_stock_data(code)
-                logger.debug(stock_data_df)
 
                 reward_result = self.compute_reward(stock_data_df)
                 reward_result["code"] = str(code)
                 self.reward_results.append(reward_result)
+                return
 
             self.save_reward_result(json_file_path)
             self.make_new_format()
