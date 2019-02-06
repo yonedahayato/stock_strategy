@@ -112,7 +112,6 @@ class Check_Reward(Save_Result):
                 reward_result = self.compute_reward(stock_data_df)
                 reward_result["code"] = str(code)
                 self.reward_results.append(reward_result)
-                return
 
             self.save_reward_result(json_file_path)
             self.make_new_format()
