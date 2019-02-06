@@ -82,15 +82,12 @@ class Check_Reward(Save_Result):
             self.date_indexes_for_backtest = list(close_values_for_backtest.index)
 
         reward_rates = (close_values_for_backtest - close_value_bought) / close_value_bought
-        logger.debug("compute_reward_methodes: {}".format(self.compute_reward_methodes))
 
         if "using_all_of_data_for_backtest_with_mean" in self.compute_reward_methodes:
             result_format_tmp["reward_rate_mean"] = reward_rates.mean()
 
 
-        elif "using_all_of_data_for_backtest" in self.compute_reward_methodes:
-            logger.debug("reward_rates: {}".format(reward_rates))
-            logger.debug("list(reward_rates): {}".format(list(reward_rates)))
+        if "using_all_of_data_for_backtest" in self.compute_reward_methodes:
             result_format_tmp["reward_rates"] = list(reward_rates)
 
         return result_format_tmp
