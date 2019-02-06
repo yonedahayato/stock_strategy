@@ -47,6 +47,7 @@ class Check_Reward(Save_Result):
                                 "reward_rate_mean": 0
                             }
         self.date_indexes = []
+        self.reward_rate_mean_in_method = []
 
     def make_format(self):
         logger.info("[Check_Reward:make_format]: not need to make format.")
@@ -113,17 +114,22 @@ class Check_Reward(Save_Result):
                 reward_result["code"] = str(code)
                 self.reward_results.append(reward_result)
 
+            self.reward_rate_mean_in_method.append(reward_result["reward_rate_mean"])
             self.save_reward_result(json_file_path)
             self.make_new_format()
 
     def save_reward_result(self, json_file_path):
+
+        count_winner = (self.reward_rate_mean_in_method > 0).sum()
         self.format = {"code_json_file": json_file_path,
                         "method": self.method,
                         "data_range_start": self.data_range_start_to_compute,
                         "data_range_end": self.data_range_end_to_compute,
                         "stock_list": self.stock_list,
                         "reward_results": self.reward_results,
-                        "creat_time": self.creat_time
+                        "creat_time": self.creat_time,
+                        "reward_rate_mean_in_method": self.reward_rate_mean_in_method.mean(),
+                        "count_winner_brand": "{} / {}".format(count_winner, len(self.stock_list))
                         }
         self.save() # json save
 
