@@ -37,7 +37,7 @@ class Check_Reward(Save_Result):
         self.make_new_format()
 
 
-    def make_new_format():
+    def make_new_format(self):
         self.date_indexes_for_backtest = []
 
         self.reward_results = []
