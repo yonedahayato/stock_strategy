@@ -121,7 +121,7 @@ class Check_Reward(Save_Result):
             return
 
     def save_reward_result(self, json_file_path):
-
+        print(self.reward_rate_mean_in_method)
         count_winner = sum([ reward_rate > 0.0 for reward_rate in self.reward_rate_mean_in_method])
         print([ reward_rate > 0.0 for reward_rate in self.reward_rate_mean_in_method])
         self.format = {"code_json_file": json_file_path,
