@@ -6,10 +6,12 @@ p_dirname_push_line = os.path.dirname(abspath_push_line)
 sys.path.append(p_dirname+"/helper")
 
 from setting import LINE_NOTIFY_TOKEN
+from log import logger
 
 line_notify_token = setting.line_notify_token
 
 def push_line(message):
+    logger.debug("[push line]: {}".format(message))
     line_notify_api = 'https://notify-api.line.me/api/notify'
 
     payload = {'message': message}
