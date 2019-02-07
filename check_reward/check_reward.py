@@ -29,6 +29,8 @@ class Check_Reward(Save_Result):
         Save_Result.__init__(self, save_path = save_path)
 
         self.compute_reward_methodes = compute_reward_methodes
+        self.push_line = push_line
+
         self.stock_strategy = StockStrategy(download_method=download_method)
 
         # self.selected_code_json_file = "move_average_2018_08_14_08_55_08.json"
@@ -135,9 +137,9 @@ class Check_Reward(Save_Result):
                         "reward_rate_mean_in_method": mean(self.reward_rate_mean_in_method),
                         "count_winner_brand": "{} / {}".format(count_winner, len(self.stock_list))
                         }
-        self.save() # json save
-        push_line("test")
-
+        json_str = self.save() # json save
+        if self.push_line:
+            push_line(json_str)
 
 
 def main():
