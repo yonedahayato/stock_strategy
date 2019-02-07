@@ -27,3 +27,6 @@ RESULT_PATH = p_dirname + "/check_reward/result/selected_code"
 
 # get stock data to local
 THREAD_NUM = 2
+
+# push line
+LINE_NOTIFY_TOKEN = ""

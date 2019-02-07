@@ -9,10 +9,12 @@ import sys
 abspath_check_reward = os.path.dirname(os.path.abspath(__file__))
 p_dirname = os.path.dirname(abspath_check_reward)
 sys.path.append(p_dirname+"/stock_strategy")
+sys.path.append(p_dirname+"/notification")
 
 from save_result import Save_Result, save_result_path, logger
 from check_list import *
 from stock_strategy import StockStrategy
+from push_line import push_line
 
 result_path = save_result_path + "/result/reward"
 SELECTED_CODE_RESULT_PATH = save_result_path + "/result/selected_code"
@@ -21,7 +23,9 @@ COMPUTE_REWARD_METHOD = ["using_all_of_data_for_backtest_with_mean", "using_all_
 
 class Check_Reward(Save_Result):
     def __init__(self, save_path=result_path, download_method="LOCAL",
-                 compute_reward_methodes=["using_all_of_data_for_backtest_with_mean", "using_all_of_data_for_backtest"]):
+                 compute_reward_methodes=["using_all_of_data_for_backtest_with_mean", "using_all_of_data_for_backtest"],
+                 push_line=False):
+
         Save_Result.__init__(self, save_path = save_path)
 
         self.compute_reward_methodes = compute_reward_methodes
@@ -132,10 +136,14 @@ class Check_Reward(Save_Result):
                         "count_winner_brand": "{} / {}".format(count_winner, len(self.stock_list))
                         }
         self.save() # json save
+        push_line("test")
+
 
 
 def main():
-    cr = Check_Reward(download_method="LOCAL", compute_reward_methodes=["using_all_of_data_for_backtest_with_mean", "using_all_of_data_for_backtest"])
+    cr = Check_Reward(download_method="LOCAL",
+                      compute_reward_methodes=["using_all_of_data_for_backtest_with_mean", "using_all_of_data_for_backtest"],
+                      push_line=True)
     cr.check_reward()
 
 if __name__ == "__main__":
