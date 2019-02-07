@@ -4,7 +4,7 @@ import sys
 
 abspath_push_line = os.path.dirname(os.path.abspath(__file__))
 p_dirname_push_line = os.path.dirname(abspath_push_line)
-sys.path.append(p_dirname+"/helper")
+sys.path.append(p_dirname_push_line + "/helper")
 
 from setting import LINE_NOTIFY_TOKEN
 from log import logger
