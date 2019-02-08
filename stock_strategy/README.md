@@ -1,6 +1,6 @@
 <!-- TOC -->
-- [Move Average With Low Value](#MoveAverageWithLowValue)
-- [Move Average](#MoveAverage)
+- [Move Average With Low Value](#move-average-with-low-value)
+- [Move Average](#move-average)
 
 
 <!-- TOC -->
