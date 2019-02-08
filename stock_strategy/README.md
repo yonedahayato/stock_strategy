@@ -1,13 +1,13 @@
 <!-- TOC -->
-- [move average with low value](#move average with low value)
-- [move average](#move average)
+- [Move Average With Low Value](#MoveAverageWithLowValue)
+- [Move Average](#Move Average)
 
 
 <!-- TOC -->
 
 <!-- move average with low value -->
 
-# move average with low value
+# Move Average With Low Value
 ## 入力
 - pandas dataframe の時系列データ（Open, Close, Highm Low, Volume）
 
@@ -57,7 +57,7 @@
 
 <!-- move average -->
 
-# move average
+# Move Average
 
 
 <!-- move average -->
