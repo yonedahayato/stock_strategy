@@ -1,3 +1,12 @@
+<!-- TOC -->
+- [move average with low value](#move average with low value)
+- [move average](#move average)
+
+
+<!-- TOC -->
+
+<!-- move average with low value -->
+
 # move average with low value
 ## 入力
 - pandas dataframe の時系列データ（Open, Close, Highm Low, Volume）
@@ -41,6 +50,14 @@
 1. 判断材料１と判断材料２をどちらを満たす銘柄を選択銘柄とする
 (raising_rate_MAが大きい順に保持する)
 
-## 課題
+## イメージ
+![move_average_with_low_value](./images/move_average_with_low_value.jpg)
 
-## 改善点
+<!-- move average with low value -->
+
+<!-- move average -->
+
+# move average
+
+
+<!-- move average -->
