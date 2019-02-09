@@ -15,7 +15,8 @@ def push_line(message):
 
     payload = {'message': message}
     headers = {'Authorization': 'Bearer ' + LINE_NOTIFY_TOKEN}  # 発行したトークン
-    line_notify = requests.post(line_notify_api, data=payload, headers=headers)
+    files = {"imageFile": open("./notification/test_image.png"), "rb")}
+    line_notify = requests.post(line_notify_api, data=payload, headers=headers, files=files)
 
 if __name__ == "__main__":
     push_line("test")
