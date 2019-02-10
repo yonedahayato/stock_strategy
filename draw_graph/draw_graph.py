@@ -55,4 +55,4 @@ class DrawGraph:
         self.save(plt)
 
     def save(self, plt):
-        plt.savefig("{}/{}_{}.png".format(IMAGE_SAVE_PATH, sele.method_name, self.code))
+        plt.savefig("{}/{}_{}.png".format(IMAGE_SAVE_PATH, self.method_name, self.code))
