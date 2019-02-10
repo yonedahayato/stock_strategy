@@ -56,6 +56,7 @@ class DrawGraph:
         ax2.set_ylabel("Volume")
 
         save_path = self.save(plt)
+        plt.close(fig)
         return save_path
 
     def save(self, plt):
