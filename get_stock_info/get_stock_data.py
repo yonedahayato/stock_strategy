@@ -16,10 +16,11 @@ helper_dirname = path.join(parent_dirname, "helper")
 sys.path.append(helper_dirname)
 
 import log
+from setting import QUANDL_API_KEY
 
 logger = log.logger
 
-api_key = "c_MVftyir5vTKxyiuego"
+api_key = QUANDL_API_KEY
 
 class GetStockData:
     def __init__(self, verbose=False):
