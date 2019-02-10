@@ -157,7 +157,7 @@ class StockStrategy:
             draw_graph = DrawGraph(stock_data_df, code, self.method_name)
             graph_image_path = draw_graph.draw()
             push_line(str(code), image_path = graph_image_path)
-            return
+            draw_graph.remove()
 
     def execute(self):
         msg = self.msg_tmpl.format("exect") + "{}"

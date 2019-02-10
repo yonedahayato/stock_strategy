@@ -56,7 +56,10 @@ class DrawGraph:
         return save_path
 
     def save(self, plt):
-        save_path = "{}/{}_{}.png".format(IMAGE_SAVE_PATH, self.method_name, self.code)
-        plt.savefig(save_path)
+        self.save_path = "{}/{}_{}.png".format(IMAGE_SAVE_PATH, self.method_name, self.code)
+        plt.savefig(self.save_path)
 
-        return save_path
+        return self.save_path
+
+    def remove(self):
+        os.remove(self.save_path)
