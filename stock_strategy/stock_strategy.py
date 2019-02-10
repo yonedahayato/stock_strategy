@@ -40,6 +40,8 @@ parser.add_argument("--back_test_return_date",
                     help = "どのくらいback test の使用するか(0の場合はback testには使用せず、全てのデータを使用)",
                     default=0)
 
+args = parser.parse_args()
+
 class StockStrategy:
     def __init__(self, debug=False, back_test_return_date=parser.back_test_return_date,
                  method_name="method_name", multiprocess=False,
