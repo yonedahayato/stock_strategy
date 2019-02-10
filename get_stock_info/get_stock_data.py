@@ -125,7 +125,7 @@ class GetStockData:
         adj_close = [_._adj_close for _ in data]
         volume = [_.volume for _ in data]
 
-        data_dict = {"Open": open, "High": high, "Low": low, "Close": close, "Adj_Close": adj_close, "Vloume": volume}
+        data_dict = {"Open": open, "High": high, "Low": low, "Close": close, "Adj_Close": adj_close, "Volume": volume}
         columns = *data_dict.keys(),
 
         data_df = pd.DataFrame(data_dict, index=date, columns=columns).sort_index()
