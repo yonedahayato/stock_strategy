@@ -19,7 +19,7 @@ class DrawGraph:
 
     def draw(self):
         data_df = copy.deepcopy(self.data_df)
-        data_df = data_df[["Open", "High", "Low", "Close", "Volume"]]
+        data_df = data_df[["Open", "High", "Low", "Close", "Vloume"]]
 
         fig = plt.figure(figsize=(18, 9))
         fig.subplots_adjust(left=0.045, bottom=0.075, right=0.95, top=0.95, wspace=0.15, hspace=0.15)
