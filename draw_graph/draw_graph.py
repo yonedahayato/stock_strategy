@@ -18,8 +18,11 @@ class DrawGraph:
         self.code = code
         self.method_name = method_name
 
+        self.graph_length = 100
+
     def draw(self):
         data_df = copy.deepcopy(self.data_df)
+        data_df = data_df.iat[-self.graph_length:]
         data_df.columns = ["Open", "High", "Low", "Close", "Adj_Close", "Volume"]
         data_df = data_df[["Open", "High", "Low", "Close", "Volume"]]
 
