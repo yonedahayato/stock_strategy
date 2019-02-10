@@ -25,6 +25,7 @@ class DrawGraph:
         data_df = data_df.iloc[-self.graph_length:]
         data_df.columns = ["Open", "High", "Low", "Close", "Adj_Close", "Volume"]
         data_df = data_df[["Open", "High", "Low", "Close", "Volume"]]
+        logger.debug(data_df)
 
         fig = plt.figure(figsize=(18, 9))
         fig.subplots_adjust(left=0.045, bottom=0.075, right=0.95, top=0.95, wspace=0.15, hspace=0.15)
