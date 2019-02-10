@@ -14,6 +14,7 @@ sys.path.append(p_path + "/get_stock_info")
 sys.path.append(p_path + "/get_stock_info/google_cloud_storage")
 sys.path.append(p_path + "/helper")
 sys.path.append(p_path + "/check_reward")
+sys.path.append(p_path + "/draw_graph")
 
 from data_downloader import Data_Downloader
 from get_new_stock_code import GetCodeList, GetCodeListNikkei225
@@ -22,6 +23,7 @@ import log
 import just_now
 from save_result import Save_Result
 from setting import HISTRICAL_DATA_PATH
+from draw_graph import DrawGraph
 
 jst_now = just_now.jst_now
 
@@ -146,6 +148,12 @@ class StockStrategy:
 
         return self.result_codes
 
+    def draw_graph(self):
+        for code in self.result_codes:
+            stock_data_df = self.get_stock_data(code)
+            draw_graph = DrawGraph(stock_data_df, code)
+            draw_graph.draw()
+
     def execute(self):
         msg = self.msg_tmpl.format("exect") + "{}"
 
@@ -204,7 +212,8 @@ class StockStrategy:
             logger.info(msg.format("success to check select code."))
 
         try:
-            self.save_result()
+            json_result = self.save_result()
+            self.draw_graph(stock_data_df)
         except:
             err_msg = msg.format("fail to save result select code.")
             logger.error(err_msg)
