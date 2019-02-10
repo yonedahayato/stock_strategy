@@ -152,8 +152,9 @@ class StockStrategy:
         for code in self.result_codes:
             logger.info("draw graph {}".format(cde))
             stock_data_df = self.get_stock_data(code)
-            draw_graph = DrawGraph(stock_data_df, code)
+            draw_graph = DrawGraph(stock_data_df, code, self.method_name)
             draw_graph.draw()
+            return
 
     def execute(self):
         msg = self.msg_tmpl.format("exect") + "{}"

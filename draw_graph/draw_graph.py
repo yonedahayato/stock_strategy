@@ -13,9 +13,10 @@ IMAGE_SAVE_PATH = os.path.dirname(os.path.abspath(__file__)) + "/images"
 
 
 class DrawGraph:
-    def __init__(self, data_df, code):
+    def __init__(self, data_df, code, method_name):
         self.data_df = data_df
         self.code = code
+        self.method_name = method_name
 
     def draw(self):
         data_df = copy.deepcopy(self.data_df)
@@ -51,4 +52,4 @@ class DrawGraph:
         ax2.set_ylim([0, float(data_df["Volume"].max()) * 4])
         ax2.set_ylabel("Volume")
 
-        plt.savefig("{}/{}.png".foramt(IMAGE_SAVE_PATH, self.code))
+        plt.savefig("{}/{}_{}.png".foramt(IMAGE_SAVE_PATH, sele.method_name, self.code))
