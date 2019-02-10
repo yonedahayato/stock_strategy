@@ -24,7 +24,7 @@ class DrawGraph:
         self.code = code
         self.method_name = method_name
 
-        self.graph_length = 10
+        self.graph_length = 100
 
     def draw(self):
         data_df = copy.deepcopy(self.data_df)
@@ -38,7 +38,8 @@ class DrawGraph:
         fig.subplots_adjust(left=0.045, bottom=0.075, right=0.95, top=0.95, wspace=0.15, hspace=0.15)
         ax = plt.subplot(1, 1, 1)
 
-        candlestick2_ohlc(ax, data_df["Open"], data_df["High"], data_df["Low"], data_df["Close"], width=0.9, colorup="white", colordown="black")
+        candlestick2_ohlc(ax, data_df["Open"], data_df["High"], data_df["Low"], data_df["Close"],
+                          width=0.9, colorup="b", colordown="black")
 
         place = ax.get_xticks()
         place[-2] = place[-2] - 1.0
