@@ -43,7 +43,7 @@ parser.add_argument("--back_test_return_date",
 args = parser.parse_args()
 
 class StockStrategy:
-    def __init__(self, debug=False, back_test_return_date=parser.back_test_return_date,
+    def __init__(self, debug=False, back_test_return_date=args.back_test_return_date,
                  method_name="method_name", multiprocess=False,
                  download_method="LOCAL", code_list = "1st_225"):
         self.msg_tmpl = "[Stock_Storategy:{}]: "

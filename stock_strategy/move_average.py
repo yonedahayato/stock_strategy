@@ -22,7 +22,7 @@ import log
 import just_now
 from save_result import Save_Result
 from setting import HISTRICAL_DATA_PATH
-from stock_strategy import StockStrategy, parser
+from stock_strategy import StockStrategy, args
 
 jst_now = just_now.jst_now
 
@@ -98,7 +98,7 @@ def main():
     # ss = Stock_Storategy(debug=True, back_test_return_date=5)
     # ss.exect()
 
-    back_test_return_date = parser.back_test_return_date
+    back_test_return_date = args.back_test_return_date
     move_average_window_75 = MoveAverage(debug=False, back_test_return_date=back_test_return_date,
                         method_name="MAMAM_window=75", multiprocess=False, window=75)
     move_average_window_50 = MoveAverage(debug=False, back_test_return_date=back_test_return_date,
