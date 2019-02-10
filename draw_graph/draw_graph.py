@@ -13,8 +13,7 @@ abspath_draw_graph = os.path.dirname(os.path.abspath(__file__))
 p_path = os.path.dirname(abspath_draw_graph)
 sys.path.append(p_path + "/helper")
 
-from log
-logger = log.logger
+from log import logger
 
 IMAGE_SAVE_PATH = os.path.dirname(os.path.abspath(__file__)) + "/graphs"
 
