@@ -15,7 +15,7 @@ IMAGE_SAVE_PATH = os.path.dirname(os.path.abspath(__file__)) + "/images"
 class DrawGraph:
     def __init__(self, data_df, code):
         self.data_df = data_df
-        self.code
+        self.code = code
 
     def draw(self):
         data_df = copy.deepcopy(self.data_df)
