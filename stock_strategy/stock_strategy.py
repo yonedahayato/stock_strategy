@@ -213,7 +213,6 @@ class StockStrategy:
 
         try:
             json_result = self.save_result()
-            self.draw_graph(stock_data_df)
         except:
             err_msg = msg.format("fail to save result select code.")
             logger.error(err_msg)
@@ -221,5 +220,16 @@ class StockStrategy:
             raise Exception(err_msg)
         else:
             logger.info(msg.format("success to save result select code."))
+
+        try:
+            self.draw_graph()
+        except:
+            err_msg = msg.format("fail to draw graph.")
+            logger.error(err_msg)
+            logger.exception(err_msg)
+            raise Exception(err_msg)
+        else:
+            logger.info(msg.format("success to draw graph."))
+
 
         return self.result_codes
