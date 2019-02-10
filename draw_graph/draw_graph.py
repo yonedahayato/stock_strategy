@@ -52,7 +52,11 @@ class DrawGraph:
         ax2.set_ylim([0, float(data_df["Volume"].max()) * 4])
         ax2.set_ylabel("Volume")
 
-        self.save(plt)
+        save_path = self.save(plt)
+        return save_path
 
     def save(self, plt):
-        plt.savefig("{}/{}_{}.png".format(IMAGE_SAVE_PATH, self.method_name, self.code))
+        save_path = "{}/{}_{}.png".format(IMAGE_SAVE_PATH, self.method_name, self.code)
+        plt.savefig(save_path)
+
+        return save_path

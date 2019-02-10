@@ -15,6 +15,7 @@ sys.path.append(p_path + "/get_stock_info/google_cloud_storage")
 sys.path.append(p_path + "/helper")
 sys.path.append(p_path + "/check_reward")
 sys.path.append(p_path + "/draw_graph")
+sys.path.append(p_path + "/notification")
 
 from data_downloader import Data_Downloader
 from get_new_stock_code import GetCodeList, GetCodeListNikkei225
@@ -24,6 +25,7 @@ import just_now
 from save_result import Save_Result
 from setting import HISTRICAL_DATA_PATH
 from draw_graph import DrawGraph
+from push_line import push_line
 
 jst_now = just_now.jst_now
 
@@ -153,7 +155,8 @@ class StockStrategy:
             logger.info("draw graph {}".format(code))
             stock_data_df = self.get_stock_data(code)
             draw_graph = DrawGraph(stock_data_df, code, self.method_name)
-            draw_graph.draw()
+            graph_image_path = draw_graph.draw()
+            push_line(str(code), image_path = graph_image_path)
             return
 
     def execute(self):
