@@ -1,5 +1,11 @@
 # crontab cron_setting.txt
 # /etc/init.d/cron status
 
-# 毎週土曜日３時に ./docker_exe_select_stock_code.sh を実行
-00 3 * * 6 cd path/to/shell_script_dir; sudo ./docker_exe_select_stock_code.sh
+# 毎日15時(UTC = 3時JST)に ./docker_exe_downloader_to_local.shを実行
+00 15 * * * cd path/to/shell_script_dir; sudo ./docker_exe_downloader_to_local.sh
+
+# 毎日18時(UTC = 6時JST)に ./docker_exe_select_stock_code.shを実行
+00 18 * * * cd path/to/shell_script_dir; sudo ./docker_exe_select_stock_code.sh
+
+# 毎日19時(UTC = 7時JST)に ./docker_exe_check_reward.shを実行
+00 19 * * * cd path/to/shell_script_dir; sudo ./docker_exe_check_reward.sh
