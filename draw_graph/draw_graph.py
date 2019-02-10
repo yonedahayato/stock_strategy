@@ -24,7 +24,7 @@ class DrawGraph:
         self.code = code
         self.method_name = method_name
 
-        self.graph_length = 100
+        self.graph_length = 10
 
     def draw(self):
         data_df = copy.deepcopy(self.data_df)
