@@ -9,6 +9,13 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from mpl_finance import candlestick2_ohlc, volume_overlay
 
+abspath_draw_graph = os.path.dirname(os.path.abspath(__file__))
+p_path = os.path.dirname(abspath_draw_graph)
+sys.path.append(p_path + "/helper")
+
+from log
+logger = log.logger
+
 IMAGE_SAVE_PATH = os.path.dirname(os.path.abspath(__file__)) + "/graphs"
 
 
