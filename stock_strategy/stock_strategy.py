@@ -164,6 +164,7 @@ class StockStrategy:
             graph_image_path = draw_graph.draw()
             push_line(str(code), image_path = graph_image_path)
             draw_graph.remove()
+            return
 
     def execute(self):
         msg = self.msg_tmpl.format("exect") + "{}"
