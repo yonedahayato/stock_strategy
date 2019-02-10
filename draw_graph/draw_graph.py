@@ -29,6 +29,7 @@ class DrawGraph:
     def draw(self):
         data_df = copy.deepcopy(self.data_df)
         data_df = data_df.iloc[-self.graph_length:]
+        logger.debug(data_df)
         data_df.columns = ["Open", "High", "Low", "Close", "Adj_Close", "Volume"]
         data_df = data_df[["Open", "High", "Low", "Close", "Volume"]]
         logger.debug(data_df)
