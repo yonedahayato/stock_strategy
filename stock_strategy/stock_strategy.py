@@ -1,3 +1,4 @@
+import argparse
 import datetime
 from datetime import datetime as dt
 from joblib import Parallel, delayed
@@ -34,9 +35,14 @@ logger = log.logger
 DOWNLOAD_METHODES = ["LOCAL", "CLOUD", "API"]
 CODE_LIST = ["1st_all", "1st_225"]
 
+parser = argparse.ArgumentParser("--back_test_return_date",
+                                 help = "どのくらいback test の使用するか(0の場合はback testには使用せず、全てのデータを使用)",
+                                 default=0)
+
 class StockStrategy:
-    def __init__(self, debug=False, back_test_return_date=0, method_name="method_name", multiprocess=False,
-                download_method="LOCAL", code_list = "1st_225"):
+    def __init__(self, debug=False, back_test_return_date=parser.back_test_return_date,
+                 method_name="method_name", multiprocess=False,
+                 download_method="LOCAL", code_list = "1st_225"):
         self.msg_tmpl = "[Stock_Storategy:{}]: "
 
         self.debug = debug
