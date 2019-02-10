@@ -150,6 +150,7 @@ class StockStrategy:
 
     def draw_graph(self):
         for code in self.result_codes:
+            logger.info("draw graph {}".format(cde))
             stock_data_df = self.get_stock_data(code)
             draw_graph = DrawGraph(stock_data_df, code)
             draw_graph.draw()

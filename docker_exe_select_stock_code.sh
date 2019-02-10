@@ -20,14 +20,17 @@ SCRIPT_DIR=$(cd $(dirname $0); pwd)
 DOWNLOAD_DIR=$SCRIPT_DIR/get_stock_info/stock_data
 LOG_DIR=$SCRIPT_DIR/helper/log
 SELECT_CODE_DIR=$SCRIPT_DIR/check_reward/result/selected_code
+GRAPH_DIR=$$SCRIPT_DIR/draw_graph/graphs
 
 export DOWNLOAD_DIR=$DOWNLOAD_DIR
 export LOG_DIR=$LOG_DIR
 export SELECT_CODE_DIR=$SELECT_CODE_DIR
+export GRAPH_DIR=$GRAPH_DIR
 
 echo "DOWNLOAD_DIR: " $DOWNLOAD_DIR
 echo "LOG_DIR: " $LOG_DIR
 echo "SELECT_CODE_DIR: " $SELECT_CODE_DIR
+echo "GRAPH_DIR: " $GRAPH_DIR
 
 # get stock data
 export COMPOSE_FILE=dockerfile/docker-compose.select_stock_code.yml
