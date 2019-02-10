@@ -9,7 +9,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from mpl_finance import candlestick2_ohlc, volume_overlay
 
-IMAGE_SAVE_PATH = os.path.dirname(os.path.abspath(__file__)) + "/images"
+IMAGE_SAVE_PATH = os.path.dirname(os.path.abspath(__file__)) + "/graphs"
 
 
 class DrawGraph:
