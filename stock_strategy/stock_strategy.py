@@ -38,7 +38,8 @@ CODE_LIST = ["1st_all", "1st_225"]
 parser = argparse.ArgumentParser(description="stock_strategyの引数")
 parser.add_argument("--back_test_return_date",
                     help = "どのくらいback test の使用するか(0の場合はback testには使用せず、全てのデータを使用)",
-                    default=0)
+                    default=0,
+                    type=int)
 
 args = parser.parse_args()
 
