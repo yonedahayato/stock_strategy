@@ -39,7 +39,7 @@ class DrawGraph:
         ax = plt.subplot(1, 1, 1)
 
         candlestick2_ohlc(ax, data_df["Open"], data_df["High"], data_df["Low"], data_df["Close"],
-                          width=0.9, colorup="b", colordown="black")
+                          width=0.9, colorup="w", colordown="black")
 
         place = ax.get_xticks()
         place[-2] = place[-2] - 1.0
