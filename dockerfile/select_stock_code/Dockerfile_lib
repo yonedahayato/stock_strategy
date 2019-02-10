@@ -9,4 +9,5 @@ RUN pip install \
   lxml\
   xlrd\
   requests\
-  matplotlib
+  matplotlib\
+  mpl_finance
