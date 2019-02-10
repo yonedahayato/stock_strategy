@@ -8,4 +8,5 @@ RUN pip install \
   Quandl\
   lxml\
   xlrd\
-  requests
+  requests\
+  matplotlib

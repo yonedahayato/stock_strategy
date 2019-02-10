@@ -1,6 +1,4 @@
 import copy
-# import csv
-import itertools
 import matplotlib
 import numpy as np
 import os
