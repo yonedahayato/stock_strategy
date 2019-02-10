@@ -163,7 +163,9 @@ class StockStrategy:
     def draw_graph(self):
         for code in self.result_codes:
             logger.info("draw graph {}".format(code))
+
             stock_data_df = self.get_stock_data(code)
+            logger.debug(stock_data_df)
             draw_graph = DrawGraph(stock_data_df, code, self.method_name)
             graph_image_path = draw_graph.draw()
             push_line(str(code), image_path = graph_image_path)
