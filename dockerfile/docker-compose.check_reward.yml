@@ -11,4 +11,4 @@ services:
       - ${CHECK_REWARD_RESULT_DIR}:/select_stock_code/check_reward/result/reward
       - ${LOG_DIR}:/select_stock_code/helper/log
       - ${SELECT_CODE_DIR}:/select_stock_code/check_reward/result/selected_code
-    command: python /select_stock_code/check_reward/check_reward.py
+    command: python /select_stock_code/check_reward/check_reward.sh
