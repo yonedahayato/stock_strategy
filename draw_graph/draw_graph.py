@@ -15,8 +15,6 @@ sys.path.append(p_path + "/helper")
 sys.path.append(p_path + "/stock_strategy")
 
 from log import logger
-from move_average import MoveAverage
-
 
 IMAGE_SAVE_PATH = os.path.dirname(os.path.abspath(__file__)) + "/graphs"
 
@@ -80,6 +78,8 @@ class DrawGraph:
         return plt, fig
 
     def draw_move_average_lie(self, data_df, plt):
+        from move_average import MoveAverage
+
         move_average_for_compute = MoveAverage(window=self.window)
         move_average_df = move_average_for_compute.get_move_average()
         return plt
