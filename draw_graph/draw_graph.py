@@ -29,22 +29,22 @@ class DrawGraph:
         self.window = window
 
     def draw(self):
-        data_df = copy.deepcopy(self.data_df)
-        data_df = data_df.iloc[-self.graph_length:]
-        data_df.columns = ["Open", "High", "Low", "Close", "Adj_Close", "Volume"]
-        data_df = data_df[["Open", "High", "Low", "Close", "Volume"]]
-
-        plt, fig, ax = self.draw_chlcv(data_df)
+        plt, fig, ax = self.draw_chlcv()
 
         if self.window != None:
-            plt, fig, ax = self.draw_move_average_line(data_df, plt, fig, ax)
+            plt, fig, ax = self.draw_move_average_line(plt, fig, ax)
 
         save_path = self.save(plt)
         plt.close(fig)
         return save_path
 
 
-    def draw_chlcv(self, data_df):
+    def draw_chlcv(self):
+        data_df = copy.deepcopy(self.data_df)
+        data_df = data_df.iloc[-self.graph_length:]
+        data_df.columns = ["Open", "High", "Low", "Close", "Adj_Close", "Volume"]
+        data_df = data_df[["Open", "High", "Low", "Close", "Volume"]]
+
         fig = plt.figure(figsize=(18, 9))
         fig.subplots_adjust(left=0.045, bottom=0.075, right=0.95, top=0.95, wspace=0.15, hspace=0.15)
         ax = plt.subplot(1, 1, 1)
@@ -77,8 +77,9 @@ class DrawGraph:
 
         return plt, fig, ax
 
-    def draw_move_average_line(self, data_df, plt, fig, ax):
+    def draw_move_average_line(self, plt, fig, ax):
         from move_average import MoveAverage
+        data_df = copy.deepcopy(self.data_df)
 
         move_average_for_compute = MoveAverage(window=self.window)
         move_average_df = move_average_for_compute.get_move_average(data_df)
