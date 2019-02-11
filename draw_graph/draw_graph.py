@@ -87,7 +87,7 @@ class DrawGraph:
 
         index = data_df.index[-self.graph_length:]
 
-        ax.plot(index ,move_average_df["rolling_mean"])
+        ax.plot(index, move_average_df["rolling_mean"], label="move_average_{}".format(self.window))
         return plt, fig, ax
 
 
