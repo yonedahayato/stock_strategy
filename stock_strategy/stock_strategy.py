@@ -177,7 +177,6 @@ class StockStrategy:
 
             push_line(str(code), image_path = graph_image_path)
             draw_graph.remove()
-            return
 
     def execute(self):
         msg = self.msg_tmpl.format("exect") + "{}"
@@ -238,6 +237,7 @@ class StockStrategy:
 
         try:
             json_result = self.save_result()
+            push_line(json_result)
         except:
             err_msg = msg.format("fail to save result select code.")
             logger.error(err_msg)
