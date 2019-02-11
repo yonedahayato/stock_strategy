@@ -77,7 +77,7 @@ class DrawGraph:
 
         return plt, fig
 
-    def draw_move_average_lie(self, data_df, plt):
+    def draw_move_average_line(self, data_df, plt):
         from move_average import MoveAverage
 
         move_average_for_compute = MoveAverage(window=self.window)
