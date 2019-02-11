@@ -34,6 +34,8 @@ class DrawGraph:
         if self.window != None:
             plt, fig, ax = self.draw_move_average_line(plt, fig, ax)
 
+        ax.legend(fontsize=12)
+
         save_path = self.save(plt)
         plt.close(fig)
         return save_path
