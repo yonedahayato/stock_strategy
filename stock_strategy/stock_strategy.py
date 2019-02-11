@@ -167,6 +167,9 @@ class StockStrategy:
             stock_data_df = self.get_stock_data(code)
             draw_graph = DrawGraph(stock_data_df, code, self.method_name)
             graph_image_path = draw_graph.draw()
+            if "window" in self.__dic__.keys():
+                logger.debug("window: {}".format(window))
+
             push_line(str(code), image_path = graph_image_path)
             draw_graph.remove()
             return
