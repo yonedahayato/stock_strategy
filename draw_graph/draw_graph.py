@@ -35,6 +35,7 @@ class DrawGraph:
             plt, fig, ax = self.draw_move_average_line(plt, fig, ax)
 
         ax.legend(fontsize=12)
+        plt.title("{}_{}".format(self.method_name, self.code))
 
         save_path = self.save(plt)
         plt.close(fig)
