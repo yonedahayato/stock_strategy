@@ -34,10 +34,10 @@ class DrawGraph:
         data_df.columns = ["Open", "High", "Low", "Close", "Adj_Close", "Volume"]
         data_df = data_df[["Open", "High", "Low", "Close", "Volume"]]
 
-        plt, fig = self.draw_chlcv(data_df)
+        plt, fig, ax = self.draw_chlcv(data_df)
 
         if self.window != None:
-            plt = self.draw_move_average_line(data_df, plt)
+            plt, fig, ax = self.draw_move_average_line(data_df, plt, fig, ax)
 
         save_path = self.save(plt)
         plt.close(fig)
@@ -75,14 +75,19 @@ class DrawGraph:
         ax2.set_ylim([0, float(data_df["Volume"].max()) * 4])
         ax2.set_ylabel("Volume")
 
-        return plt, fig
+        return plt, fig, ax
 
-    def draw_move_average_line(self, data_df, plt):
+    def draw_move_average_line(self, data_df, plt, fig, ax):
         from move_average import MoveAverage
 
         move_average_for_compute = MoveAverage(window=self.window)
         move_average_df = move_average_for_compute.get_move_average(data_df)
-        return plt
+        move_average_df = move_average_df.iloc[-self.graph_length:]
+
+        index = data_df.index[-self.graph_length]
+
+        ax.plot(index ,move_average_df["rolling_mean"])
+        return plt, fig, ax
 
 
     def save(self, plt):
