@@ -10,4 +10,5 @@ RUN pip install \
   xlrd\
   requests\
   matplotlib\
-  mpl_finance
+  mpl_finance\
+  logzero
