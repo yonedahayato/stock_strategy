@@ -81,7 +81,7 @@ class DrawGraph:
         from move_average import MoveAverage
 
         move_average_for_compute = MoveAverage(window=self.window)
-        move_average_df = move_average_for_compute.get_move_average()
+        move_average_df = move_average_for_compute.get_move_average(data_df)
         return plt
 
 
