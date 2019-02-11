@@ -22,8 +22,7 @@ import log
 import just_now
 from save_result import Save_Result
 from setting import HISTRICAL_DATA_PATH
-from stock_strategy import StockStrategy, args
-from move_average import MoveAverage
+from move_average import MoveAverage, args
 
 jst_now = just_now.jst_now
 
