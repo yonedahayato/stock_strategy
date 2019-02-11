@@ -59,50 +59,17 @@ class MoveAverage(StockStrategy):
         return rm_df
 
     def select_code(self, code, stock_data_df):
-        # ＊買い
-        # １、７５日移動平均線が上向いている
-        # ２、７５日移動平均線の下にあった株価（安値）が上に抜ける
-        #
-        # ＊売り
-        # １、７５日移動平均線を下に抜ける
-
         move_average_df = self.get_move_average(stock_data_df)
         move_average_diff_df = move_average_df.diff(periods=1)
 
-        sign_rising_MA_term = 100 # 10
+        sign_rising_MA_term = 3 # 10
         move_average_diff_df = move_average_diff_df.iloc[-sign_rising_MA_term:]>0
         sign_rising_MA = move_average_diff_df.all().values[0]
 
-        if self.debug:
-            print("sign_rising_MA: {}".format(sign_rising_MA))
-
-        stock_data_low_df = self.shape_stock_data(stock_data_df, value="Low")
-        diff_Low_MoveAverage = stock_data_low_df - move_average_df
-
-        sign_rising_Low_term = 100 # 10
-        diff_Low_MoveAverage = diff_Low_MoveAverage.iloc[-sign_rising_Low_term:] > 0
-
-        sign_rising_Low = False
-        for cnt in range(sign_rising_Low_term-1):
-            if (diff_Low_MoveAverage.iloc[cnt].values[0] == False) and \
-                (diff_Low_MoveAverage.iloc[cnt+1].values[0] == True):
-                sign_rising_Low = True
-                break
-
-        if self.debug:
-            print("sign_rising_Low: {}".format(sign_rising_Low))
-
-        if sign_rising_MA and sign_rising_Low:
+        if sign_rising_MA:
             self.result_codes.append(code)
-        # self.result_codes.append(code)
-        # self.result_codes.reverse()
-        # if len(self.result_codes) > 5:
-        #     self.result_codes = self.result_codes[:5]
 
 def main():
-    # ss = Stock_Storategy(debug=True, back_test_return_date=5)
-    # ss.exect()
-
     back_test_return_date = args.back_test_return_date
     move_average_window_75 = MoveAverage(debug=False, back_test_return_date=back_test_return_date,
                         method_name="MAMAM_window=75", multiprocess=False, window=75)

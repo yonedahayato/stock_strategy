@@ -85,9 +85,6 @@ class MoveAverageWithLowValue(MoveAverage):
             self.result_codes = [code[0] for code in result_codes_tmp]
 
 def main():
-    # ss = Stock_Storategy(debug=True, back_test_return_date=5)
-    # ss.exect()
-
     back_test_return_date = args.back_test_return_date
     move_average_window_75 = MoveAverageWithLowValue(debug=False, back_test_return_date = back_test_return_date,
                         method_name="MoveAverageWithLowValue_window=75", multiprocess=False, window=75)
