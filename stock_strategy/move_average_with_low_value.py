@@ -23,6 +23,7 @@ import just_now
 from save_result import Save_Result
 from setting import HISTRICAL_DATA_PATH
 from stock_strategy import StockStrategy, args
+from move_average import MoveAverage
 
 jst_now = just_now.jst_now
 
@@ -32,7 +33,7 @@ logger = log.logger
 pd.options.display.max_rows = 1000
 
 
-class MoveAverage(StockStrategy):
+class MoveAverageWithLowValue(MoveAverage):
     def __init__(self, debug=True, back_test_return_date=5, \
                 method_name="move_average", multiprocess=False, window=75):
 
@@ -41,21 +42,6 @@ class MoveAverage(StockStrategy):
 
         self.window = window
         self.result_dict_with_raising_rate_MA = {}
-
-    def shape_stock_data(self, stock_data_df, value="Close"):
-        shape = stock_data_df.shape
-        if shape[1] != 1:
-            stock_data_df = stock_data_df[[value]]
-
-        return stock_data_df
-
-    def get_move_average(self, stock_data_df):
-        stock_data_df = self.shape_stock_data(stock_data_df)
-
-        rm_df = stock_data_df.rolling(window=self.window, center=False).mean()
-        rm_df.columns = ["rolling_mean"]
-
-        return rm_df
 
     def select_code(self, code, stock_data_df):
         # ＊買い
@@ -104,13 +90,13 @@ def main():
     # ss.exect()
 
     back_test_return_date = args.back_test_return_date
-    move_average_window_75 = MoveAverage(debug=False, back_test_return_date = back_test_return_date,
+    move_average_window_75 = MoveAverageWithLowValue(debug=False, back_test_return_date = back_test_return_date,
                         method_name="MoveAverageWithLowValue_window=75", multiprocess=False, window=75)
-    move_average_window_50 = MoveAverage(debug=False, back_test_return_date = back_test_return_date,
+    move_average_window_50 = MoveAverageWithLowValue(debug=False, back_test_return_date = back_test_return_date,
                         method_name="MoveAverageWithLowValue_window=50", multiprocess=False, window=50)
-    move_average_window_25 = MoveAverage(debug=False, back_test_return_date = back_test_return_date,
+    move_average_window_25 = MoveAverageWithLowValue(debug=False, back_test_return_date = back_test_return_date,
                         method_name="MoveAverageWithLowValue_window=25", multiprocess=False, window=25)
-    move_average_window_10 = MoveAverage(debug=False, back_test_return_date = back_test_return_date,
+    move_average_window_10 = MoveAverageWithLowValue(debug=False, back_test_return_date = back_test_return_date,
                         method_name="MoveAverageWithLowValue_window=10", multiprocess=False, window=10)
 
     result_codes_window_75 = move_average_window_75.execute()

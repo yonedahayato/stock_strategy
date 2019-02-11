@@ -1,3 +1,4 @@
+import copy
 import datetime
 from datetime import datetime as dt
 from joblib import Parallel, delayed
@@ -45,10 +46,13 @@ class MoveAverage(StockStrategy):
 
         return stock_data_df
 
-    def get_move_average(self, stock_data_df):
+    def get_move_average(self, stock_data_df, window=None):
         stock_data_df = self.shape_stock_data(stock_data_df)
 
-        rm_df = stock_data_df.rolling(window=self.window, center=False).mean()
+        if window == None:
+            window = copy.deepcopy(self.window)
+
+        rm_df = stock_data_df.rolling(window=window, center=False).mean()
         rm_df.columns = ["rolling_mean"]
 
         return rm_df

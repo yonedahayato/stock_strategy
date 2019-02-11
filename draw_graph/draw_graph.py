@@ -12,28 +12,41 @@ from mpl_finance import candlestick2_ohlc, volume_overlay
 abspath_draw_graph = os.path.dirname(os.path.abspath(__file__))
 p_path = os.path.dirname(abspath_draw_graph)
 sys.path.append(p_path + "/helper")
+sys.path.append(p_path + "/stock_strategy")
 
 from log import logger
+from move_average import MoveAverage
+
 
 IMAGE_SAVE_PATH = os.path.dirname(os.path.abspath(__file__)) + "/graphs"
 
 
 class DrawGraph:
-    def __init__(self, data_df, code, method_name):
+    def __init__(self, data_df, code, method_name, window=None):
         self.data_df = data_df
         self.code = code
         self.method_name = method_name
 
         self.graph_length = 100
+        self.window = window
 
     def draw(self):
         data_df = copy.deepcopy(self.data_df)
         data_df = data_df.iloc[-self.graph_length:]
-        logger.debug(data_df)
         data_df.columns = ["Open", "High", "Low", "Close", "Adj_Close", "Volume"]
         data_df = data_df[["Open", "High", "Low", "Close", "Volume"]]
-        logger.debug(data_df)
 
+        plt, fig = self.draw_chlcv(data_df)
+
+        if self.window != None:
+            plt = self.draw_move_average_line(data_df, plt)
+
+        save_path = self.save(plt)
+        plt.close(fig)
+        return save_path
+
+
+    def draw_chlcv(self, data_df):
         fig = plt.figure(figsize=(18, 9))
         fig.subplots_adjust(left=0.045, bottom=0.075, right=0.95, top=0.95, wspace=0.15, hspace=0.15)
         ax = plt.subplot(1, 1, 1)
@@ -64,9 +77,13 @@ class DrawGraph:
         ax2.set_ylim([0, float(data_df["Volume"].max()) * 4])
         ax2.set_ylabel("Volume")
 
-        save_path = self.save(plt)
-        plt.close(fig)
-        return save_path
+        return plt, fig
+
+    def draw_move_average_lie(self, data_df, plt):
+        move_average_for_compute = MoveAverage(window=self.window)
+        move_average_df = move_average_for_compute.get_move_average()
+        return plt
+
 
     def save(self, plt):
         self.save_path = "{}/{}_{}.png".format(IMAGE_SAVE_PATH, self.method_name, self.code)

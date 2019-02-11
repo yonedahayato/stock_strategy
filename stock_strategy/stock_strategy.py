@@ -165,10 +165,14 @@ class StockStrategy:
             logger.info("draw graph {}".format(code))
 
             stock_data_df = self.get_stock_data(code)
-            draw_graph = DrawGraph(stock_data_df, code, self.method_name)
-            graph_image_path = draw_graph.draw()
+
             if "window" in self.__dict__.keys():
-                logger.debug("window: {}".format(self.window))
+                window = copy.deepcopy(self.window)
+            else:
+                window = None
+
+            draw_graph = DrawGraph(stock_data_df, code, self.method_name, window=window)
+            graph_image_path = draw_graph.draw()
 
             push_line(str(code), image_path = graph_image_path)
             draw_graph.remove()
