@@ -1,3 +1,2 @@
-echo "a"
-# sh stock_strategy/strategies.sh
-# python check_reward/check_reward.py
+sh stock_strategy/strategies_back_test.sh
+python check_reward/check_reward.py

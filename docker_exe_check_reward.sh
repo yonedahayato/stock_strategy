@@ -1,6 +1,7 @@
 # check reward
 
 # docker build
+# docker build -t select_stock_code_lib -f dockerfile/select_stock_code/Dockerfile_lib .
 docker build -t check_reward -f dockerfile/select_stock_code/Dockerfile .
 
 # check reward directory
