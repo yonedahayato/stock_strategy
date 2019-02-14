@@ -1,7 +1,7 @@
 <!-- TOC -->
 - [Move Average With Low Value](#move-average-with-low-value)
 - [Move Average](#move-average)
-
+- [Trend Line](#trend-line)
 
 <!-- TOC -->
 
@@ -58,6 +58,14 @@
 <!-- move average -->
 
 # Move Average
-
+## 戦略
+### 買い
+1. 移動平均線が直近で上昇している銘柄を選択
 
 <!-- move average -->
+
+<!-- trend line -->
+
+# Trend Line
+
+<!-- trend line -->
