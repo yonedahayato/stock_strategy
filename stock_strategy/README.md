@@ -1,8 +1,9 @@
 <!-- TOC -->
-- [Move Average With Low Value](#move-average-with-low-value)
-- [Move Average](#move-average)
-- [Trend Line](#trend-line)
-
+- Stock Strategy
+  - [Move Average](#move-average)
+    - [Move Average With Low Value](#move-average-with-low-value)
+  - [Trend Line](#trend-line)
+    - [Trend Conversion Line](#trend-conversion-line)
 <!-- TOC -->
 
 <!-- move average with low value -->
@@ -67,5 +68,21 @@
 <!-- trend line -->
 
 # Trend Line
+- Algorithm in DS_Q
+
+## 機能
+1. ピーク点をもとめる
+1. ピークとピークを結んだ線（トレンドライン）を作成する
 
 <!-- trend line -->
+
+<!-- trend conversion line -->
+
+# Trend Conversion Line
+- Algorithm In 「世界一やさしいの教科書１年生 P.171~」
+
+## 戦略
+### 買い
+1. チャートの上に存在するトレンドライン（抵抗線）を上につけ抜ける銘柄を選択
+
+<!-- trend conversion line -->
