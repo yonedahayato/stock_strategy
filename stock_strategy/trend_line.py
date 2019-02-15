@@ -15,6 +15,7 @@ from stock_strategy import (
     args,
     logger
 )
+import itertools
 
 class PeakInfo():
     def __init__(self):
@@ -32,6 +33,45 @@ class PeakInfo():
         logger.debug("dates: {}".format(self.peak_dates))
         logger.debug("prices: {}".format(self.peak_prices))
 
+    def get_length(self):
+        return len(self.peak_indexes)
+
+    def get_info_from_id_as_dict(self, idx):
+        return {"index": self.peak_indexes[idx],
+                "date": self.peak_dates[idx],
+                "price": self.peak_prices[idx]}
+
+
+class LineInfo():
+    def __init__(self):
+        self.start_indexes = []
+        self.start_indexes_in_peak = []
+        self.start_prices = []
+        self.end_indexes = []
+        self.end_indexes_in_peak = []
+        self.end_prices = []
+
+        self.data_dict = {"start_index": self.start_indexes,
+                          "start_index_in_peak": self.start_indexes_in_peak,
+                          "start_price": self.start_prices,
+                          "end_index": self.end_indexes,
+                          "end_index_in_peak": self.end_indexes_in_peak,
+                          "end_price": self.end_prices}
+
+    def append_info(self, start_index, start_index_in_peak, start_price,
+                    end_index, end_index_in_peak, end_price):
+        self.start_indexes.append(start_index)
+        self.start_indexes_in_peak.append(start_index_in_peak)
+        self.start_prices.append(start_price)
+        self.end_indexes.append(end_index)
+        self.end_indexes_in_peak.append(end_index_in_peak)
+        self.end_prices.append(end_price)
+
+    def set_list_to_dict(key, data_list):
+        data_list_tmp = self.data_dict[key]
+        data_list_tmp.clear()
+        data_list.extend(data_list)
+
 
 class TrendLine(StockStrategy):
     def __init__(self, debug=True, back_test_return_date=5, \
@@ -41,9 +81,17 @@ class TrendLine(StockStrategy):
                                 method_name=method_name, multiprocess=multiprocess)
 
     def reset_info_each_brand(self):
-        # detect small peak
+        # for small peak
         self.rear_candle, self.middle_candle, self.fore_candle = [pd.Series([])] * 3
         self.small_peak_info = PeakInfo()
+
+        # for large peak
+        self.large_peak_info = PeakInfo()
+        self.peak_indexes_in_small_peaks = []
+
+        # for trend line
+        self.line = LineInfo()
+        self.trend_line = LineInfo()
 
     def set_candle(self, candle):
         if self.rear_candle.empty:
@@ -56,7 +104,7 @@ class TrendLine(StockStrategy):
             self.middle_candle = copy.deepcopy(self.rear_candle)
             self.rear_candle = copy.deepcopy(candle)
 
-    def check_peak(self, fore_candle_index, for_buy=True):
+    def check_small_peak(self, fore_candle_index, for_buy=True):
         # for buy
         middle_candle_index = fore_candle_index - 1
 
@@ -90,6 +138,16 @@ class TrendLine(StockStrategy):
 
         # TODO: for sell
 
+    def check_large_peak(self, for_buy=True):
+        for idx in range(1, self.small_peak_info.get_length() - 1):
+            if self.small_peak_info.peak_prices[idx - 1] <= self.small_peak_info.peak_prices[idx] and \
+               self.small_peak_info.peak_prices[idx] <= self.small_peak_info.peak_prices[idx + 1]:
+
+                self.large_peak_info.append_info(**self.small_peak_info.get_info_from_id_as_dict(idx))
+                self.peak_indexes_in_small_peaks.append(idx)
+
+        # TODO: for sell
+
     def detect_small_peak(self, data_df):
         self.data_df_tmp = copy.deepcopy(data_df)
 
@@ -99,27 +157,37 @@ class TrendLine(StockStrategy):
             if self.fore_candle.empty:
                 continue
 
-            self.check_peak(index)
+            self.check_small_peak(index)
 
         del self.data_df_tmp
 
     def detect_large_peak(self):
-        pass
+        if self.small_peak_info.get_length() < 3:
+            logger.info("[detect large peak]: No small peak, so I can not detect large peak")
+
+        self.large_peak_info.append_info(**self.small_peak_info.get_info_from_id_as_dict(0))
+
+        self.check_large_peak()
+
+        self.large_peak_info.append_info(**self.small_peak_info.get_info_from_id_as_dict(-1))
 
     def detect_trend_line(self):
-        pass
+        lines_tmp = list(itertools.combinations(self.peak_indexes_in_small_peaks, 2))
+        self.line.set_list_to_dict("start_index_in_peak", [line[0] for line in lines_tmp])
+        self.line.set_list_to_dict("end_index_in_peak", [line[1] for line in lines_tmp])
+
+
 
     def select_code(self, code, stock_data_df):
         self.reset_info_each_brand()
 
         self.detect_small_peak(stock_data_df)
-        self.small_peak_info.print()
-
-        sys.exit()
+        # self.small_peak_info.print()
 
         self.detect_large_peak()
 
         self.detect_trend_line()
+        sys.exit()
 
         self.result_codes.appends(code)
 
