@@ -99,7 +99,6 @@ class LineInfo():
         for line_id in self.data_df.index]
 
     def set_line_values_list(self, histlical_data_df):
-        # histlical_data_df_tmp = copy.deepcopy(histlical_data_df)
         peak_info = copy.deepcopy(self.peak_info)
 
         self.line_values_list = [
@@ -122,3 +121,28 @@ class LineInfo():
                 for time in self.peak_lists_in_line[line_id]]
             )
         for line_id in self.data_df.index]
+
+    def check_diff_between_high_value_and_line(self):
+        self.list_checked_diff_between_high_value_and_line = \
+            [
+                (
+                    (
+                        self.high_values_list_in_line[line_id] - \
+                        self.line_values_list[line_id] \
+                     ) \
+                < 0.5).all()
+            for line_id in self.data_df.index]
+
+    def check_diff_between_high_value_and_line_in_peak(sekf):
+        self.list_checked_diff_between_high_value_and_line_in_peak = \
+            [
+                (
+                    np.absolute(
+                        self.high_values_list_in_peak[line_id] - \
+                        self.line_values_list_in_peak[line_id] \
+                        ) \
+                    < 0.5).sum()
+            for line_id in self.data_df.index]
+
+    def count_peaks_used_in_line(self):
+        pass
