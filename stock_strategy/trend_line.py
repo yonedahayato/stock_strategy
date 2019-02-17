@@ -16,61 +16,10 @@ from stock_strategy import (
     logger
 )
 import itertools
+import numpy as np
 
-class PeakInfo():
-    def __init__(self):
-        self.peak_indexes = []
-        self.peak_dates = []
-        self.peak_prices = []
-
-    def append_info(self, index, date, price):
-        self.peak_indexes.append(index)
-        self.peak_dates.append(date)
-        self.peak_prices.append(price)
-
-    def print(self):
-        logger.debug("indexes: {}".format(self.peak_indexes))
-        logger.debug("dates: {}".format(self.peak_dates))
-        logger.debug("prices: {}".format(self.peak_prices))
-
-    def get_length(self):
-        return len(self.peak_indexes)
-
-    def get_info_from_id_as_dict(self, idx):
-        return {"index": self.peak_indexes[idx],
-                "date": self.peak_dates[idx],
-                "price": self.peak_prices[idx]}
-
-
-class LineInfo():
-    def __init__(self):
-        self.start_indexes = []
-        self.start_indexes_in_peak = []
-        self.start_prices = []
-        self.end_indexes = []
-        self.end_indexes_in_peak = []
-        self.end_prices = []
-
-        self.data_dict = {"start_index": self.start_indexes,
-                          "start_index_in_peak": self.start_indexes_in_peak,
-                          "start_price": self.start_prices,
-                          "end_index": self.end_indexes,
-                          "end_index_in_peak": self.end_indexes_in_peak,
-                          "end_price": self.end_prices}
-
-    def append_info(self, start_index, start_index_in_peak, start_price,
-                    end_index, end_index_in_peak, end_price):
-        self.start_indexes.append(start_index)
-        self.start_indexes_in_peak.append(start_index_in_peak)
-        self.start_prices.append(start_price)
-        self.end_indexes.append(end_index)
-        self.end_indexes_in_peak.append(end_index_in_peak)
-        self.end_prices.append(end_price)
-
-    def set_list_to_dict(key, data_list):
-        data_list_tmp = self.data_dict[key]
-        data_list_tmp.clear()
-        data_list.extend(data_list)
+from helper.peak import PeakInfo
+from helper.line import LineInfo
 
 
 class TrendLine(StockStrategy):
@@ -90,8 +39,8 @@ class TrendLine(StockStrategy):
         self.peak_indexes_in_small_peaks = []
 
         # for trend line
-        self.line = LineInfo()
-        self.trend_line = LineInfo()
+        self.lines_info = LineInfo(self.large_peak_info)
+        self.trend_lines_info = LineInfo(self.large_peak_info)
 
     def set_candle(self, candle):
         if self.rear_candle.empty:
@@ -171,11 +120,37 @@ class TrendLine(StockStrategy):
 
         self.large_peak_info.append_info(**self.small_peak_info.get_info_from_id_as_dict(-1))
 
-    def detect_trend_line(self):
+    def detect_trend_line(self, stock_data_df):
         lines_tmp = list(itertools.combinations(self.peak_indexes_in_small_peaks, 2))
-        self.line.set_list_to_dict("start_index_in_peak", [line[0] for line in lines_tmp])
-        self.line.set_list_to_dict("end_index_in_peak", [line[1] for line in lines_tmp])
+        self.lines_info.set_list_to_dict("start_index_in_peak", [line[0] for line in lines_tmp])
+        self.lines_info.set_list_to_dict("end_index_in_peak", [line[1] for line in lines_tmp])
 
+
+        self.lines_info.set_list_to_dict("start_index", \
+                                   [self.small_peak_info.peak_indexes[line[0]] for line in lines_tmp])
+        self.lines_info.set_list_to_dict("start_price", \
+                                   [self.small_peak_info.peak_prices[line[0]] for line in lines_tmp])
+        self.lines_info.set_list_to_dict("end_index", \
+                                   [self.small_peak_info.peak_indexes[line[1]] for line in lines_tmp])
+        self.lines_info.set_list_to_dict("end_price", \
+                                   [self.small_peak_info.peak_prices[line[1]] for line in lines_tmp])
+
+        if not self.lines_info.check_length():
+            msg = "line のdata_dict内のリストの長さが同じでないのでエラーです"
+            logger.error(msg)
+            raise(Exception(msg))
+
+        self.lines_info.make_data_frame()
+
+        self.lines_info.compute_length_index_to_index()
+        self.lines_info.compute_line_rate()
+        self.lines_info.set_peak_lists_in_line()
+        self.lines_info.set_candle_indexes_in_line_without_peak()
+        self.lines_info.set_high_values_list(stock_data_df)
+        self.lines_info.set_high_values_list_in_line()
+        self.lines_info.set_high_values_list_in_peak()
+        self.lines_info.set_line_values_list(stock_data_df)
+        self.lines_info.set_line_values_list_in_peak()
 
 
     def select_code(self, code, stock_data_df):
@@ -186,7 +161,7 @@ class TrendLine(StockStrategy):
 
         self.detect_large_peak()
 
-        self.detect_trend_line()
+        self.detect_trend_line(stock_data_df)
         sys.exit()
 
         self.result_codes.appends(code)
