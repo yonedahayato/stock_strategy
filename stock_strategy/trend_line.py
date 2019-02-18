@@ -152,6 +152,12 @@ class TrendLine(StockStrategy):
         self.lines_info.set_line_values_list(stock_data_df)
         self.lines_info.set_line_values_list_in_peak()
 
+        self.lines_info.check_diff_between_high_value_and_line()
+        self.lines_info.check_diff_between_high_value_and_line_in_peak()
+        self.lines_info.count_peaks_used_in_line()
+        self.lines_info.check_sumary_diff_between_high_value_and_line()
+        self.lines_info.check_trend_line_rule()
+
 
     def select_code(self, code, stock_data_df):
         self.reset_info_each_brand()
