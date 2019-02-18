@@ -122,9 +122,9 @@ class TrendLine(StockStrategy):
 
     def detect_trend_line(self, stock_data_df):
         lines_tmp = list(itertools.combinations(self.peak_indexes_in_small_peaks, 2))
+
         self.lines_info.set_list_to_dict("start_index_in_peak", [line[0] for line in lines_tmp])
         self.lines_info.set_list_to_dict("end_index_in_peak", [line[1] for line in lines_tmp])
-
 
         self.lines_info.set_list_to_dict("start_index", \
                                    [self.small_peak_info.peak_indexes[line[0]] for line in lines_tmp])
@@ -153,11 +153,13 @@ class TrendLine(StockStrategy):
         self.lines_info.set_line_values_list_in_peak()
 
         self.lines_info.check_diff_between_high_value_and_line()
+        return
         self.lines_info.check_diff_between_high_value_and_line_in_peak()
         self.lines_info.count_peaks_used_in_line()
         self.lines_info.check_sumary_diff_between_high_value_and_line()
         self.lines_info.check_trend_line_rule()
 
+        logger.debug(self.lines_info.data_df)
 
     def select_code(self, code, stock_data_df):
         self.reset_info_each_brand()

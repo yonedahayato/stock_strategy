@@ -1,5 +1,8 @@
 import copy
+import numpy as np
 import pandas as pd
+
+from stock_strategy import logger
 
 class LineInfo():
     def __init__(self, peak_info):
@@ -19,6 +22,9 @@ class LineInfo():
 
         self.peak_info = peak_info
 
+        # start peak と end peak の間の長さが何本以上あればよいのか
+        self.candle_num_start_to_end = 10
+
     def append_info(self, start_index, start_index_in_peak, start_price,
                     end_index, end_index_in_peak, end_price):
         self.start_indexes.append(start_index)
@@ -31,7 +37,7 @@ class LineInfo():
     def set_list_to_dict(self, key, data_list):
         data_list_tmp = self.data_dict[key]
         data_list_tmp.clear()
-        data_list.extend(data_list)
+        data_list_tmp.extend(data_list)
 
     # 全ての辞書のkeyのlistの長さが同じかどうかを確認する
     def check_length(self):
@@ -46,7 +52,18 @@ class LineInfo():
         return True
 
     def make_data_frame(self):
-        self.data_df = pd.DataFrame(self.data_dict)
+        self.data_df = copy.deepcopy(pd.DataFrame(self.data_dict))
+
+
+        self.data_df = self.data_df.astype(
+             {"start_index": "uint32",
+              "start_index_in_peak": "uint32",
+              "start_price": "float64",
+              "end_index": "uint32",
+              "end_index_in_peak": "uint32",
+              "end_price": "float64"}
+              )
+
         return copy.deepcopy(self.data_df)
 
     def compute_length_index_to_index(self):
@@ -69,10 +86,11 @@ class LineInfo():
 
     def set_candle_indexes_in_line_without_peak(self):
         peak_info = copy.deepcopy(self.peak_info)
+
         self.candle_indexes_in_line_without_peak = \
             [list(
-                set(range(self.data_df.iloc[line_id, :]["start_index"] + 1, self.data_df.iloc[line_id, :]["end_index"])) - \
-                set(self.peak_lists_between_start_and_end)
+                set(range(self.data_df["start_index"].iat[line_id] + 1, self.data_df["end_index"].iat[line_id])) - \
+                set(self.peak_lists_in_line[line_id]) \
             )\
             for line_id in self.data_df.index]
 
@@ -81,14 +99,14 @@ class LineInfo():
         self.high_values = histlical_data_df["High"].values
 
     def set_high_values_list_in_line(self):
-        peak_info = copy.deepcopy(self.peak_info)
+        # peak_info = copy.deepcopy(self.peak_info)
         high_values = copy.deepcopy(self.high_values)
 
         self.high_values_list_in_line = [
             np.transpose(
-                high_values[peak_info.start_indexes[line_id]+1 : high_values[peak_info.end_indexes[line_id]]]
+                high_values[self.start_indexes[line_id]+1 : high_values[self.end_indexes[line_id]]]
             )
-            for lind_id in self.data_df.index]
+            for line_id in self.data_df.index]
 
     def set_high_values_list_in_peak(self):
         high_values = copy.deepcopy(self.high_values)
@@ -116,24 +134,24 @@ class LineInfo():
         self.line_values_list_in_peak = [
             np.array([
                 self.start_prices[line_id] + \
-                self.data_df[line_id:, :]["line_rate"] *
+                self.data_df["line_rate"].iat[line_id] *
                 (time - self.start_indexes[line_id])
                 for time in self.peak_lists_in_line[line_id]]
             )
         for line_id in self.data_df.index]
 
     def check_diff_between_high_value_and_line(self):
+        logger.debug(self.high_values_list_in_line[0])
+        logger.debug(self.line_values_list[0])
         self.list_checked_diff_between_high_value_and_line = \
             [
                 (
-                    (
-                        self.high_values_list_in_line[line_id] - \
-                        self.line_values_list[line_id] \
-                     ) \
+                    (self.high_values_list_in_line[line_id] - \
+                     self.line_values_list[line_id]) \
                 < 0.5).all()
             for line_id in self.data_df.index]
 
-    def check_diff_between_high_value_and_line_in_peak(sekf):
+    def check_diff_between_high_value_and_line_in_peak(self):
         self.list_checked_diff_between_high_value_and_line_in_peak = \
             [
                 (
@@ -145,4 +163,51 @@ class LineInfo():
             for line_id in self.data_df.index]
 
     def count_peaks_used_in_line(self):
-        pass
+        self.list_peaks_used_in_line = \
+            [list(
+                np.array(peaks)[checker]
+                )
+            for peaks, checker in zip(
+                                    self.peak_lists_in_line,
+                                    self.list_checked_diff_between_high_value_and_line_in_peak
+                                    )]
+
+    def check_sumary_diff_between_high_value_and_line(self):
+        # high value が line value を上回っていない
+        # （peak にて） high value と line value の値が 0.5以下となる peak が 1以上存在する
+        list_checked_summary_diff = \
+            [
+                self.list_checked_diff_between_high_value_and_line[line_id] and \
+                (self.list_checked_diff_between_high_value_and_line_in_peak[line_id] >= 1)
+            for line_id in self.data_df.index]
+
+        if not self.data_df.empty:
+            self.data_df = self.data_df[
+                pd.Serries(list_checked_summary_diff)
+            ].reset_index(drop=True)
+        else:
+            logger.info("ckeck するデータが空です。")
+
+    def check_trend_line_rule(self):
+        # 通常ルール（突き抜ける）
+        self.trend_line_rule_1 = \
+            [   True
+                if ((self.list_checked_diff_between_high_value_and_line_in_peak[line_id] == 1) |
+                    (self.list_checked_diff_between_high_value_and_line_in_peak[line_id] == 2)) &
+                   self.data_df[line_id, :]["length_index_to_index"] + 1 >= self.candle_num_start_to_end
+                else False
+            for line_id in self.data_df.index]
+
+        # 直近ルール（突き抜けなくてもいい）
+        self.trend_line_rule_1_immediate = \
+            [   True
+                if (self.list_checked_diff_between_high_value_and_line_in_peak[line_id] == 1) |
+                   (self.list_checked_diff_between_high_value_and_line_in_peak[line_id] == 2)
+                else False
+            for line_id in self.data_df.index]
+
+        self.trend_line_rule_2 = \
+            [   True
+                if (self.list_checked_diff_between_high_value_and_line_in_peak[line_id] > 2)
+                else False
+            for line_id in self.data_df.index]
