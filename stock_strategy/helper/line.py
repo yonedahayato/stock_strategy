@@ -104,7 +104,7 @@ class LineInfo():
 
         self.high_values_list_in_line = [
             np.transpose(
-                high_values[self.start_indexes[line_id]+1 : high_values[self.end_indexes[line_id]]]
+                high_values[self.start_indexes[line_id]+1 : self.end_indexes[line_id]]
             )
             for line_id in self.data_df.index]
 
@@ -141,8 +141,6 @@ class LineInfo():
         for line_id in self.data_df.index]
 
     def check_diff_between_high_value_and_line(self):
-        logger.debug(self.high_values_list_in_line[0])
-        logger.debug(self.line_values_list[0])
         self.list_checked_diff_between_high_value_and_line = \
             [
                 (
@@ -159,8 +157,11 @@ class LineInfo():
                         self.high_values_list_in_peak[line_id] - \
                         self.line_values_list_in_peak[line_id] \
                         ) \
-                    < 0.5).sum()
+                    < 0.5)
             for line_id in self.data_df.index]
+
+        self.counts_checked_diff_between_high_value_and_line_in_peak = \
+            [checked.sum() for checked in self.list_checked_diff_between_high_value_and_line_in_peak]
 
     def count_peaks_used_in_line(self):
         self.list_peaks_used_in_line = \
@@ -178,12 +179,12 @@ class LineInfo():
         list_checked_summary_diff = \
             [
                 self.list_checked_diff_between_high_value_and_line[line_id] and \
-                (self.list_checked_diff_between_high_value_and_line_in_peak[line_id] >= 1)
+                (self.counts_checked_diff_between_high_value_and_line_in_peak[line_id] >= 1)
             for line_id in self.data_df.index]
 
         if not self.data_df.empty:
             self.data_df = self.data_df[
-                pd.Serries(list_checked_summary_diff)
+                pd.Series(list_checked_summary_diff)
             ].reset_index(drop=True)
         else:
             logger.info("ckeck するデータが空です。")
@@ -192,8 +193,8 @@ class LineInfo():
         # 通常ルール（突き抜ける）
         self.trend_line_rule_1 = \
             [   True
-                if ((self.list_checked_diff_between_high_value_and_line_in_peak[line_id] == 1) |
-                    (self.list_checked_diff_between_high_value_and_line_in_peak[line_id] == 2)) &
+                if ((self.counts_checked_diff_between_high_value_and_line_in_peak[line_id] == 1) |
+                    (self.counts_checked_diff_between_high_value_and_line_in_peak[line_id] == 2)) &
                    self.data_df[line_id, :]["length_index_to_index"] + 1 >= self.candle_num_start_to_end
                 else False
             for line_id in self.data_df.index]
@@ -201,13 +202,13 @@ class LineInfo():
         # 直近ルール（突き抜けなくてもいい）
         self.trend_line_rule_1_immediate = \
             [   True
-                if (self.list_checked_diff_between_high_value_and_line_in_peak[line_id] == 1) |
-                   (self.list_checked_diff_between_high_value_and_line_in_peak[line_id] == 2)
+                if (self.counts_checked_diff_between_high_value_and_line_in_peak[line_id] == 1) |
+                   (self.counts_checked_diff_between_high_value_and_line_in_peak[line_id] == 2)
                 else False
             for line_id in self.data_df.index]
 
         self.trend_line_rule_2 = \
             [   True
-                if (self.list_checked_diff_between_high_value_and_line_in_peak[line_id] > 2)
+                if (self.counts_checked_diff_between_high_value_and_line_in_peak[line_id] > 2)
                 else False
             for line_id in self.data_df.index]

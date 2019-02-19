@@ -153,7 +153,6 @@ class TrendLine(StockStrategy):
         self.lines_info.set_line_values_list_in_peak()
 
         self.lines_info.check_diff_between_high_value_and_line()
-        return
         self.lines_info.check_diff_between_high_value_and_line_in_peak()
         self.lines_info.count_peaks_used_in_line()
         self.lines_info.check_sumary_diff_between_high_value_and_line()
@@ -173,8 +172,6 @@ class TrendLine(StockStrategy):
         sys.exit()
 
         self.result_codes.appends(code)
-
-
 
 
 def main():
