@@ -40,7 +40,6 @@ class TrendLine(StockStrategy):
 
         # for trend line
         self.lines_info = LineInfo(self.large_peak_info)
-        self.trend_lines_info = LineInfo(self.large_peak_info)
 
     def set_candle(self, candle):
         if self.rear_candle.empty:
@@ -158,7 +157,16 @@ class TrendLine(StockStrategy):
         self.lines_info.check_sumary_diff_between_high_value_and_line()
         self.lines_info.check_trend_line_rule()
 
-        logger.debug(self.lines_info.data_df)
+        self.trend_lines = copy.deepcopy(self.lines_info.data_df)
+
+        self.trend_lines = self.trend_lines.sort_values(["end_index", "start_index"],
+                                                         ascending=[False, False])
+        self.trend_lines = self.trend_lines.reset_index(drop=True)
+
+        if self.trend_lines.empty:
+            self.trend_line = copy.deepcopy(self.trend_lines)
+        else:
+            self.trend_line = copy.deepcopy(self.trend_lines.iloc[0, :])
 
     def select_code(self, code, stock_data_df):
         self.reset_info_each_brand()
@@ -169,9 +177,9 @@ class TrendLine(StockStrategy):
         self.detect_large_peak()
 
         self.detect_trend_line(stock_data_df)
-        sys.exit()
 
-        self.result_codes.appends(code)
+        if not self.trend_line.empty:
+            self.result_codes.append(code)
 
 
 def main():

@@ -190,25 +190,34 @@ class LineInfo():
             logger.info("ckeck するデータが空です。")
 
     def check_trend_line_rule(self):
-        # 通常ルール（突き抜ける）
-        self.trend_line_rule_1 = \
+        # 通常ルール1（突き抜ける）、ピーク３〜４
+        trend_line_rule_1 = \
             [   True
                 if ((self.counts_checked_diff_between_high_value_and_line_in_peak[line_id] == 1) |
                     (self.counts_checked_diff_between_high_value_and_line_in_peak[line_id] == 2)) &
-                   self.data_df[line_id, :]["length_index_to_index"] + 1 >= self.candle_num_start_to_end
+                   self.data_df["length_index_to_index"].iat[line_id] + 1 >= self.candle_num_start_to_end
                 else False
             for line_id in self.data_df.index]
 
         # 直近ルール（突き抜けなくてもいい）
-        self.trend_line_rule_1_immediate = \
+        trend_line_rule_1_immediate = \
             [   True
                 if (self.counts_checked_diff_between_high_value_and_line_in_peak[line_id] == 1) |
                    (self.counts_checked_diff_between_high_value_and_line_in_peak[line_id] == 2)
                 else False
             for line_id in self.data_df.index]
 
-        self.trend_line_rule_2 = \
+        # 通常ルール2（突き抜ける）、ピーク５以上
+        trend_line_rule_2 = \
             [   True
                 if (self.counts_checked_diff_between_high_value_and_line_in_peak[line_id] > 2)
                 else False
             for line_id in self.data_df.index]
+
+        checked_rules = pd.DataFrame({"trend_line_rule_1": trend_line_rule_1,
+                                      "trend_line_rule_1_immediate": trend_line_rule_1_immediate,
+                                      "trend_line_rule_2": trend_line_rule_2})
+
+        self.data_df = pd.concat([self.data_df, checked_rules], axis=1)
+        self.data_df = self.data_df[checked_rules.any(axis=1)]
+        self.data_df = self.data_df.reset_index(drop=True)
