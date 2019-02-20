@@ -12,3 +12,4 @@ services:
       - ${LOG_DIR}:/select_stock_code/helper/log
       - ${SELECT_CODE_DIR}:/select_stock_code/check_reward/result/selected_code
       - ${GRAPH_DIR}:/select_stock_code/draw_graph/graphs
+    #command: sh ./stock_strategy/strategies_back_test.sh
