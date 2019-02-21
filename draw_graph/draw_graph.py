@@ -13,20 +13,24 @@ abspath_draw_graph = os.path.dirname(os.path.abspath(__file__))
 p_path = os.path.dirname(abspath_draw_graph)
 sys.path.append(p_path + "/helper")
 sys.path.append(p_path + "/stock_strategy")
+sys.path.append(abspath_draw_graph + "/helper")
 
 from log import logger
+from draw_line import draw_line
 
 IMAGE_SAVE_PATH = os.path.dirname(os.path.abspath(__file__)) + "/graphs"
 
 
 class DrawGraph:
-    def __init__(self, data_df, code, method_name, window=None):
+    def __init__(self, data_df, code, method_name, window=None, lines=[]):
         self.data_df = data_df
         self.code = code
         self.method_name = method_name
 
-        self.graph_length = 100
+        # self.graph_length = 100
+        self.graph_length = 0
         self.window = window
+        self.lines = lines
 
     def draw(self):
         plt, fig, ax = self.draw_chlcv()
@@ -34,13 +38,15 @@ class DrawGraph:
         if self.window != None:
             plt, fig, ax = self.draw_move_average_line(plt, fig, ax)
 
+        if self.lines != []:
+            plt, fig, ax = draw_line(plt, fig, ax, self.lines)
+
         ax.legend(fontsize=12)
         plt.title("{}_{}".format(self.method_name, self.code))
 
         save_path = self.save(plt)
         plt.close(fig)
         return save_path
-
 
     def draw_chlcv(self):
         data_df = copy.deepcopy(self.data_df)
@@ -93,7 +99,6 @@ class DrawGraph:
         ax.plot(index, move_average_df["rolling_mean"], label="move_average_{}".format(self.window))
         return plt, fig, ax
 
-
     def save(self, plt):
         self.save_path = "{}/{}_{}.png".format(IMAGE_SAVE_PATH, self.method_name, self.code)
         plt.savefig(self.save_path)
@@ -101,4 +106,5 @@ class DrawGraph:
         return self.save_path
 
     def remove(self):
-        os.remove(self.save_path)
+        # os.remove(self.save_path)
+        pass
