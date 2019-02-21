@@ -222,7 +222,6 @@ class StockStrategy:
             else:
                 logger.info(msg.format("success to ecect multiprocess."))
 
-        return
         try:
             self.check_select_code()
         except:
