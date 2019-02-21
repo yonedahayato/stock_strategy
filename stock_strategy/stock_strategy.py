@@ -169,7 +169,14 @@ class StockStrategy:
             else:
                 window = None
 
-            draw_graph = DrawGraph(stock_data_df, code, self.method_name, window=window)
+            if "lines_for_draw_graph" in self.__dict__.keys():
+                lines = copy.deepcopy(self.lines_for_draw_graph)
+            else:
+                lines = []
+
+            draw_graph = DrawGraph(stock_data_df, code, self.method_name,
+                                   window=window, lines=lines)
+
             graph_image_path = draw_graph.draw()
 
             push_line(str(code), image_path = graph_image_path)
@@ -204,6 +211,8 @@ class StockStrategy:
 
                 try:
                     self.select_code(code, stock_data_df)
+                    if self.result_codes != []:
+                        break
                 except:
                     err_msg = msg.format("fail to select code.")
                     logger.error(err_msg)
