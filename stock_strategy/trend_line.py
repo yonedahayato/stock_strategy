@@ -206,7 +206,7 @@ def main():
     back_test_return_date = args.back_test_return_date
     trend_line = TrendLine(debug=False, back_test_return_date=back_test_return_date,
                            method_name="trend_line", multiprocess=False,
-                           length_limited_between_end_and_latest=200)
+                           length_limited_between_end_and_latest=300)
 
     trend_line.execute()
 
