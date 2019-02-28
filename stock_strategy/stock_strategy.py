@@ -211,8 +211,6 @@ class StockStrategy:
 
                 try:
                     self.select_code(code, stock_data_df)
-                    if self.result_codes != []:
-                        break
                 except:
                     err_msg = msg.format("fail to select code.")
                     logger.error(err_msg)
