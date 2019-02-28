@@ -118,16 +118,21 @@ class TrendLine(StockStrategy):
             logger.info("[detect large peak]: No small peak, so I can not detect large peak")
 
         self.large_peak_info.append_info(**self.small_peak_info.get_info_from_id_as_dict(0))
+        self.peak_indexes_in_small_peaks.append(0)
 
         self.check_large_peak()
 
         self.large_peak_info.append_info(**self.small_peak_info.get_info_from_id_as_dict(-1))
+        self.peak_indexes_in_small_peaks.append(self.small_peak_info.get_length() - 1)
 
-    def check_length_between_end_and_latest(self, data_length, lines):
+    def check_length_between_end_and_latest(self, data_length, lines_index_in_peak):
+        lines_index = list(itertools.combinations(self.large_peak_info.peak_indexes, 2))
         point = {"start": 0, "end": 1}
-        logger.debug(lines[0][1])
-        lines = [line for line in lines \
-            if (data_length - line[point["end"]]) <= self.length_limited_between_end_and_latest]
+
+        lines = [line for cnt, line in enumerate(lines_index_in_peak) \
+                    if (data_length - lines_index[cnt][point["end"]]) <= \
+                    self.length_limited_between_end_and_latest
+                ]
         return lines
 
     def detect_trend_line(self, stock_data_df):
@@ -204,11 +209,18 @@ class TrendLine(StockStrategy):
 
 def main():
     back_test_return_date = args.back_test_return_date
-    trend_line = TrendLine(debug=False, back_test_return_date=back_test_return_date,
-                           method_name="trend_line", multiprocess=False,
-                           length_limited_between_end_and_latest=1000)
+    lengthes_limited_between_end_and_latest = [100, 50, 25]
+    results = []
+    for length_limited_between_end_and_latest in lengthes_limited_between_end_and_latest:
+        trend_line = TrendLine(debug=False, back_test_return_date=back_test_return_date,
+                               method_name="trend_line_length_limited={}".format(length_limited_between_end_and_latest),
+                               multiprocess=False,
+                               length_limited_between_end_and_latest=length_limited_between_end_and_latest)
+        result = trend_line.execute()
+        results.append(result)
 
-    trend_line.execute()
+    for cnt, _ in enumerate(lengthes_limited_between_end_and_latest):
+        print(results[cnt])
 
 if __name__ == "__main__":
     main()
