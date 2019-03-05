@@ -1,4 +1,15 @@
-from stock_strategy import logger
+import os
+import sys
+
+abspath_peak = os.path.dirname(os.path.abspath(__file__))
+abspath_helper = os.path.dirname(abspath_peak)
+abspath_draw_graph = os.path.dirname(abspath_helper)
+abspath_project = os.path.dirname(abspath_draw_graph)
+
+sys.path.append(abspath_project + "/helper")
+
+import log
+logger = log.logger
 
 class PeakInfo():
     def __init__(self):
