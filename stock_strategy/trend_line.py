@@ -33,6 +33,17 @@ class TrendLine(StockStrategy):
         self.length_limited_between_end_and_latest = \
             length_limited_between_end_and_latest
 
+        # for drawing to graph
+        self.lines_for_draw_graph = []
+
+        self.small_peak_infos = []
+        self.flag_draw_small_peak = True
+
+        self.large_peak_infos = []
+        self.flag_draw_large_peak = True
+
+        self.flag_draw_all_trend_lines = True
+
     def reset_info_each_brand(self):
         # for small peak
         self.rear_candle, self.middle_candle, self.fore_candle = [pd.Series([])] * 3
@@ -93,7 +104,7 @@ class TrendLine(StockStrategy):
     def check_large_peak(self, for_buy=True):
         for idx in range(1, self.small_peak_info.get_length() - 1):
             if self.small_peak_info.peak_prices[idx - 1] <= self.small_peak_info.peak_prices[idx] and \
-               self.small_peak_info.peak_prices[idx] <= self.small_peak_info.peak_prices[idx + 1]:
+               self.small_peak_info.peak_prices[idx] >= self.small_peak_info.peak_prices[idx + 1]:
 
                 self.large_peak_info.append_info(**self.small_peak_info.get_info_from_id_as_dict(idx))
                 self.peak_indexes_in_small_peaks.append(idx)
@@ -191,20 +202,31 @@ class TrendLine(StockStrategy):
         self.reset_info_each_brand()
 
         self.detect_small_peak(stock_data_df)
-        # self.small_peak_info.print()
 
         self.detect_large_peak()
 
         trend_line = self.detect_trend_line(stock_data_df)
 
         if not self.trend_line.empty:
-            self.lines_for_draw_graph = [{"start_index": trend_line["start_index"],
-                                          "end_index": trend_line["end_index"],
-                                          "start_price": trend_line["start_price"],
-                                          "end_price": trend_line["end_price"]
-                                          }]
+            self.lines_for_draw_graph.append([{"start_index": trend_line["start_index"],
+                                              "end_index": trend_line["end_index"],
+                                              "start_price": trend_line["start_price"],
+                                              "end_price": trend_line["end_price"]
+                                              }])
 
             self.result_codes.append(code)
+
+            # for drawing to graph
+            if self.flag_draw_all_trend_lines:
+                for name, trend_line in self.trend_lines.iterrows():
+                    self.lines_for_draw_graph[-1].append({"start_index": trend_line["start_index"],
+                                                      "end_index": trend_line["end_index"],
+                                                      "start_price": trend_line["start_price"],
+                                                      "end_price": trend_line["end_price"]
+                                                      })
+
+            self.small_peak_infos.append(self.small_peak_info)
+            self.large_peak_infos.append(self.large_peak_info)
 
 
 def main():
