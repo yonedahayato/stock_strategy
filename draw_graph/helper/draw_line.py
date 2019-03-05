@@ -16,6 +16,6 @@ def draw_line(plt, fig, ax, lines):
         prices = np.array([float(line["start_price"]), float(line["end_price"])])
 
         ax.plot(indexes, prices,
-                linewidth=5, color="red", label="trend_lien_{}".format(cnt))
+                linewidth=3, color="red", label="trend_lien_{}".format(cnt))
 
     return plt, fig, ax,
