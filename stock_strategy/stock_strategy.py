@@ -11,23 +11,25 @@ p_path = os.path.dirname(abspath)
 sys.path.append(p_path + "/get_stock_info")
 sys.path.append(p_path + "/get_stock_info/google_cloud_storage")
 sys.path.append(p_path + "/helper")
+sys.path.append(abspath + "/helper")
 sys.path.append(p_path + "/check_reward")
 sys.path.append(p_path + "/draw_graph")
+sys.path.append(p_path + "/draw_graph/helper")
 sys.path.append(p_path + "/notification")
 
 from data_downloader import Data_Downloader
+from decide_drawing import PackageDrawing
+from draw_graph import DrawGraph
 from get_new_stock_code import GetCodeList, GetCodeListNikkei225
 from get_stock_data import GetStockData
 import log
+logger = log.logger
 import just_now
+jst_now = just_now.jst_now
+from peak import PeakInfo
+from push_line import push_line
 from save_result import Save_Result
 from setting import HISTRICAL_DATA_PATH
-from draw_graph import DrawGraph
-from push_line import push_line
-
-jst_now = just_now.jst_now
-
-logger = log.logger
 
 DOWNLOAD_METHODES = ["LOCAL", "CLOUD", "API"]
 CODE_LIST = ["1st_all", "1st_225"]
@@ -159,23 +161,14 @@ class StockStrategy:
         return self.result_codes
 
     def draw_graph(self):
-        for code in self.result_codes:
+        for cnt, code in enumerate(self.result_codes):
             logger.info("draw graph {}".format(code))
 
             stock_data_df = self.get_stock_data(code)
 
-            if "window" in self.__dict__.keys():
-                window = copy.deepcopy(self.window)
-            else:
-                window = None
+            package_drawing = PackageDrawing(self, cnt, stock_data_df, code)
 
-            if "lines_for_draw_graph" in self.__dict__.keys():
-                lines = copy.deepcopy(self.lines_for_draw_graph)
-            else:
-                lines = []
-
-            draw_graph = DrawGraph(stock_data_df, code, self.method_name,
-                                   window=window, lines=lines)
+            draw_graph = DrawGraph(**package_drawing.__dict__)
 
             graph_image_path = draw_graph.draw()
 
