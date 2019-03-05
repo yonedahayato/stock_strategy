@@ -25,6 +25,14 @@ class LineInfo():
         # start peak と end peak の間の長さが何本以上あればよいのか
         self.candle_num_start_to_end = 10
 
+        # ラインの班員全てにおいて、高値とライン上の値の差がどれくらいの範囲内なはっていればよいか
+        #  オリジナルは0.5
+        self.value_accept_between_high_value_and_list = 5
+
+        # ピークにおいて、高値とライン上の値の差がどれくらいの範囲内なはっていればよいか
+        # オリジナルは0.5
+        self.value_accept_between_high_value_and_list_in_peak = 5
+
     def append_info(self, start_index, start_index_in_peak, start_price,
                     end_index, end_index_in_peak, end_price):
         self.start_indexes.append(start_index)
@@ -146,7 +154,7 @@ class LineInfo():
                 (
                     (self.high_values_list_in_line[line_id] - \
                      self.line_values_list[line_id]) \
-                < 0.5).all()
+                < self.value_accept_between_high_value_and_list).all()
             for line_id in self.data_df.index]
 
     def check_diff_between_high_value_and_line_in_peak(self):
@@ -157,7 +165,7 @@ class LineInfo():
                         self.high_values_list_in_peak[line_id] - \
                         self.line_values_list_in_peak[line_id] \
                         ) \
-                    < 0.5)
+                    < self.value_accept_between_high_value_and_list_in_peak)
             for line_id in self.data_df.index]
 
         self.counts_checked_diff_between_high_value_and_line_in_peak = \
