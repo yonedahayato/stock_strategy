@@ -26,7 +26,7 @@ def req(code):
     try:
         data_df = get_stock_data.get_stock_data_jsm(code, "D",
                     start=HISTRICAL_DATA_RANGE_START, end=HISTRICAL_DATA_RANGE_END_NOW)
-        # data_df.to_csv(HISTRICAL_DATA_PATH.format(code=code))
+        data_df.to_csv(HISTRICAL_DATA_PATH.format(code=code))
 
     except Exception as e:
         logger.error("[{}]: ヒストリカルデータの取得に失敗しました。{}".format(code, e))
