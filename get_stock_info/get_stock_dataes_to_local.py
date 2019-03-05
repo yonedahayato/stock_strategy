@@ -63,6 +63,8 @@ def GetStockDataesToLocal():
                 logger.info("処理時間: {}".format(time.time() - st))
             except Exception as e:
                 logger.exception("非同期処理が失敗しました。: {}".format(e))
+            else:
+                logger.info("非同期処理終了しました。")
             code_list_tmp = []
 
 
