@@ -1,0 +1,11 @@
+joblib
+jsm
+logzero
+lxml
+matplotlib
+mpl_finance
+numpy
+pandas==0.20.3
+Quandl
+requests
+xlrd
