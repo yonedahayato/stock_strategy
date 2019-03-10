@@ -1,11 +1,29 @@
 import copy
 import numpy as np
 import pandas as pd
+pd.options.display.max_rows = None
+pd.options.display.max_columns = None
 
 from stock_strategy import logger
 
 class LineInfo():
-    def __init__(self, peak_info):
+    def __init__(self, peak_info, value_accept_between_high_value_and_line):
+        self.reset_indexes()
+
+        self.peak_info = peak_info
+
+        # start peak と end peak の間の長さが何本以上あればよいのか
+        self.candle_num_start_to_end = 10
+
+        # ラインの班員全てにおいて、高値とライン上の値の差がどれくらいの範囲内なはっていればよいか
+        #  オリジナルは0.5
+        self.value_accept_between_high_value_and_line = value_accept_between_high_value_and_line
+
+        # ピークにおいて、高値とライン上の値の差がどれくらいの範囲内なはっていればよいか
+        # オリジナルは0.5
+        self.value_accept_between_high_value_and_line_in_peak = value_accept_between_high_value_and_line
+
+    def reset_indexes(self):
         self.start_indexes = []
         self.start_indexes_in_peak = []
         self.start_prices = []
@@ -19,28 +37,6 @@ class LineInfo():
                           "end_index": self.end_indexes,
                           "end_index_in_peak": self.end_indexes_in_peak,
                           "end_price": self.end_prices}
-
-        self.peak_info = peak_info
-
-        # start peak と end peak の間の長さが何本以上あればよいのか
-        self.candle_num_start_to_end = 10
-
-        # ラインの班員全てにおいて、高値とライン上の値の差がどれくらいの範囲内なはっていればよいか
-        #  オリジナルは0.5
-        self.value_accept_between_high_value_and_list = 5
-
-        # ピークにおいて、高値とライン上の値の差がどれくらいの範囲内なはっていればよいか
-        # オリジナルは0.5
-        self.value_accept_between_high_value_and_list_in_peak = 5
-
-    def append_info(self, start_index, start_index_in_peak, start_price,
-                    end_index, end_index_in_peak, end_price):
-        self.start_indexes.append(start_index)
-        self.start_indexes_in_peak.append(start_index_in_peak)
-        self.start_prices.append(start_price)
-        self.end_indexes.append(end_index)
-        self.end_indexes_in_peak.append(end_index_in_peak)
-        self.end_prices.append(end_price)
 
     def set_list_to_dict(self, key, data_list):
         data_list_tmp = self.data_dict[key]
@@ -60,8 +56,8 @@ class LineInfo():
         return True
 
     def make_data_frame(self):
-        self.data_df = copy.deepcopy(pd.DataFrame(self.data_dict))
-
+        self.data_df = pd.DataFrame(self.data_dict)
+        self.reset_indexes()
 
         self.data_df = self.data_df.astype(
              {"start_index": "uint32",
@@ -86,10 +82,15 @@ class LineInfo():
         self.data_df["line_rate"] = (data_df["end_price"] - data_df["start_price"]) / \
                                     (data_df["end_index"] - data_df["start_index"])
 
+    def check_line_rate(self):
+        self.data_df = self.data_df.query("line_rate <= 0")
+        self.data_df = self.data_df.reset_index(drop=True)
+
     def set_peak_lists_in_line(self):
         peak_index = copy.deepcopy(self.peak_info.peak_indexes)
         self.peak_lists_in_line = \
-            [peak_index[self.start_indexes_in_peak[line_id]+1:self.end_indexes_in_peak[line_id]]\
+            [peak_index[peak_index.index(self.data_df["start_index"].iat[line_id])+1 : \
+                        peak_index.index(self.data_df["end_index"].iat[line_id])] \
             for line_id in self.data_df.index]
 
     def set_candle_indexes_in_line_without_peak(self):
@@ -107,12 +108,12 @@ class LineInfo():
         self.high_values = histlical_data_df["High"].values
 
     def set_high_values_list_in_line(self):
-        # peak_info = copy.deepcopy(self.peak_info)
         high_values = copy.deepcopy(self.high_values)
 
         self.high_values_list_in_line = [
             np.transpose(
-                high_values[self.start_indexes[line_id]+1 : self.end_indexes[line_id]]
+                high_values[self.data_df["start_index"].iat[line_id]+1 :
+                            self.data_df["end_index"].iat[line_id]]
             )
             for line_id in self.data_df.index]
 
@@ -126,14 +127,13 @@ class LineInfo():
 
     def set_line_values_list(self, histlical_data_df):
         peak_info = copy.deepcopy(self.peak_info)
-
         self.line_values_list = [
             np.array([
-                self.start_prices[line_id] +\
+                self.data_df["start_price"].iat[line_id] +\
                 self.data_df.iloc[line_id, :]["line_rate"] * \
-                (time - self.start_indexes[line_id])
-                for time in range(self.start_indexes[line_id] + 1,
-                                  self.end_indexes[line_id])\
+                (time - self.data_df["start_index"].iat[line_id])
+                for time in range(self.data_df["start_index"].iat[line_id] + 1,
+                                  self.data_df["end_index"].iat[line_id])\
                 ]\
             )
         for line_id in self.data_df.index]
@@ -141,9 +141,9 @@ class LineInfo():
     def set_line_values_list_in_peak(self):
         self.line_values_list_in_peak = [
             np.array([
-                self.start_prices[line_id] + \
+                self.data_df["start_price"].iat[line_id] + \
                 self.data_df["line_rate"].iat[line_id] *
-                (time - self.start_indexes[line_id])
+                (time - self.data_df["start_index"].iat[line_id])
                 for time in self.peak_lists_in_line[line_id]]
             )
         for line_id in self.data_df.index]
@@ -154,7 +154,7 @@ class LineInfo():
                 (
                     (self.high_values_list_in_line[line_id] - \
                      self.line_values_list[line_id]) \
-                < self.value_accept_between_high_value_and_list).all()
+                < self.value_accept_between_high_value_and_line).all()
             for line_id in self.data_df.index]
 
     def check_diff_between_high_value_and_line_in_peak(self):
@@ -165,21 +165,11 @@ class LineInfo():
                         self.high_values_list_in_peak[line_id] - \
                         self.line_values_list_in_peak[line_id] \
                         ) \
-                    < self.value_accept_between_high_value_and_list_in_peak)
+                    < self.value_accept_between_high_value_and_line_in_peak)
             for line_id in self.data_df.index]
 
         self.counts_checked_diff_between_high_value_and_line_in_peak = \
             [checked.sum() for checked in self.list_checked_diff_between_high_value_and_line_in_peak]
-
-    def count_peaks_used_in_line(self):
-        self.list_peaks_used_in_line = \
-            [list(
-                np.array(peaks)[checker]
-                )
-            for peaks, checker in zip(
-                                    self.peak_lists_in_line,
-                                    self.list_checked_diff_between_high_value_and_line_in_peak
-                                    )]
 
     def check_sumary_diff_between_high_value_and_line(self):
         # high value が line value を上回っていない
