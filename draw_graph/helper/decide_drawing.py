@@ -26,12 +26,16 @@ class PackageDrawing(object):
             attributes_dict.get("flag_draw_large_peak", False):
             self.large_peak_info = copy.deepcopy(attributes.large_peak_infos[cnt])
 
+        if "vertical_lines" in attributes_dict.keys():
+            self.vertical_lines = copy.deepcopy(attributes.vertical_lines)
+
     def reset_attribute(self):
         self.window = None
         self.lines = []
         self.small_peak_info = None
         self.large_peak_info = None
         self.method_name = ""
+        self.vertical_lines = []
 
     def output_as_dict(self):
         pass

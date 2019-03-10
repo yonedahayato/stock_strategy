@@ -16,7 +16,7 @@ sys.path.append(p_path + "/stock_strategy")
 sys.path.append(abspath_draw_graph + "/helper")
 
 from log import logger
-from draw_line import draw_line
+from draw_line import draw_line, draw_vertical_line
 from draw_peak import draw_peak
 
 IMAGE_SAVE_PATH = os.path.dirname(os.path.abspath(__file__)) + "/graphs"
@@ -24,7 +24,7 @@ IMAGE_SAVE_PATH = os.path.dirname(os.path.abspath(__file__)) + "/graphs"
 
 class DrawGraph:
     def __init__(self, data_df, code, method_name, window=None, lines=[],
-                 small_peak_info=None, large_peak_info=None):
+                 small_peak_info=None, large_peak_info=None, vertical_lines=[]):
         self.data_df = data_df
         self.code = code
         self.method_name = method_name
@@ -35,6 +35,7 @@ class DrawGraph:
         self.lines = lines
         self.small_peak_info = small_peak_info
         self.large_peak_info = large_peak_info
+        self.vertical_lines = vertical_lines
 
     def draw(self):
         import matplotlib.pyplot as plt
@@ -51,6 +52,9 @@ class DrawGraph:
 
         if self.large_peak_info != None:
             plt, fig, ax = draw_peak(plt, fig, ax, self.large_peak_info, "large")
+
+        if self.vertical_lines != []:
+            plt, fig, ax = draw_vertical_line(plt, fig, ax, self.vertical_lines)
 
 
         ax.legend(fontsize=12)
