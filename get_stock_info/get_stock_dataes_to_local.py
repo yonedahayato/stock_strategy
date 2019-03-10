@@ -55,7 +55,8 @@ def GetStockDataesToLocal():
         logger.debug("code; {}, {} / {}".format(code, cnt, len(code_list)))
         code_list_tmp.append(code)
 
-        if cnt % THREAD_NUM == (THREAD_NUM - 1):
+        if cnt % THREAD_NUM == (THREAD_NUM - 1) or\  # バッチごとに実行
+           cnt == len(code_list)-1:                 # 最後のバッチ
             try:
                 st = time.time()
                 loop = asyncio.get_event_loop()
