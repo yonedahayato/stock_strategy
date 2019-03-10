@@ -110,7 +110,7 @@ class Check_Reward(Save_Result):
             logger.debug("stock_list: {}".format(stock_list))
             if stock_list == []:
                 logger.info(msg.format("stock list to check is empty."))
-                return
+                continue
 
             for code in stock_list:
                 msg_tmp = msg.format("code: {}".format(code))
