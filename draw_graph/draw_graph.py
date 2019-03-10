@@ -122,5 +122,4 @@ class DrawGraph:
         return self.save_path
 
     def remove(self):
-        # os.remove(self.save_path)
-        pass
+        os.remove(self.save_path)
