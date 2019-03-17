@@ -1,3 +1,4 @@
+import argparse
 import copy
 from glob import glob
 import json
@@ -21,8 +22,19 @@ SELECTED_CODE_RESULT_PATH = save_result_path + "/result/selected_code"
 
 COMPUTE_REWARD_METHOD = ["using_all_of_data_for_backtest_with_mean", "using_all_of_data_for_backtest"]
 
+parser = argparse.ArgumentParser(description="check_rewardの引数")
+parser.add_argument("--back_test_return_date",
+                    help = "どのくらいback test の使用するか(0の場合はback testには使用せず、全てのデータを使用)\
+                    なお、デフォルト値は結果jsonファイルのdata_range_end_to_computeを使用する",
+                    default=-1,
+                    type=int)
+
+args = parser.parse_args()
+
+
 class Check_Reward(Save_Result):
-    def __init__(self, save_path=result_path, download_method="LOCAL",
+    def __init__(self, save_path=result_path, back_test_return_date,
+                 download_method="LOCAL",
                  compute_reward_methodes=["using_all_of_data_for_backtest_with_mean", "using_all_of_data_for_backtest"],
                  push_line=False):
 
@@ -30,6 +42,7 @@ class Check_Reward(Save_Result):
 
         self.compute_reward_methodes = compute_reward_methodes
         self.push_line = push_line
+        self.back_test_return_date = back_test_return_date
 
         self.stock_strategy = StockStrategy(download_method=download_method)
 
@@ -42,7 +55,6 @@ class Check_Reward(Save_Result):
 
         logger.info("selected_code_json_files: {}".format(self.selected_code_json_files))
         self.make_new_format()
-
 
     def make_new_format(self):
         self.date_indexes_for_backtest = []
@@ -78,13 +90,13 @@ class Check_Reward(Save_Result):
         return stock_data_df
 
     def compute_reward(self, stock_data_df):
-        # close_value = stock_data_df.loc[self.data_range_end]["Close"]
-        # reward = stock_data_df.loc[self.data_range_end:].iloc[1:]["Close"]
-
         result_format_tmp = copy.deepcopy(self.result_format)
 
         close_value_bought = stock_data_df.loc[self.data_range_end_to_compute]["Close"]
-        close_values_for_backtest = stock_data_df.loc[self.data_range_end_to_compute:].iloc[1:]["Close"]
+        if self.back_test_return_date == -1:
+            close_values_for_backtest = stock_data_df.loc[self.data_range_end_to_compute:].iloc[1:]["Close"]
+        else:
+            close_values_for_backtest = stock_data_df.iloc[-self.back_test_return_date:]["Close"]
 
         if len(self.date_indexes) == 0:
             self.date_indexes_for_backtest = list(close_values_for_backtest.index)
@@ -143,9 +155,11 @@ class Check_Reward(Save_Result):
 
 
 def main():
+    back_test_return_date = args.back_test_return_date
     cr = Check_Reward(download_method="LOCAL",
                       compute_reward_methodes=["using_all_of_data_for_backtest_with_mean", "using_all_of_data_for_backtest"],
-                      push_line=True)
+                      push_line=True,
+                      back_test_return_date=back_test_return_date)
     cr.check_reward()
 
 if __name__ == "__main__":
