@@ -1,9 +1,11 @@
+import asyncio
 import gc
 import os
 from os import path
 import pandas as pd
 import sys
 import threading
+import time
 
 abs_dirname = os.path.dirname(os.path.abspath(__file__))
 parent_dirname = path.dirname(abs_dirname)
@@ -18,33 +20,26 @@ from setting import *
 
 logger = log.logger
 
-def request(code_list, result):
-    for code in code_list:
-        try:
-            get_stock_data = GetStockData(verbose=True)
-            data_df = get_stock_data.get_stock_data_jsm(code, "D",
+get_stock_data = GetStockData(verbose=True)
+
+def req(code):
+    try:
+        data_df = get_stock_data.get_stock_data_jsm(code, "D",
                     start=HISTRICAL_DATA_RANGE_START, end=HISTRICAL_DATA_RANGE_END_NOW)
-            data_df.to_csv(HISTRICAL_DATA_PATH.format(code=code))
-        except Exception as e:
-            logger.error("[{}]: ヒストリカルデータの取得に失敗しました。{}".format(code, e))
-        else:
-            logger.info("[{}]: ヒストリカルデータを取得しました。".format(code))
-            result.append(code)
+        data_df.to_csv(HISTRICAL_DATA_PATH.format(code=code))
 
-        get_stock_data = None
-        data_df = None
-        gc.collect()
+    except Exception as e:
+        logger.error("[{}]: ヒストリカルデータの取得に失敗しました。{}".format(code, e))
+    else:
+        logger.info("[{}]: ヒストリカルデータを取得しました。".format(code))
 
 
-def split_list(l, n):
-    """
-    リストをサブリストに分割する
-    :param l: リスト
-    :param n: サブリストの要素数
-    :return:
-    """
-    for idx in range(0, len(l), n):
-        yield l[idx:idx + n]
+async def run(loop, code_list):
+    async def run_req(code):
+        return await loop.run_in_executor(None, req, code)
+
+    tasks = [run_req(code) for code in code_list]
+    return await asyncio.gather(*tasks, return_exceptions=True)
 
 
 def GetStockDataesToLocal():
@@ -54,34 +49,26 @@ def GetStockDataesToLocal():
     code_list_df = gcl_nikkei_225.get_new_stock_code()
     code_list = code_list_df["コード"].values.tolist()
 
-    thread_num = THREAD_NUM
-    code_lists = list(split_list(code_list, int(len(code_list)/thread_num) + 1))
+    code_list_tmp = []
 
-    thread_list = []
-    result = []
-    for thread_id in range(thread_num):
-        thread = threading.Thread(target=request, args=([code_lists[thread_id], result]), name = "thread_{}".format(thread_id))
-        thread_list.append(thread)
+    for cnt, code in enumerate(code_list):
+        logger.debug("code; {}, {} / {}".format(code, cnt, len(code_list)))
+        code_list_tmp.append(code)
 
-    for thread in thread_list:
-        while True:
+        if cnt % THREAD_NUM == (THREAD_NUM - 1) or cnt == len(code_list)-1:
+        # バッチごとに実行
+        # 最後のバッチ
             try:
-                thread.start()
+                st = time.time()
+                loop = asyncio.get_event_loop()
+                loop.run_until_complete(run(loop, code_list_tmp))
+                logger.info("処理時間: {}".format(time.time() - st))
             except Exception as e:
-                logger.exception("threadの処理の開始を失敗しました、再度行います, {}".format(e))
-                continue
+                logger.exception("非同期処理が失敗しました。: {}".format(e))
             else:
-                break
+                logger.info("非同期処理終了しました。")
+            code_list_tmp = []
 
-    for thread in thread_list:
-        while True:
-            try:
-                thread.join()
-            except Exception as e:
-                logger.exception("thredの処理の終了を失敗しました、再度行います, {}".format(e))
-                continue
-            else:
-                break
 
 
 if __name__ == "__main__":

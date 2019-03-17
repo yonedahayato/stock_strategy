@@ -16,6 +16,13 @@ def draw_line(plt, fig, ax, lines):
         prices = np.array([float(line["start_price"]), float(line["end_price"])])
 
         ax.plot(indexes, prices,
-                linewidth=5, color="red", label="trend_lien_{}".format(cnt))
+                linewidth=2, color="red", label="trend_lien_{}".format(cnt))
 
     return plt, fig, ax,
+
+
+def draw_vertical_line(plt, fig, ax, vertical_lines):
+    for vertical_id in vertical_lines:
+        ax.axvline(x=vertical_id, linewidth=2, color="green", linestyle="dashed")
+
+    return plt, fig, ax

@@ -25,7 +25,8 @@ from helper.line import LineInfo
 class TrendLine(StockStrategy):
     def __init__(self, debug=True, back_test_return_date=5, \
                 method_name="trend_line", multiprocess=False,\
-                length_limited_between_end_and_latest=100):
+                length_limited_between_end_and_latest=100,
+                rate_accept_between_high_value_and_line=20):
 
         StockStrategy.__init__(self, debug=debug, back_test_return_date=back_test_return_date, \
                                 method_name=method_name, multiprocess=multiprocess)
@@ -33,7 +34,23 @@ class TrendLine(StockStrategy):
         self.length_limited_between_end_and_latest = \
             length_limited_between_end_and_latest
 
-    def reset_info_each_brand(self):
+        self.rate_accept_between_high_value_and_line = \
+            rate_accept_between_high_value_and_line
+
+        # for drawing to graph
+        self.lines_for_draw_graph = []
+
+        self.small_peak_infos = []
+        self.flag_draw_small_peak = True
+
+        self.large_peak_infos = []
+        self.flag_draw_large_peak = True
+
+        self.flag_draw_all_trend_lines = True
+
+        self.vertical_lines = []
+
+    def reset_info_each_brand(self, histlical_data):
         # for small peak
         self.rear_candle, self.middle_candle, self.fore_candle = [pd.Series([])] * 3
         self.small_peak_info = PeakInfo()
@@ -43,7 +60,11 @@ class TrendLine(StockStrategy):
         self.peak_indexes_in_small_peaks = []
 
         # for trend line
-        self.lines_info = LineInfo(self.large_peak_info)
+        diff_high_value_and_low_value = int(histlical_data["High"].max() - histlical_data["Low"].min())
+        self.value_accept_between_high_value_and_line = \
+            diff_high_value_and_low_value * self.rate_accept_between_high_value_and_line / 100
+        self.lines_info = LineInfo(self.large_peak_info,
+                                   self.value_accept_between_high_value_and_line)
 
     def set_candle(self, candle):
         if self.rear_candle.empty:
@@ -93,7 +114,7 @@ class TrendLine(StockStrategy):
     def check_large_peak(self, for_buy=True):
         for idx in range(1, self.small_peak_info.get_length() - 1):
             if self.small_peak_info.peak_prices[idx - 1] <= self.small_peak_info.peak_prices[idx] and \
-               self.small_peak_info.peak_prices[idx] <= self.small_peak_info.peak_prices[idx + 1]:
+               self.small_peak_info.peak_prices[idx] >= self.small_peak_info.peak_prices[idx + 1]:
 
                 self.large_peak_info.append_info(**self.small_peak_info.get_info_from_id_as_dict(idx))
                 self.peak_indexes_in_small_peaks.append(idx)
@@ -160,6 +181,8 @@ class TrendLine(StockStrategy):
 
         self.lines_info.compute_length_index_to_index()
         self.lines_info.compute_line_rate()
+        self.lines_info.check_line_rate()
+
         self.lines_info.set_peak_lists_in_line()
         self.lines_info.set_candle_indexes_in_line_without_peak()
         self.lines_info.set_high_values_list(stock_data_df)
@@ -170,7 +193,6 @@ class TrendLine(StockStrategy):
 
         self.lines_info.check_diff_between_high_value_and_line()
         self.lines_info.check_diff_between_high_value_and_line_in_peak()
-        self.lines_info.count_peaks_used_in_line()
         self.lines_info.check_sumary_diff_between_high_value_and_line()
         self.lines_info.check_trend_line_rule()
 
@@ -188,34 +210,52 @@ class TrendLine(StockStrategy):
         return copy.deepcopy(self.trend_line)
 
     def select_code(self, code, stock_data_df):
-        self.reset_info_each_brand()
+        # for draw graph
+        self.vertical_lines.append(len(stock_data_df) - self.length_limited_between_end_and_latest + 1)
 
+        # for detect
+        self.reset_info_each_brand(stock_data_df)
         self.detect_small_peak(stock_data_df)
-        # self.small_peak_info.print()
-
         self.detect_large_peak()
-
         trend_line = self.detect_trend_line(stock_data_df)
 
         if not self.trend_line.empty:
-            self.lines_for_draw_graph = [{"start_index": trend_line["start_index"],
-                                          "end_index": trend_line["end_index"],
-                                          "start_price": trend_line["start_price"],
-                                          "end_price": trend_line["end_price"]
-                                          }]
+            self.lines_for_draw_graph.append([{"start_index": trend_line["start_index"],
+                                              "end_index": trend_line["end_index"],
+                                              "start_price": trend_line["start_price"],
+                                              "end_price": trend_line["end_price"]
+                                              }])
 
             self.result_codes.append(code)
+
+            # for drawing to graph
+            if self.flag_draw_all_trend_lines:
+                for name, trend_line in self.trend_lines.iterrows():
+                    self.lines_for_draw_graph[-1].append({"start_index": trend_line["start_index"],
+                                                      "end_index": trend_line["end_index"],
+                                                      "start_price": trend_line["start_price"],
+                                                      "end_price": trend_line["end_price"]
+                                                      })
+
+            self.small_peak_infos.append(self.small_peak_info)
+            self.large_peak_infos.append(self.large_peak_info)
 
 
 def main():
     back_test_return_date = args.back_test_return_date
-    lengthes_limited_between_end_and_latest = [100, 50, 25]
+    # lengthes_limited_between_end_and_latest = [100, 75, 50, 25]
+    lengthes_limited_between_end_and_latest = [30]
+    rate_accept_between_high_value_and_lines = [5]
     results = []
-    for length_limited_between_end_and_latest in lengthes_limited_between_end_and_latest:
+    for length_limited_between_end_and_latest, rate_accept_between_high_value_and_line in \
+        zip(lengthes_limited_between_end_and_latest, rate_accept_between_high_value_and_lines):
         trend_line = TrendLine(debug=False, back_test_return_date=back_test_return_date,
-                               method_name="trend_line_length_limited={}".format(length_limited_between_end_and_latest),
+                               method_name="TrendLine_length_limited={}_rate_accept_between_high_value_and_line={}".format(
+                                   length_limited_between_end_and_latest,
+                                   rate_accept_between_high_value_and_line),
                                multiprocess=False,
-                               length_limited_between_end_and_latest=length_limited_between_end_and_latest)
+                               length_limited_between_end_and_latest=length_limited_between_end_and_latest,
+                               rate_accept_between_high_value_and_line=rate_accept_between_high_value_and_line)
         result = trend_line.execute()
         results.append(result)
 

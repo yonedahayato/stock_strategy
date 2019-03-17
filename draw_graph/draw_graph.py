@@ -6,7 +6,7 @@ import pandas as pd
 import sys
 
 matplotlib.use('Agg')
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from mpl_finance import candlestick2_ohlc, volume_overlay
 
 abspath_draw_graph = os.path.dirname(os.path.abspath(__file__))
@@ -16,13 +16,15 @@ sys.path.append(p_path + "/stock_strategy")
 sys.path.append(abspath_draw_graph + "/helper")
 
 from log import logger
-from draw_line import draw_line
+from draw_line import draw_line, draw_vertical_line
+from draw_peak import draw_peak
 
 IMAGE_SAVE_PATH = os.path.dirname(os.path.abspath(__file__)) + "/graphs"
 
 
 class DrawGraph:
-    def __init__(self, data_df, code, method_name, window=None, lines=[]):
+    def __init__(self, data_df, code, method_name, window=None, lines=[],
+                 small_peak_info=None, large_peak_info=None, vertical_lines=[]):
         self.data_df = data_df
         self.code = code
         self.method_name = method_name
@@ -31,15 +33,29 @@ class DrawGraph:
         self.graph_length = 0
         self.window = window
         self.lines = lines
+        self.small_peak_info = small_peak_info
+        self.large_peak_info = large_peak_info
+        self.vertical_lines = vertical_lines
 
     def draw(self):
-        plt, fig, ax = self.draw_chlcv()
+        import matplotlib.pyplot as plt
+        plt, fig, ax = self.draw_chlcv(plt)
 
         if self.window != None:
             plt, fig, ax = self.draw_move_average_line(plt, fig, ax)
 
         if self.lines != []:
             plt, fig, ax = draw_line(plt, fig, ax, self.lines)
+
+        if self.small_peak_info != None:
+            plt, fig, ax = draw_peak(plt, fig, ax, self.small_peak_info, "small")
+
+        if self.large_peak_info != None:
+            plt, fig, ax = draw_peak(plt, fig, ax, self.large_peak_info, "large")
+
+        if self.vertical_lines != []:
+            plt, fig, ax = draw_vertical_line(plt, fig, ax, self.vertical_lines)
+
 
         ax.legend(fontsize=12)
         plt.title("{}_{}".format(self.method_name, self.code))
@@ -48,7 +64,7 @@ class DrawGraph:
         plt.close(fig)
         return save_path
 
-    def draw_chlcv(self):
+    def draw_chlcv(self, plt):
         data_df = copy.deepcopy(self.data_df)
         data_df = data_df.iloc[-self.graph_length:]
         data_df.columns = ["Open", "High", "Low", "Close", "Adj_Close", "Volume"]
@@ -106,5 +122,4 @@ class DrawGraph:
         return self.save_path
 
     def remove(self):
-        # os.remove(self.save_path)
-        pass
+        os.remove(self.save_path)
