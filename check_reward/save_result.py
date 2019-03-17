@@ -29,7 +29,8 @@ class Save_Result:
                         "creat_time": now_str,
                         "data_range_start_to_compute": "",
                         "data_range_end_to_compute": "",
-                        "back_test_return_date": ""}
+                        "back_test_return_date": "",
+                        "elapsed_time_average": 0}
 
     def make_dir(self, dir_path):
         if not os.path.exists(dir_path):
