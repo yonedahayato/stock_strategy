@@ -95,7 +95,7 @@
 
 <!-- trend line using linear regression -->
 
-#Trend Line Using Linear Regression
+# Trend Line Using Linear Regression
 - [参考：PythonでFXのトレンドラインを引いてみる](http://www.algo-fx-blog.com/python-fx-trend-line/)
 
 ![trend_line_using_linear_regression](./images/trend_line_using_linear_regression.png)
