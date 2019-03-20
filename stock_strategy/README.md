@@ -4,6 +4,7 @@
     - [Move Average With Low Value](#move-average-with-low-value)
   - [Trend Line](#trend-line)
     - [Trend Conversion Line](#trend-conversion-line)
+  - [Trend Line Using Linear Regression](#trend-line-using-linear-regression)
 <!-- TOC -->
 
 <!-- move average with low value -->
@@ -91,6 +92,16 @@
 1. エンドピークが一番直近にあるトレンドラインを選択（複数ある場合は短いトレンドラインを選択）
 
 <!-- trend line -->
+
+<!-- trend line using linear regression -->
+
+#Trend Line Using Linear Regression
+- [参考：PythonでFXのトレンドラインを引いてみる](http://www.algo-fx-blog.com/python-fx-trend-line/)
+
+![trend_line_using_linear_regression](./images/trend_line_using_linear_regression.png)
+
+<!-- trend line using linear regression -->
+
 
 <!-- trend conversion line -->
 
