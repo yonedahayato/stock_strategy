@@ -80,16 +80,12 @@ class StockStrategy:
             dd = Data_Downloader()
             stock_data_df = dd.download(code)
             stock_data_df = stock_data_df.set_index("Date")
-            if self.back_test_return_date != 0:
-                stock_data_df = stock_data_df.iloc[:-self.back_test_return_date]
 
         elif self.download_method == "LOCAL":
             stock_data_df = pd.read_csv(HISTRICAL_DATA_PATH.format(code=code), index_col=0)
-            if self.back_test_return_date != 0:
-                stock_data_df = stock_data_df.iloc[:-self.back_test_return_date]
 
-        if self.debug:
-            print(msg.format(stock_data_df))
+        if self.back_test_return_date != 0:
+            stock_data_df = stock_data_df.iloc[:-self.back_test_return_date]
 
         return stock_data_df
 
