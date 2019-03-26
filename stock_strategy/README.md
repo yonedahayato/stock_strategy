@@ -91,6 +91,8 @@
     1. 「ルール２」：「start peak と end peak の間のピークの数が３個以上」
 1. エンドピークが一番直近にあるトレンドラインを選択（複数ある場合は短いトレンドラインを選択）
 
+## イメージ
+![trend_line_01](./images/trend_line_01.png)
 <!-- trend line -->
 
 <!-- trend conversion line -->
@@ -110,6 +112,7 @@
 # Trend Line Using Linear Regression
 - [参考：PythonでFXのトレンドラインを引いてみる](http://www.algo-fx-blog.com/python-fx-trend-line/)
 
+## イメージ
 ![trend_line_using_linear_regression](./images/trend_line_using_linear_regression.png)
 
 <!-- trend line using linear regression -->
