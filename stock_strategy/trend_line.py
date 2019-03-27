@@ -31,9 +31,11 @@ class TrendLine(StockStrategy):
         StockStrategy.__init__(self, debug=debug, back_test_return_date=back_test_return_date, \
                                 method_name=method_name, multiprocess=multiprocess)
 
+        # end peak と最後のローソクの距離をある数以下に制限する
         self.length_limited_between_end_and_latest = \
             length_limited_between_end_and_latest
 
+        # trend line と peak の差がどれだけなければ同値とみなすか、もしくはどれだけあれば、trend line を超えていないとみなすかの数値
         self.rate_accept_between_high_value_and_line = \
             rate_accept_between_high_value_and_line
 
@@ -260,7 +262,7 @@ def main():
         results.append(result)
 
     for cnt, _ in enumerate(lengthes_limited_between_end_and_latest):
-        print(results[cnt])
+        logger.info("results: {}".format(results[cnt]))
 
 if __name__ == "__main__":
     main()

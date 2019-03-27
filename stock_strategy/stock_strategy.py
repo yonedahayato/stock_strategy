@@ -58,6 +58,10 @@ class StockStrategy:
         self.download_method = download_method
         self.code_list = code_list
 
+        self.length_historical_data = 0
+
+        logger.info("method_name:{}".format(method_name))
+
     def get_code_list(self):
         if self.code_list == "1st_all":
             gettter = GetCodeList()
@@ -86,6 +90,8 @@ class StockStrategy:
 
         if self.back_test_return_date != 0:
             stock_data_df = stock_data_df.iloc[:-self.back_test_return_date]
+
+        stock_data_df = stock_data_df.iloc[-self.length_historical_data:]
 
         return stock_data_df
 
@@ -168,8 +174,9 @@ class StockStrategy:
 
             graph_image_path = draw_graph.draw()
 
-            push_line(str(code), image_path = graph_image_path)
-            draw_graph.remove()
+            if not self.debug:
+                response = push_line(str(code), image_path = graph_image_path)
+                draw_graph.remove()
 
     def execute(self):
         msg = self.msg_tmpl.format("exect") + "{}"
@@ -230,7 +237,7 @@ class StockStrategy:
 
         try:
             json_result = self.save_result()
-            push_line(json_result)
+            response_result = push_line(json_result)
         except:
             err_msg = msg.format("fail to save result select code.")
             logger.error(err_msg)

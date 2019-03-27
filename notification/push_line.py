@@ -22,5 +22,13 @@ def push_line(message, image_path=None):
         files = {"imageFile": open(image_path, "rb")}
         line_notify = requests.post(line_notify_api, data=payload, headers=headers, files=files)
 
+    if line_notify.status_code != 200:
+        logger.error("lineへのmessage の送信に失敗しました。")
+        logger.error("headers: {}".format(line_notify.headers))
+        logger.error("text: {}".format(line_notify.text))
+        requests.post(line_notify_api, data={'message': "lineへのメッセージの送信に失敗しました。"}, headers=headers)
+
+    return line_notify
+
 if __name__ == "__main__":
     push_line("test")
