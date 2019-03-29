@@ -23,7 +23,7 @@ python check_reward.py
 ```
 
 # select code output
-##format
+## format
 ```
 {
   "result_code_list": 選択した銘柄,
