@@ -33,7 +33,7 @@ args = parser.parse_args()
 
 
 class Check_Reward(Save_Result):
-    def __init__(self, save_path=result_path, back_test_return_date,
+    def __init__(self, save_path=result_path,
                  download_method="LOCAL",
                  compute_reward_methodes=["using_all_of_data_for_backtest_with_mean", "using_all_of_data_for_backtest"],
                  push_line=False):
@@ -42,9 +42,9 @@ class Check_Reward(Save_Result):
 
         self.compute_reward_methodes = compute_reward_methodes
         self.push_line = push_line
-        self.back_test_return_date = back_test_return_date
 
-        self.stock_strategy = StockStrategy(download_method=download_method)
+        self.stock_strategy = StockStrategy(download_method=download_method,
+                                            back_test_return_date=0)
 
         # self.selected_code_json_file = "move_average_2018_08_14_08_55_08.json"
         self.selected_code_json_files = []
@@ -92,11 +92,12 @@ class Check_Reward(Save_Result):
     def compute_reward(self, stock_data_df):
         result_format_tmp = copy.deepcopy(self.result_format)
 
-        close_value_bought = stock_data_df.loc[self.data_range_end_to_compute]["Close"]
+        close_value_bought = copy.deepcopy(stock_data_df.loc[self.data_range_end_to_compute]["Close"])
         if self.back_test_return_date == -1:
-            close_values_for_backtest = stock_data_df.loc[self.data_range_end_to_compute:].iloc[1:]["Close"]
+            close_values_for_backtest = copy.deepcopy(stock_data_df.loc[self.data_range_end_to_compute:].iloc[1:]["Close"])
         else:
-            close_values_for_backtest = stock_data_df.iloc[-self.back_test_return_date:]["Close"]
+            close_values_for_backtest = copy.deepcopy(stock_data_df.loc[self.data_range_end_to_compute:])
+            close_values_for_backtest = close_values_for_backtest.iloc[:self.back_test_return_date]["Close"]
 
         if len(self.date_indexes) == 0:
             self.date_indexes_for_backtest = list(close_values_for_backtest.index)
@@ -105,7 +106,6 @@ class Check_Reward(Save_Result):
 
         if "using_all_of_data_for_backtest_with_mean" in self.compute_reward_methodes:
             result_format_tmp["reward_rate_mean"] = reward_rates.mean()
-
 
         if "using_all_of_data_for_backtest" in self.compute_reward_methodes:
             result_format_tmp["reward_rates"] = list(reward_rates)
@@ -155,11 +155,9 @@ class Check_Reward(Save_Result):
 
 
 def main():
-    back_test_return_date = args.back_test_return_date
     cr = Check_Reward(download_method="LOCAL",
                       compute_reward_methodes=["using_all_of_data_for_backtest_with_mean", "using_all_of_data_for_backtest"],
-                      push_line=True,
-                      back_test_return_date=back_test_return_date)
+                      push_line=True)
     cr.check_reward()
 
 if __name__ == "__main__":
