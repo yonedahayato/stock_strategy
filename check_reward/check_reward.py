@@ -1,4 +1,3 @@
-import argparse
 import copy
 from glob import glob
 import json
@@ -21,15 +20,6 @@ result_path = save_result_path + "/result/reward"
 SELECTED_CODE_RESULT_PATH = save_result_path + "/result/selected_code"
 
 COMPUTE_REWARD_METHOD = ["using_all_of_data_for_backtest_with_mean", "using_all_of_data_for_backtest"]
-
-parser = argparse.ArgumentParser(description="check_rewardの引数")
-parser.add_argument("--back_test_return_date",
-                    help = "どのくらいback test の使用するか(0の場合はback testには使用せず、全てのデータを使用)\
-                    なお、デフォルト値は結果jsonファイルのdata_range_end_to_computeを使用する",
-                    default=-1,
-                    type=int)
-
-args = parser.parse_args()
 
 
 class Check_Reward(Save_Result):
