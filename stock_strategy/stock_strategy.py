@@ -4,7 +4,9 @@ import datetime
 from datetime import datetime as dt
 import os
 import pandas as pd
+from statistics import mean
 import sys
+import time
 
 abspath = os.path.dirname(os.path.abspath(__file__))
 p_path = os.path.dirname(abspath)
@@ -126,6 +128,8 @@ class StockStrategy:
         sr.add_info("data_range_end_to_compute", stock_data_df_index[-1])
         sr.add_info("back_test_return_date", self.back_test_return_date)
 
+        sr.add_info("elapsed_time_average", mean(self.elapsed_times))
+
         json_result = sr.save()
         return json_result
 
@@ -189,6 +193,7 @@ class StockStrategy:
             logger.info(msg.format("success to get code list."))
 
         if not self.multiprocess:
+            self.elapsed_times = []
             for code_cnt, code in enumerate(code_list):
                 logger.info(msg.format("code {}, {} / {}".format(code, code_cnt+1, len(code_list))))
 
@@ -203,7 +208,11 @@ class StockStrategy:
                     logger.info(msg.format("success to get stock histlical data."))
 
                 try:
+                    start_time = time.time()
                     self.select_code(code, stock_data_df)
+                    elapsed_time = time.time() - start_time
+                    self.elapsed_times.append(elapsed_time)
+                    logger.info("elapsed_time: {}".format(elapsed_time))
                 except:
                     err_msg = msg.format("fail to select code.")
                     logger.error(err_msg)
