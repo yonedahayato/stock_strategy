@@ -19,8 +19,8 @@ TOSHO_1ST_LIST_URL = "http://www.jpx.co.jp/markets/statistics-equities/misc/01.h
 NIKKEI_225_LIST_URL = "https://indexes.nikkei.co.jp/nkave/index/component?idx=nk225"
 
 # range date to get stock data
-HISTRICAL_DATA_RANGE_START = pd.Timestamp("20160101")
-HISTRICAL_DATA_RANGE_END = pd.Timestamp("20180101")
+HISTRICAL_DATA_RANGE_START = pd.Timestamp("20100101")
+HISTRICAL_DATA_RANGE_END = pd.Timestamp("20190308")
 HISTRICAL_DATA_RANGE_END_NOW = pd.Timestamp(NOW_STR_IN_SETTING)
 
 # path save and get histrical data to local
