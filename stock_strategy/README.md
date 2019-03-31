@@ -111,5 +111,5 @@
 # Predict Class Of Change Using LSTM
 - [参考 : LSTM で株価予測してみる (その7、4分類で予測)](https://qiita.com/deadbeef/items/8831a34990da7f84304b)
 - [参考 : Stock prediction (slideshare)](https://www.slideshare.net/tetsuoishigaki/stock-prediction-82133990/)
-  - ![pdf](./document/stockprediction-171116003123.pdf)
+  - [pdf](./document/stockprediction-171116003123.pdf)
 <!-- predict class of change using lstm -->
