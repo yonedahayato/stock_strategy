@@ -25,6 +25,7 @@ HISTRICAL_DATA_RANGE_END_NOW = pd.Timestamp(NOW_STR_IN_SETTING)
 
 # path save and get histrical data to local
 HISTRICAL_DATA_PATH = p_dirname + "/get_stock_info/stock_data/{code}.csv"
+HISTRICAL_EXCHANGE_DATA_PATH = p_dirname + "/get_stock_info/exchange_data/{name}.csv"
 
 # path save result
 RESULT_PATH = p_dirname + "/check_reward/result/selected_code"

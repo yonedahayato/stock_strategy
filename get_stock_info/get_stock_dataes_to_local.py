@@ -49,6 +49,9 @@ def GetStockDataesToLocal():
     code_list_df = gcl_nikkei_225.get_new_stock_code()
     code_list = code_list_df["コード"].values.tolist()
 
+    code_list_option = {"日経平均": 998407, "TOPIX": 998405}
+    code_list += list(code_list_option.values())
+
     code_list_tmp = []
 
     for cnt, code in enumerate(code_list):

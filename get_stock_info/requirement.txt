@@ -1,4 +1,7 @@
 jsm
+keras
 numpy
 pandas
+pandas_datareader
+tensorflow
 quandl

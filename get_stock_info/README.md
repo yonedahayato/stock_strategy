@@ -23,6 +23,7 @@ python get_stock_info/get_new_stock_code.py
 ```
 
 # get historical data
+- jsm APIを使用
 ```
 python get_stock_info/get_stock_data.py
 ```
@@ -45,4 +46,31 @@ Date,Open,High,Low,Close,Adj_Close,Vloume
 使用する前にスレッド数を設定
 ```
 sudo python get_stock_data_to_local.py
+```
+
+# get exchange data
+- OANDA API を使用?(未実装)
+  - [参考](http://swdrsker.hatenablog.com/entry/2018/05/18/070000)
+- pandas datareader
+  - [参考](https://python.askbox.net/2018/06/10/python%E3%81%A7%E7%82%BA%E6%9B%BF%E3%83%AC%E3%83%BC%E3%83%88%E3%82%92csv%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%81%AB%E6%9B%B8%E3%81%8D%E5%87%BA%E3%81%99/)
+
+```
+python get_exchange_data.py
+```
+
+```
+DATE,Close
+2016-01-01,
+2016-01-04,119.3
+2016-01-05,118.95
+2016-01-06,118.54
+2016-01-07,118.0
+2016-01-08,117.74
+2016-01-11,117.48
+2016-01-12,117.78
+2016-01-13,118.06
+2016-01-14,118.03
+2016-01-15,116.78
+2016-01-18,
+2016-01-19,117.66
 ```
