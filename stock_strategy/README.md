@@ -4,6 +4,8 @@
     - [Move Average With Low Value](#move-average-with-low-value)
   - [Trend Line](#trend-line)
     - [Trend Conversion Line](#trend-conversion-line)
+  - [Predict Class Of Change](#predict-class-of-change)
+    - [Predict Class Of Change Using LSTM](#predict-class-of-change-using-lstm)
 <!-- TOC -->
 
 <!-- move average with low value -->
@@ -103,3 +105,11 @@
 1. 上に突き抜ける瞬間に移動平均線が上昇している
 
 <!-- trend conversion line -->
+
+<!-- predict class of change using lstm -->
+
+# Predict Class Of Change Using LSTM
+- [参考 : LSTM で株価予測してみる (その7、4分類で予測)](https://qiita.com/deadbeef/items/8831a34990da7f84304b)
+- [参考 : Stock prediction (slideshare)](https://www.slideshare.net/tetsuoishigaki/stock-prediction-82133990/)
+  - ![pdf](./document/stockprediction-171116003123.pdf)
+<!-- predict class of change using lstm -->
