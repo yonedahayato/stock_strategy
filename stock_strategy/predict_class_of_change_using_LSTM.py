@@ -31,23 +31,23 @@ class PredictClassOfChangeUsingLSTM(StockStrategy):
         self.threshold = 0.01
         self.category_threshold = [-1, -self.threshold, 0, self.threshold, 1]
         self.training_days = 75
-
+        self.batch_size = 256
+        self.epochs = 2000
 
     def select_code(self, code, stock_data_df_original):
         logger.debug(code)
 
         stock_data_df = copy.deepcopy(stock_data_df_original)
-        logger.debug("stock_data_df.head 1: {}".format(stock_data_df.head()))
         close_values, open_values, high_values, low_values, stock_data_df = self.set_dataset(stock_data_df)
 
         y_data = self.compute_rate_of_decline(close_values)
         y_data = pd.cut(y_data, self.category_threshold, labels=False)
+        logger.debug("value counts: {}".format(pd.Series(y_data.transpose()[0]).value_counts()))
 
         stock_data_df = stock_data_df.applymap(lambda x: math.log10(x))
         stock_data_df = stock_data_df.diff()
         stock_data_df = stock_data_df.dropna(how='any')
         y_data = y_data[1:]
-        logger.debug("stock_data_df.head 2: {}".format(stock_data_df.head()))
 
         X, Y = self.create_train_data(np.array(stock_data_df), y_data, self.training_days)
 
@@ -65,12 +65,11 @@ class PredictClassOfChangeUsingLSTM(StockStrategy):
         test_y = Y[split_pos:]
 
         self.hidden_neurons = 400
-        self.epochs = 50
         dimension = len(X[0][0])
         model = self.create_model(dimension)
 
         es = EarlyStopping(patience=10, verbose=1)
-        history = model.fit(train_x, train_y, batch_size=10,
+        history = model.fit(train_x, train_y, batch_size=self.batch_size,
                             epochs=self.epochs, verbose=1, validation_split=0.2, callbacks=[es])
 
         self.print_train_history(history)
@@ -164,10 +163,10 @@ class PredictClassOfChangeUsingLSTM(StockStrategy):
         TOPIX_data = self.read_TOPIX_data()
 
         exchange_data.columns = ["Close_DEXJPUS"]
-        nikei225_data = nikei225_data[["Close"]]
-        nikei225_data.columns = ["Close_nikei225"]
-        TOPIX_data = TOPIX_data[["Close"]]
-        TOPIX_data.columns = ["Close_TOPIX"]
+        nikei225_data = nikei225_data[["Open", "Close"]]
+        nikei225_data.columns = ["Open_nikei225", "Close_nikei225"]
+        TOPIX_data = TOPIX_data[["Open", "Close"]]
+        TOPIX_data.columns = ["Open_TOPIX", "Close_TOPIX"]
 
         stock_data_df = pd.concat([close_values, open_values,
                                    exchange_data, nikei225_data, TOPIX_data], axis=1)
