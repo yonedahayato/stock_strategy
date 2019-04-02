@@ -10,6 +10,8 @@ parent_dirname = path.dirname(abs_dirname)
 helper_dirname = path.join(parent_dirname, "helper")
 sys.path.append(helper_dirname)
 
+from log import logger
+
 from setting import (
     HISTRICAL_DATA_RANGE_START,
     HISTRICAL_DATA_RANGE_END,
@@ -18,34 +20,55 @@ from setting import (
     HISTRICAL_EXCHANGE_DATA_PATH,
 )
 
-CURRENCY = {
+CURRENCY_FRED = {
 	'ドル/円': 'DEXJPUS',
 	'ユーロ/ドル': 'DEXUSEU',
 	'ポンド/ドル': 'DEXUSUK',
+    'ダウ平均': 'DJIA',
     }
+
+CURRENCY_GOOGLE = {
+    'DAX指数': 'DAX',
+}
+
+SOURCES = {
+    "fred": CURRENCY_FRED,
+    "google": CURRENCY_GOOGLE,
+}
 
 def make_save_data_dir():
     save_dir = path.dirname(HISTRICAL_EXCHANGE_DATA_PATH)
     os.makedirs(save_dir, exist_ok=True)
 
-def get_exchange_data(start=None, end=None, currency=None):
+def get_data(sources, currency, start, end):
+    logger.debug("source: {}".format(sources))
+    logger.debug("currency: {}".format(currency))
+    data = web.DataReader(currency.values(), sources, start, end)
+    data.columns = list(currency.keys())
+
+    return data
+
+def get_exchange_data(start=None, end=None, sources=None):
     if start == None:
         start = HISTRICAL_DATA_RANGE_START
     if end == None:
         end = HISTRICAL_DATA_RANGE_END_NOW
-    if currency == None:
-        currency = CURRENCY
+    if sources == None:
+        sources = SOURCES
 
-    data = web.DataReader(currency.values(), 'fred', start, end)
-    data.columns = list(currency.keys())
+    data_list = []
+    for source, currency in sources.items():
+        data_list.append(get_data(source, currency, start, end))
+
+    data = pd.concat(data_list, axis=0)
 
     make_save_data_dir()
-
-    for key, name in currency.items():
-        data_for_save = data.loc[:, [key]]
-        data_for_save.columns = ["Close"]
-        data_for_save = data_for_save.fillna(method='bfill')
-        data_for_save.to_csv(HISTRICAL_EXCHANGE_DATA_PATH.format(name=name))
+    for source, currency in sources.times():
+        for key, name in currency.items():
+            data_for_save = data.loc[:, [key]]
+            data_for_save.columns = ["Close"]
+            data_for_save = data_for_save.fillna(method='bfill')
+            data_for_save.to_csv(HISTRICAL_EXCHANGE_DATA_PATH.format(name=name))
 
 if __name__ == '__main__':
     get_exchange_data()

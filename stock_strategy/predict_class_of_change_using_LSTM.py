@@ -30,9 +30,10 @@ class PredictClassOfChangeUsingLSTM(StockStrategy):
 
         self.threshold = 0.01
         self.category_threshold = [-1, -self.threshold, 0, self.threshold, 1]
-        self.training_days = 75
-        self.batch_size = 256
+        self.training_days = 40
+        self.batch_size = 10
         self.epochs = 2000
+        self.hidden_neurons = 432
 
     def select_code(self, code, stock_data_df_original):
         logger.debug(code)
@@ -44,10 +45,7 @@ class PredictClassOfChangeUsingLSTM(StockStrategy):
         y_data = pd.cut(y_data, self.category_threshold, labels=False)
         logger.debug("value counts: {}".format(pd.Series(y_data.transpose()[0]).value_counts()))
 
-        stock_data_df = stock_data_df.applymap(lambda x: math.log10(x))
-        stock_data_df = stock_data_df.diff()
-        stock_data_df = stock_data_df.dropna(how='any')
-        y_data = y_data[1:]
+        y_data, stock_data_df = self.compute_log_and_diff(y_data, stock_data_df)
 
         X, Y = self.create_train_data(np.array(stock_data_df), y_data, self.training_days)
 
@@ -64,7 +62,6 @@ class PredictClassOfChangeUsingLSTM(StockStrategy):
         test_x = X[split_pos:]
         test_y = Y[split_pos:]
 
-        self.hidden_neurons = 400
         dimension = len(X[0][0])
         model = self.create_model(dimension)
 
@@ -156,6 +153,8 @@ class PredictClassOfChangeUsingLSTM(StockStrategy):
         open_values = stock_data_df[["Open"]]
         high_values = stock_data_df[["High"]]
         low_values = stock_data_df[["Low"]]
+        # stock_data_df["diff_Open_Close"] = open_values["Open"] - close_values["Close"]
+        # stock_data_df["diff_rate_Opne_Close"] = stock_data_df["diff_Open_Close"] / close_values["Close"]
 
         # get option data
         exchange_data = self.read_exchange_data("DEXJPUS")
@@ -163,10 +162,17 @@ class PredictClassOfChangeUsingLSTM(StockStrategy):
         TOPIX_data = self.read_TOPIX_data()
 
         exchange_data.columns = ["Close_DEXJPUS"]
-        nikei225_data = nikei225_data[["Open", "Close"]]
-        nikei225_data.columns = ["Open_nikei225", "Close_nikei225"]
-        TOPIX_data = TOPIX_data[["Open", "Close"]]
-        TOPIX_data.columns = ["Open_TOPIX", "Close_TOPIX"]
+
+        nikei225_data = nikei225_data[["Open", "Close", "High", "Low"]]
+        nikei225_data.columns = ["Open_nikei225", "Close_nikei225", "High_nikei225", "Low_nikei225"]
+        # nikei225_data["diff_Open_Close_nikei225"] = nikei225_data["Open_nikei225"] - nikei225_data["Close_nikei225"]
+        # nikei225_data["diff_rate_Opne_Close_nikei225"] = nikei225_data["diff_Open_Close_nikei225"] / nikei225_data["Close_nikei225"]
+
+        TOPIX_data = TOPIX_data[["Open", "Close", "High", "Low"]]
+        TOPIX_data.columns = ["Open_TOPIX", "Close_TOPIX", "High_TOPIX", "Low_TOPIX"]
+        # TOPIX_data["diff_Open_Close_TOPIX"] = TOPIX_data["Open_TOPIX"] - TOPIX_data["Close_TOPIX"]
+        # TOPIX_data["diff_rate_Opne_Close_TOPIX"] = TOPIX_data["diff_Open_Close_TOPIX"] / TOPIX_data["Close_TOPIX"]
+        # ==============
 
         stock_data_df = pd.concat([close_values, open_values,
                                    exchange_data, nikei225_data, TOPIX_data], axis=1)
@@ -191,6 +197,14 @@ class PredictClassOfChangeUsingLSTM(StockStrategy):
     @staticmethod
     def read_TOPIX_data():
         return pd.read_csv(HISTRICAL_DATA_PATH.format(code="998405"), index_col=0)
+
+    @staticmethod
+    def compute_log_and_diff(y_data, stock_data_df):
+        stock_data_df = stock_data_df.applymap(lambda x: math.log10(x))
+        stock_data_df = stock_data_df.diff()
+        stock_data_df = stock_data_df.dropna(how='any')
+        y_data = y_data[1:]
+        return y_data, stock_data_df
 
 
 if __name__ == '__main__':
