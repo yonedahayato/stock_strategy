@@ -1,7 +1,7 @@
 import datetime
 import os
 from os import path
-import pandas
+import pandas as pd
 import pandas_datareader.data as web
 import sys
 
@@ -25,15 +25,14 @@ CURRENCY_FRED = {
 	'ユーロ/ドル': 'DEXUSEU',
 	'ポンド/ドル': 'DEXUSUK',
     'ダウ平均': 'DJIA',
-    }
+    # 'DAX指数',
+    # ハンセン指数,
+    'SP500': 'SP500'
 
-CURRENCY_GOOGLE = {
-    'DAX指数': 'DAX',
-}
+    }
 
 SOURCES = {
     "fred": CURRENCY_FRED,
-    "google": CURRENCY_GOOGLE,
 }
 
 def make_save_data_dir():
@@ -43,6 +42,7 @@ def make_save_data_dir():
 def get_data(sources, currency, start, end):
     logger.debug("source: {}".format(sources))
     logger.debug("currency: {}".format(currency))
+
     data = web.DataReader(currency.values(), sources, start, end)
     data.columns = list(currency.keys())
 
@@ -63,7 +63,7 @@ def get_exchange_data(start=None, end=None, sources=None):
     data = pd.concat(data_list, axis=0)
 
     make_save_data_dir()
-    for source, currency in sources.times():
+    for source, currency in sources.items():
         for key, name in currency.items():
             data_for_save = data.loc[:, [key]]
             data_for_save.columns = ["Close"]
