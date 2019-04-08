@@ -8,4 +8,5 @@ numpy
 pandas==0.20.3
 Quandl
 requests
+sklearn
 xlrd
