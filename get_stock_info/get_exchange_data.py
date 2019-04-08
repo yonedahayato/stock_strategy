@@ -27,8 +27,9 @@ CURRENCY_FRED = {
     'ダウ平均': 'DJIA',
     # 'DAX指数',
     # ハンセン指数,
-    'SP500': 'SP500'
-
+    'SP500': 'SP500',
+    # 'NASDAQ',
+    # 'SHA',
     }
 
 SOURCES = {
@@ -43,7 +44,7 @@ def get_data(sources, currency, start, end):
     logger.debug("source: {}".format(sources))
     logger.debug("currency: {}".format(currency))
 
-    data = web.DataReader(currency.values(), sources, start, end)
+    data = web.DataReader(list(currency.values()), sources, start, end)
     data.columns = list(currency.keys())
 
     return data
