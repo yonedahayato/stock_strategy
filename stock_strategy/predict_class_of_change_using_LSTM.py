@@ -7,6 +7,7 @@ from keras.callbacks import EarlyStopping
 import math
 import numpy as np
 import pandas as pd
+from sklearn.metrics import confusion_matrix
 
 from stock_strategy import (
     # library
@@ -22,6 +23,8 @@ from setting import (
     HISTRICAL_DATA_PATH,
 )
 
+pd.options.display.max_rows = None
+
 class PredictClassOfChangeUsingLSTM(StockStrategy):
     def __init__(self, debug=False, back_test_return_date=5, \
                 method_name="predict_class_of_change_using_lstm", multiprocess=False):
@@ -29,8 +32,8 @@ class PredictClassOfChangeUsingLSTM(StockStrategy):
                                 method_name=method_name, multiprocess=multiprocess)
 
         self.threshold = 0.01
-        self.category_threshold = [-1, -self.threshold, 0, self.threshold, 1]
-        self.training_days = 10
+        self.category_threshold = [-100.0, -self.threshold, 0.0, self.threshold, 100.0]
+        self.training_days = 5
         self.batch_size = 10
         self.epochs = 2000
         self.hidden_neurons = 432
@@ -44,17 +47,8 @@ class PredictClassOfChangeUsingLSTM(StockStrategy):
 
         y_data = self.compute_rate_of_decline(close_values)
         y_data = pd.cut(y_data, self.category_threshold, labels=False)
-        logger.debug("value counts: {}".format(pd.Series(y_data.transpose()[0]).value_counts()))
-
         y_data, stock_data_df = self.compute_log_and_diff(y_data, stock_data_df)
-
         X, Y = self.create_train_data(np.array(stock_data_df), y_data, self.training_days)
-
-        logger.debug("X.shape: {}".format(X.shape))
-        logger.debug("X[0][:5]: {}".format(X[0][:5]))
-        logger.debug("X[0][-5:]: {}".format(X[0][-5:]))
-        logger.debug("Y.shape: {}".format(Y.shape))
-        logger.debug("Y[:10]: {}".format(Y[:10]))
 
         # データを学習用と検証用に分割
         split_pos = int(len(X) * 0.8)
@@ -78,17 +72,16 @@ class PredictClassOfChangeUsingLSTM(StockStrategy):
 
     def create_train_data(self, x_data, y_data, samples):
 
-        transposed = x_data
-
         _x = []
         _y = []
-        length = len(transposed)
+        length = len(x_data)
+
         for i in np.arange(0, length - samples):
             s = i + samples # samplesサンプル間の変化を素性にする
-            _x.append(transposed[i:s])
+            _x.append(x_data[i:s])
 
             __y = [0, 0, 0, 0]
-            __y[y_data[s][0]] = 1
+            __y[int(y_data[s][0])] = 1
             _y.append(__y)
 
         # 上げ下げの結果と教師データのセットを返す
@@ -129,6 +122,8 @@ class PredictClassOfChangeUsingLSTM(StockStrategy):
         fp = 0
         tn = 0
         fn = 0
+        predicts = []
+        trues = []
         for i in range(len(preds)):
             predict = np.argmax(preds[i])
             test    = np.argmax(test_y[i])
@@ -143,11 +138,20 @@ class PredictClassOfChangeUsingLSTM(StockStrategy):
             if not true and not positive:
                 fn += 1
 
-        print("TP = %d, FP = %d, TN = %d, FN = %d" % (tp, fp, tn, fn))
+            predicts.append(predict)
+            trues.append(test)
+
+        logger.info("TP = %d, FP = %d, TN = %d, FN = %d" % (tp, fp, tn, fn))
         precision = tp / (tp + fp + 0.00000001)
         recall = tp / (tp + fn + 0.0000001)
         f_value = 2 * recall * precision / (recall + precision + 0.0000001)
-        print("Precision = %f, Recall = %f, F = %f" % (precision, recall, f_value))
+        logger.info("Precision = %f, Recall = %f, F = %f" % (precision, recall, f_value))
+
+        matrix = confusion_matrix(trues, predicts, labels=[0, 1, 2, 3])
+        matrix = pd.DataFrame(matrix,
+                              columns=["pred_{}".format(i) for i in range(4)],
+                              index=["true_{}".format(i) for i in range(4)])
+        logger.info("Matrix: \n{}".format(matrix))
 
     def set_dataset(self, stock_data_df):
         close_values = stock_data_df[["Close"]]
@@ -158,15 +162,13 @@ class PredictClassOfChangeUsingLSTM(StockStrategy):
         # stock_data_df["diff_rate_Opne_Close"] = stock_data_df["diff_Open_Close"] / close_values["Close"]
 
         # get option data
-        DEXJPUS_data = self.read_exchange_data("DEXJPUS")
-        SP500_data = self.read_exchange_data("SP500")
+        option_data_list = []
+        for name in ["DEXJPUS", "SP500", "DJIA"]:
+            option_data = self.read_exchange_data(name)
+            option_data.columns = ["Close_{}".format(name)]
 
         nikei225_data = self.read_nikei225_data()
         TOPIX_data = self.read_TOPIX_data()
-
-        DEXJPUS_data.columns = ["Close_DEXJPUS"]
-        SP500_data.columns = ["Close_SP500"]
-
 
         nikei225_data = nikei225_data[["Open", "Close", "High", "Low"]]
         nikei225_data.columns = ["Open_nikei225", "Close_nikei225", "High_nikei225", "Low_nikei225"]
@@ -180,8 +182,7 @@ class PredictClassOfChangeUsingLSTM(StockStrategy):
         # ==============
 
         stock_data_df = pd.concat([stock_data_df[["Open", "Close", "High", "Low"]],
-                                   DEXJPUS_data, SP500_data,
-                                   nikei225_data, TOPIX_data], axis=1)
+                                   nikei225_data, TOPIX_data] + option_data_list, axis=1)
         stock_data_df = stock_data_df.dropna(how='any')
 
         return close_values, open_values, high_values, low_values, stock_data_df
