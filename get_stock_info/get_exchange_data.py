@@ -1,4 +1,7 @@
 import datetime
+import oandapy
+from oandapyV20 import API
+import oandapyV20.endpoints.instruments as oandapy
 import os
 from os import path
 import pandas as pd
@@ -40,14 +43,32 @@ def make_save_data_dir():
     save_dir = path.dirname(HISTRICAL_EXCHANGE_DATA_PATH)
     os.makedirs(save_dir, exist_ok=True)
 
+
 def get_data(sources, currency, start, end):
     logger.debug("source: {}".format(sources))
     logger.debug("currency: {}".format(currency))
 
-    data = web.DataReader(list(currency.values()), sources, start, end)
-    data.columns = list(currency.keys())
+    for source in sources.keys():
+        if source in ["fred"]:
+            data = web.DataReader(list(currency.values()), source, start, end)
+            data.columns = list(currency.keys())
+        elif sources:
+            get_data_from_oanda()
 
     return data
+
+
+def get_data_from_oanda():
+    start = datetime.datetime(year=2018,month=5,day=1)
+    start = start.strftime("%Y-%m-%dT%H:%M:00.000000Z")
+    api = API(environment="practice",
+              access_token="0b92552de1941a6f0bd5b237474035a9-6a85bd3a1ab348b29cda485348a1937f")
+
+    request = oandapy.InstrumentsCandles(instrument = "USD_JPY",
+                   params = { "alignmentTimezone": "Japan", "from": start, "count": 150, "granularity": "D" })
+
+    api.request(request)
+    logger.debug("candles: {}".format(request.response['candles']))
 
 def get_exchange_data(start=None, end=None, sources=None):
     if start == None:
@@ -72,4 +93,5 @@ def get_exchange_data(start=None, end=None, sources=None):
             data_for_save.to_csv(HISTRICAL_EXCHANGE_DATA_PATH.format(name=name))
 
 if __name__ == '__main__':
-    get_exchange_data()
+    # get_exchange_data()
+    get_data_from_oanda()

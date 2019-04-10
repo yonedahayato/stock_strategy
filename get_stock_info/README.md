@@ -50,7 +50,9 @@ sudo python get_stock_data_to_local.py
 
 # get exchange data
 - OANDA API を使用?(未実装)
-  - [参考](http://swdrsker.hatenablog.com/entry/2018/05/18/070000)
+  - [参考: pythonで為替データを取ってきて移動平均、ボリンジャーバンド、ゴールデンクロス、デッドクロスを可視化](http://swdrsker.hatenablog.com/entry/2018/05/18/070000)
+  - [参考: 過去の為替レートデータをPandasで読み込んでティックから1分へ変更してみた](http://www.algo-fx-blog.com/archived-fx-dataset-tick-to-1min/)
+
 - pandas datareader
   - [参考](https://python.askbox.net/2018/06/10/python%E3%81%A7%E7%82%BA%E6%9B%BF%E3%83%AC%E3%83%BC%E3%83%88%E3%82%92csv%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%81%AB%E6%9B%B8%E3%81%8D%E5%87%BA%E3%81%99/)
 

@@ -1,6 +1,8 @@
 jsm
 keras
 numpy
+oandapy
+oandapyV20
 pandas
 pandas_datareader
 tensorflow
