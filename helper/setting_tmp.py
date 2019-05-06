@@ -38,3 +38,6 @@ LINE_NOTIFY_TOKEN = ""
 
 # quandl API key
 QUANDL_API_KEY = ""
+
+# oanda API kye
+OANDA_API_KEY = ""
