@@ -32,12 +32,10 @@ class PredictClassOfChangeUsingLSTM(StockStrategy):
                                 method_name=method_name, multiprocess=multiprocess)
 
         self.threshold = 0.01
-        self.category_threshold = [-100.0, -self.threshold, 0.0, self.threshold, 100.0]
-        self.training_days = 5
-        self.batch_size = 10
-        self.epochs = 2000
-        self.hidden_neurons = 432
-        self.patience = 10
+        self.category_threshold = [-1, -self.threshold, 0, self.threshold, 1]
+        self.training_days = 75
+        self.batch_size = 20
+        self.epochs = 50
 
     def select_code(self, code, stock_data_df_original):
         logger.debug(code)
