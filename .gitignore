@@ -1,5 +1,5 @@
 /get_stock_info/stock_data/*.csv
-/get_stock_info/exchange_data/*.csv
+/get_stock_info/get_exchange_data/exchange_data/*.csv
 */setting.py
 *environment.txt
 */cron_setting.txt
