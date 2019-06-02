@@ -28,7 +28,6 @@ import log
 logger = log.logger
 import just_now
 jst_now = just_now.jst_now
-from peak import PeakInfo
 from push_line import push_line
 from save_result import Save_Result
 from setting import HISTRICAL_DATA_PATH
