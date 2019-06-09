@@ -8,7 +8,7 @@ RUN tar -zxvf jsm.gz
 WORKDIR /usr/local/lib/python3.6/site-packages/jsm-0.19-py3.6.egg-info
 RUN pip install -r requires.txt
 
-RUN pip install \
+RUN pip install --no-cache-dir\
   joblib\
   keras\
   logzero\
