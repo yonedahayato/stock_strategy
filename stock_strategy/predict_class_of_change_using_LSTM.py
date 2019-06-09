@@ -12,6 +12,7 @@ project_path = os.path.dirname(os.path.dirname(abspath))
 sys.path.append(abspath + "/helper/predict_class_of_change_using_LSTM")
 
 from stock_strategy import (
+    args,
     # my library
     StockStrategy,
     logger
@@ -183,5 +184,6 @@ class PredictClassOfChangeUsingLSTM(StockStrategy):
 
 
 if __name__ == '__main__':
-    predict_class_of_change_using_lstm = PredictClassOfChangeUsingLSTM()
+    back_test_return_date = args.back_test_return_date
+    predict_class_of_change_using_lstm = PredictClassOfChangeUsingLSTM(back_test_return_date=back_test_return_date)
     predict_class_of_change_using_lstm.execute()

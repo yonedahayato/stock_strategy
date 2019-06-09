@@ -10,14 +10,17 @@ RUN pip install -r requires.txt
 
 RUN pip install \
   joblib\
-  numpy\
-  pandas\
-  Quandl\
+  keras\
+  logzero\
   lxml\
-  xlrd\
-  requests\
   matplotlib\
   mpl_finance\
-  logzero
+  numpy\
+  pandas==0.20.3\
+  Quandl\
+  requests\
+  sklearn\
+  tensorflow\
+  xlrd
 
 WORKDIR /
