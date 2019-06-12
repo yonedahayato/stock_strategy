@@ -1,4 +1,4 @@
-version: "3"
+version: "3.7"
 services:
   select_stock_code:
     image: select_stock_code
@@ -12,4 +12,8 @@ services:
       - ${LOG_DIR}:/select_stock_code/helper/log
       - ${SELECT_CODE_DIR}:/select_stock_code/check_reward/result/selected_code
       - ${GRAPH_DIR}:/select_stock_code/draw_graph/graphs
+    deploy:
+      resources:
+        limits:
+          memory: 500M
     #command: sh ./stock_strategy/strategies_back_test.sh
