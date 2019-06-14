@@ -15,5 +15,5 @@ services:
     deploy:
       resources:
         limits:
-          memory: 500M
+          memory: 1.2G
     #command: sh ./stock_strategy/strategies_back_test.sh

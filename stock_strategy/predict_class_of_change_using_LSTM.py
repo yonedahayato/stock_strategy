@@ -97,6 +97,8 @@ class PredictClassOfChangeUsingLSTM(StockStrategy):
            just_pred_index in [2, 3]:
             self.result_codes.append(code)
 
+        del model
+
     def create_train_data(self, x_data, y_data, samples):
 
         _x = []
