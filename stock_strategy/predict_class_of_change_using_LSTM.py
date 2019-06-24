@@ -1,4 +1,5 @@
 import copy
+import gc
 from keras.callbacks import EarlyStopping
 import math
 import numpy as np
@@ -98,6 +99,7 @@ class PredictClassOfChangeUsingLSTM(StockStrategy):
             self.result_codes.append(code)
 
         del model, stock_data_df, close_values, open_values, high_values, low_values
+        gc.collect()
 
     def create_train_data(self, x_data, y_data, samples):
 
