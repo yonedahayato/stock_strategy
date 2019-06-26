@@ -1,12 +1,15 @@
 import copy
 import gc
-from keras.callbacks import EarlyStopping
 import math
 import numpy as np
 import os
 import pandas as pd
 from sklearn.metrics import confusion_matrix
 import sys
+
+from keras.backend.tensorflow_backend import clear_session
+from keras.backend.tensorflow_backend import get_session
+from keras.callbacks import EarlyStopping
 
 abspath = os.path.dirname(os.path.abspath(__file__))
 project_path = os.path.dirname(os.path.dirname(abspath))
@@ -98,6 +101,9 @@ class PredictClassOfChangeUsingLSTM(StockStrategy):
            just_pred_index in [2, 3]:
             self.result_codes.append(code)
 
+        sess = get_session()
+        clear_session()
+        sess.close()
         del model, stock_data_df, close_values, open_values, high_values, low_values
         gc.collect()
 
