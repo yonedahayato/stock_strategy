@@ -112,6 +112,8 @@
 # Trend Line Using Linear Regression
 - [参考：PythonでFXのトレンドラインを引いてみる](http://www.algo-fx-blog.com/python-fx-trend-line/)
 
+- [参考資料](./document/TrendLineUsingLinearRegression.pdf)
+
 ## イメージ
 ![trend_line_using_linear_regression](./images/trend_line_using_linear_regression.png)
 
