@@ -85,7 +85,7 @@ class TrendLineUsingLinearRegression(StockStrategy):
 
         regression_end_point = regression_point["date_index"].iat[-1]-1
         logger.debug("regression_end_point: {}".format(regression_end_point))
-        if regression[0] < 0 and
+        if regression[0] < 0 and\
            (len(stock_data_df) - regression_end_point) < self.length_limited_between_end_and_latest:
            # 回帰直線の傾きが負
            # 回帰直線をもとめるために使った点で時系列的に最後の点が、直近のローソクから
