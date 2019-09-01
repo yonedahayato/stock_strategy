@@ -90,6 +90,7 @@ class PredictClassOfChangeUsingLSTM(StockStrategy):
         self.print_train_history(history)
 
         preds = model.predict(test_x)
+        logger.debug("preds: {}".format(preds))
         self.print_predict_result(preds, test_y)
 
         just_pred = model.predict(just_target)
