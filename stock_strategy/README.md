@@ -113,9 +113,17 @@
 - [参考：PythonでFXのトレンドラインを引いてみる](http://www.algo-fx-blog.com/python-fx-trend-line/)
 - [参考資料](./document/TrendLineUsingLinearRegression.pdf)
 
-# 戦略
-1. ```vertical_lines```を作成
-1. 
+## 戦略
+1. ```vertical_lines``` に検出範囲を追加させる(アルゴリズムには影響なし)
+1. ```stock_data_df_with_trend``` に"data_index"を追加
+1. ```compute_line_rate``` methodを利用して、回帰の処理を行う
+    - stock_data_df_with_trend, regression, regression_pointを取得
+1. regression_end_pointを取得
+1. 以下の条件を満たす銘柄をこの戦略で取得する銘柄とする
+    1. 回帰直線の傾きが負
+    1. 回帰直線を求めるために使った点で時系列的に最後の点が直近のローソクから ```${length_limited_between_end_and_latest}``` 以内にある
+
+- [メモ](https://drive.google.com/open?id=1AfsaSkgbjM028lG_1wHkD237BOCsORXK)
 
 ## イメージ
 ![trend_line_using_linear_regression](./images/trend_line_using_linear_regression.png)
