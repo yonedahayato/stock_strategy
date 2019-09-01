@@ -5,6 +5,8 @@
   - [Trend Line](#trend-line)
     - [Trend Conversion Line](#trend-conversion-line)
   - [Trend Line Using Linear Regression](#trend-line-using-linear-regression)
+  - [Predict Class Of Change](#predict-class-of-change)
+    - [Predict Class Of Change Using LSTM](#predict-class-of-change-using-lstm)
 <!-- TOC -->
 
 <!-- move average with low value -->
@@ -129,3 +131,11 @@
 ![trend_line_using_linear_regression](./images/trend_line_using_linear_regression.png)
 
 <!-- trend line using linear regression -->
+
+<!-- predict class of change using lstm -->
+
+# Predict Class Of Change Using LSTM
+- [参考 : LSTM で株価予測してみる (その7、4分類で予測)](https://qiita.com/deadbeef/items/8831a34990da7f84304b)
+- [参考 : Stock prediction (slideshare)](https://www.slideshare.net/tetsuoishigaki/stock-prediction-82133990/)
+  - [pdf](./document/stockprediction-171116003123.pdf)
+<!-- predict class of change using lstm -->

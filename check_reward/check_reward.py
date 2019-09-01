@@ -21,8 +21,10 @@ SELECTED_CODE_RESULT_PATH = save_result_path + "/result/selected_code"
 
 COMPUTE_REWARD_METHOD = ["using_all_of_data_for_backtest_with_mean", "using_all_of_data_for_backtest"]
 
+
 class Check_Reward(Save_Result):
-    def __init__(self, save_path=result_path, download_method="LOCAL",
+    def __init__(self, save_path=result_path,
+                 download_method="LOCAL",
                  compute_reward_methodes=["using_all_of_data_for_backtest_with_mean", "using_all_of_data_for_backtest"],
                  push_line=False):
 
@@ -31,7 +33,8 @@ class Check_Reward(Save_Result):
         self.compute_reward_methodes = compute_reward_methodes
         self.push_line = push_line
 
-        self.stock_strategy = StockStrategy(download_method=download_method)
+        self.stock_strategy = StockStrategy(download_method=download_method,
+                                            back_test_return_date=0)
 
         # self.selected_code_json_file = "move_average_2018_08_14_08_55_08.json"
         self.selected_code_json_files = []
@@ -42,7 +45,6 @@ class Check_Reward(Save_Result):
 
         logger.info("selected_code_json_files: {}".format(self.selected_code_json_files))
         self.make_new_format()
-
 
     def make_new_format(self):
         self.date_indexes_for_backtest = []
@@ -78,13 +80,14 @@ class Check_Reward(Save_Result):
         return stock_data_df
 
     def compute_reward(self, stock_data_df):
-        # close_value = stock_data_df.loc[self.data_range_end]["Close"]
-        # reward = stock_data_df.loc[self.data_range_end:].iloc[1:]["Close"]
-
         result_format_tmp = copy.deepcopy(self.result_format)
 
-        close_value_bought = stock_data_df.loc[self.data_range_end_to_compute]["Close"]
-        close_values_for_backtest = stock_data_df.loc[self.data_range_end_to_compute:].iloc[1:]["Close"]
+        close_value_bought = copy.deepcopy(stock_data_df.loc[self.data_range_end_to_compute]["Close"])
+        if self.back_test_return_date == -1:
+            close_values_for_backtest = copy.deepcopy(stock_data_df.loc[self.data_range_end_to_compute:].iloc[1:]["Close"])
+        else:
+            close_values_for_backtest = copy.deepcopy(stock_data_df.loc[self.data_range_end_to_compute:])
+            close_values_for_backtest = close_values_for_backtest.iloc[:self.back_test_return_date]["Close"]
 
         if len(self.date_indexes) == 0:
             self.date_indexes_for_backtest = list(close_values_for_backtest.index)
@@ -93,7 +96,6 @@ class Check_Reward(Save_Result):
 
         if "using_all_of_data_for_backtest_with_mean" in self.compute_reward_methodes:
             result_format_tmp["reward_rate_mean"] = reward_rates.mean()
-
 
         if "using_all_of_data_for_backtest" in self.compute_reward_methodes:
             result_format_tmp["reward_rates"] = list(reward_rates)
