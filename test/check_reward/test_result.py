@@ -11,6 +11,8 @@ from test_libs import (
     logger,
 )
 
+def check_exist_file_in_GCS():
+    pass
 
 class TestResult(object):
 
@@ -37,3 +39,13 @@ class TestResult(object):
             result.print_format()
 
             result.add_info("invalid_key", "example_value")
+
+    def test_shuld_save_GCS(self):
+        result = Result(to_GCS=True)
+
+        result.add_info("result_code_list", [1332, 2990])
+        result.add_info("method", "test")
+        result.add_info("data_range_start_to_compute", "2018_01_01")
+        result.add_info("data_range_end_to_compute", "2018_09_09")
+
+        logger.info(result.save())
