@@ -29,7 +29,7 @@ logger = log.logger
 import just_now
 jst_now = just_now.jst_now
 from push_line import push_line
-from save_result import Save_Result
+from result import Result
 from setting import HISTRICAL_DATA_PATH
 
 DOWNLOAD_METHODES = ["LOCAL", "CLOUD", "API"]
@@ -41,10 +41,8 @@ parser.add_argument("--back_test_return_date",
                     default=0,
                     type=int)
 
-args = parser.parse_args()
-
 class StockStrategy:
-    def __init__(self, debug=False, back_test_return_date=args.back_test_return_date,
+    def __init__(self, debug=False, back_test_return_date=0,
                  method_name="method_name", multiprocess=False,
                  download_method="LOCAL", code_list = "1st_225"):
         self.msg_tmpl = "[Stock_Storategy:{}]: "
@@ -117,19 +115,19 @@ class StockStrategy:
         return stock_data_df.index
 
     def save_result(self):
-        sr = Save_Result()
+        result = Result()
 
-        sr.add_info("result_code_list", self.result_codes)
-        sr.add_info("method", self.method_name)
+        result.add_info("result_code_list", self.result_codes)
+        result.add_info("method", self.method_name)
 
         stock_data_df_index = self.get_stock_data_index()
-        sr.add_info("data_range_start_to_compute", stock_data_df_index[0])
-        sr.add_info("data_range_end_to_compute", stock_data_df_index[-1])
-        sr.add_info("back_test_return_date", self.back_test_return_date)
+        result.add_info("data_range_start_to_compute", stock_data_df_index[0])
+        result.add_info("data_range_end_to_compute", stock_data_df_index[-1])
+        result.add_info("back_test_return_date", self.back_test_return_date)
 
-        sr.add_info("elapsed_time_average", mean(self.elapsed_times))
+        result.add_info("elapsed_time_average", mean(self.elapsed_times))
 
-        json_result = sr.save()
+        json_result = result.save()
         return json_result
 
     def check_select_code(self):
