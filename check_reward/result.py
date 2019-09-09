@@ -19,7 +19,7 @@ from setting import (
     )
 
 class Result:
-    def __init__(self, save_path=RESULT_PATH, to_GCS=False):
+    def __init__(self, save_path=RESULT_PATH, to_GCS=True):
         msg = "[Save_Result:__init__]: {}"
         self.save_path = save_path
         self.to_GCS = to_GCS
@@ -61,15 +61,18 @@ class Result:
             json_str = json.dumps(self.format, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
             return json_str
 
-    def save_to_GCS(self, file_name):
-        self.save_to_local(file_name)
+    def save_to_GCS(self, file_name, remove=False):
+        json_str = self.save_to_local(file_name)
 
         basename = os.path.basename(file_name)
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = API_KEY_JSON_PATH
         uploader = Uploader(bucket_name="yoneda-stock-strategy")
         uploader.upload(local_path=self.file_path,
                         gcp_path="result/json/{}".format(basename))
-        os.remove(self.file_path)
+        if remove:
+            os.remove(self.file_path)
+
+        return json_str
 
     def save(self):
         msg = "[Save_Result:save]: {}"
