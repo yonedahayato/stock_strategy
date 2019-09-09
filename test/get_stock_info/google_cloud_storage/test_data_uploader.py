@@ -14,4 +14,4 @@ from test_libs import (
 
 class TestDataUploader(object):
     def test_shuld_upload(self):
-        pass
+        data_uploader = Data_Uploader()
