@@ -12,6 +12,7 @@ abspath = os.path.dirname(os.path.abspath(__file__))
 p_path = os.path.dirname(abspath)
 sys.path.append(p_path + "/get_stock_info")
 sys.path.append(p_path + "/get_stock_info/google_cloud_storage")
+sys.path.append(p_path + "/get_stock_info/google_cloud_storage/google/cloud_storage")
 sys.path.append(p_path + "/helper")
 sys.path.append(abspath + "/helper")
 sys.path.append(p_path + "/check_reward")
@@ -31,6 +32,7 @@ jst_now = just_now.jst_now
 from push_line import push_line
 from result import Result
 from setting import HISTRICAL_DATA_PATH
+from uploader import Uploader
 
 DOWNLOAD_METHODES = ["LOCAL", "CLOUD", "API"]
 CODE_LIST = ["1st_all", "1st_225"]
@@ -161,7 +163,7 @@ class StockStrategy:
 
         return self.result_codes
 
-    def draw_graph(self):
+    def draw_graph(self, to_GCS=True):
         for cnt, code in enumerate(self.result_codes):
             logger.info("draw graph {}".format(code))
 
@@ -172,6 +174,12 @@ class StockStrategy:
             draw_graph = DrawGraph(**package_drawing.__dict__)
 
             graph_image_path = draw_graph.draw()
+
+            if to_GCS:
+                image_basename = os.path.basename(graph_image_path)
+                uploader = Uploader(bucket_name="yoneda-stock-strategy")
+                uploader.upload(local_path=graph_image_path,
+                                gcp_path="result/image/{}".format(image_basename))
 
             push_line(str(code), image_path = graph_image_path)
             draw_graph.remove()
