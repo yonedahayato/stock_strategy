@@ -1,6 +1,7 @@
 from datetime import datetime as dt
 import json
 import os
+import pandas as pd
 import sys
 
 save_result_path = os.path.dirname(os.path.abspath(__file__))
@@ -55,22 +56,44 @@ class Result:
         self.format[key] = value
 
     def save_to_local(self, file_name):
-        self.file_path = "{}/{}".format(self.save_path, file_name)
-        with open(self.file_path, "w") as file:
+        # jsonをcsvに変換
+        result_df = self.change_format_to_dataframe()
+
+        # csv fileをlocalに保存
+        csv_path = "{}/{}".format(self.save_path, file_name)
+        csv_path = csv_path.replace(".json", ".csv")
+        result_df.to_csv(csv_path, index=False)
+
+        # json fileをlocalに保存
+        json_path = "{}/{}".format(self.save_path, file_name)
+        with open(json_path, "w") as file:
             json.dump(self.format, file, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
             json_str = json.dumps(self.format, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
-            return json_str
+
+        self.json_path = json_path
+        return json_str, json_path, csv_path
 
     def save_to_GCS(self, file_name, remove=False):
-        json_str = self.save_to_local(file_name)
+        # localにjson file と csv file を保存
+        json_str, json_path, csv_path = self.save_to_local(file_name)
 
-        basename = os.path.basename(file_name)
+        # GCS upload準備
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = API_KEY_JSON_PATH
         uploader = Uploader(bucket_name="yoneda-stock-strategy")
-        uploader.upload(local_path=self.file_path,
+
+        # json file をGCSに追加
+        basename = os.path.basename(json_path)
+        uploader.upload(local_path=json_path,
                         gcp_path="result/json/{}".format(basename))
+
+        # csv file を GCSに追加
+        basename = os.path.basename(csv_path)
+        uploader.upload(local_path=csv_path,
+                        gcp_path="result/csv/{}".format(basename), public=False)
+
         if remove:
-            os.remove(self.file_path)
+            os.remove(json_path)
+            os.remove(csv_path)
 
         return json_str
 
@@ -81,7 +104,7 @@ class Result:
             if self.to_GCS:
                 json_str = self.save_to_GCS(file_name)
             else:
-                json_str = self.save_to_local(file_name)
+                json_str, _, _ = self.save_to_local(file_name)
             return json_str
 
         except Exception as e:
@@ -92,6 +115,29 @@ class Result:
         else:
             sccess_msg = "success to save to json, format: {}".format(self.format)
             logger.info(sccess_msg)
+
+    def change_format_to_dataframe(self):
+        result_code_list = self.format["result_code_list"]
+        record_length = len(result_code_list)
+        result_df = {"result_code": result_code_list}
+        for key, value in self.format.items():
+            if key == "result_code_list":
+                continue
+            result_df[key] = [value] * record_length
+
+        image_urls = [
+            "https://storage.googleapis.com/yoneda-stock-strategy/result/image/{}_{}.png".format(
+                self.format["method"], code)
+            for code in result_code_list
+        ]
+        result_df["image_url"] = image_urls
+
+        result_df = pd.DataFrame(result_df)
+        columns = ["back_test_return_date", "creat_time", "data_range_end_to_compute",
+                   "data_range_start_to_compute", "elapsed_time_average", "method",
+                   "result_code", "image_url"]
+        result_df = result_df[columns]
+        return result_df
 
 def main():
     result = Result()

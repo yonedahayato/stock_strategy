@@ -179,7 +179,7 @@ class StockStrategy:
                 image_basename = os.path.basename(graph_image_path)
                 uploader = Uploader(bucket_name="yoneda-stock-strategy")
                 uploader.upload(local_path=graph_image_path,
-                                gcp_path="result/image/{}".format(image_basename))
+                                gcp_path="result/image/{}".format(image_basename), public=True)
 
             push_line(str(code), image_path = graph_image_path)
             draw_graph.remove()
