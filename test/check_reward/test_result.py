@@ -28,7 +28,7 @@ class TestResult(object):
         logger.info(result.print_format())
         logger.info(result.save())
 
-        if os.path.exists(result.file_path):
+        if os.path.exists(result.json_path):
             assert True
         else:
             raise Exception("result file が保存されていません。")
@@ -48,4 +48,4 @@ class TestResult(object):
         result.add_info("data_range_start_to_compute", "2018_01_01")
         result.add_info("data_range_end_to_compute", "2018_09_09")
 
-        logger.info(result.save())
+        result.save()
