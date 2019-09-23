@@ -43,6 +43,7 @@ class TestResult(object):
     def test_shuld_save_GCS(self):
         result = Result(to_GCS=True)
 
+        result.add_info("back_test_return_date", 0)
         result.add_info("result_code_list", [1332, 2990])
         result.add_info("method", "test_shuld_save_GCP")
         result.add_info("data_range_start_to_compute", "2018_01_01")

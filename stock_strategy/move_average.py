@@ -22,7 +22,7 @@ from get_new_stock_code import GetCodeList
 from get_stock_data import GetStockData
 import log
 import just_now
-from save_result import Save_Result
+from result import Result
 from setting import HISTRICAL_DATA_PATH
 from stock_strategy import StockStrategy, args
 
@@ -72,13 +72,13 @@ class MoveAverage(StockStrategy):
 def main():
     back_test_return_date = args.back_test_return_date
     move_average_window_75 = MoveAverage(debug=False, back_test_return_date=back_test_return_date,
-                        method_name="MAMAM_window=75", multiprocess=False, window=75)
+                        method_name="MoveAverage_window=75", multiprocess=False, window=75)
     move_average_window_50 = MoveAverage(debug=False, back_test_return_date=back_test_return_date,
-                        method_name="MAMAM_window=50", multiprocess=False, window=50)
+                        method_name="MoveAverage_window=50", multiprocess=False, window=50)
     move_average_window_25 = MoveAverage(debug=False, back_test_return_date=back_test_return_date,
-                        method_name="MAMAM_window=25", multiprocess=False, window=25)
+                        method_name="MoveAverage_window=25", multiprocess=False, window=25)
     move_average_window_10 = MoveAverage(debug=False, back_test_return_date=back_test_return_date,
-                        method_name="MAMAM_window=10", multiprocess=False, window=10)
+                        method_name="MoveAverage_window=10", multiprocess=False, window=10)
 
     move_average_window_75.execute()
     move_average_window_50.execute()
