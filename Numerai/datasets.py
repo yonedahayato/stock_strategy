@@ -4,13 +4,13 @@ import pandas as pd
 
 class Datasets(object):
     def __init__(self, dir_="./datasets"):
-        napi = numerapi.NumerAPI(verbosity="info")
+        self.napi = numerapi.NumerAPI(verbosity="info")
         self.dir_ = dir_
 
         os.makedirs(dir_, exist_ok=True)
 
     def download(self):
-        napi.download_current_dataset(unzip=True, dest_path=self.dir_)
+        self.napi.download_current_dataset(unzip=True, dest_path=self.dir_)
 
     def load(self, test=False):
         base_path = os.path.join(self.dir_, "numerai_dataset_217/numerai_{}_data.csv")
