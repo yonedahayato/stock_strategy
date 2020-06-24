@@ -3,7 +3,7 @@ import os
 import pandas as pd
 
 class Datasets(object):
-    def __init__(self, dir_="./datasets"):
+    def __init__(self, dir_="./dataset"):
         self.napi = numerapi.NumerAPI(verbosity="info")
         self.dir_ = dir_
 
