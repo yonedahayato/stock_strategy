@@ -5,7 +5,7 @@ import os
 class LogSetting(object):
     def __init__(self,
                  logfile_path = os.path.dirname(os.path.abspath(__file__)),
-                 logfile_name = "sample.log",
+                 logfile_name = "numerai.log",
                  disableStderrLogger=False,
                  maxBytes = 10e10,
                  backupCount = 10):
