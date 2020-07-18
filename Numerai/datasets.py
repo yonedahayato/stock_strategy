@@ -5,10 +5,31 @@ import pandas as pd
 from mylogger import mylogger
 
 def print_log(message):
+    """print_log func
+
+    メッセージを表示させる
+    ログに残す
+
+    Args:
+        message (str): メッセージ
+    """
     mylogger.info(message)
 
 class Features(object):
+    """ Features class
+
+    データの特徴量を整理する
+    また、表示する
+    """
     def __init__(self, cols):
+        """__init__ func
+
+        パラメータの設置
+        特徴量のカウント
+
+        Args:
+            cols (list[str]): 特徴量のリスト
+        """
         self.cols = cols
         self.counts = {
                       "wisdom": 0,
@@ -22,6 +43,11 @@ class Features(object):
         self.count()
 
     def count(self):
+        """count func
+
+        各項目の特徴量のカウントを行う
+
+        """
         for col in self.cols:
             if "feature" not in col:
                 print_log(col)
@@ -57,7 +83,21 @@ class Features(object):
 
 
 class Datasets(object):
+    """Datasets class
+
+    データセットに関する処理をまとめる
+
+    """
     def __init__(self, dir_="./dataset"):
+        """__init__ func
+
+        APIの準備
+        パラメータの設置
+        ディレクトリの作成
+
+        Args:
+            dir_ (str): データセットを保存するパス
+        """
         self.napi = numerapi.NumerAPI(verbosity="info")
         self.dir_ = dir_
 
@@ -67,9 +107,24 @@ class Datasets(object):
         print_log(message)
 
     def download(self):
+        """download func
+
+        numerapi を使ってデータをdownloadする
+
+        """
         self.napi.download_current_dataset(unzip=True, dest_path=self.dir_)
 
     def load(self, test=False):
+        """load func
+
+        CSVデータをロードする
+
+        Args:
+            test (bool): テストデータかどうか
+
+        Return:
+            pandas.core.frame.DataFrame: 読み込んだデータ
+        """
         files = os.listdir(path="{}/".format(self.dir_))
         dataset_names = [f for f in files if os.path.isdir(os.path.join(self.dir_, f))]
         sorted(dataset_names)
@@ -85,10 +140,19 @@ class Datasets(object):
         return self.row_data
 
     def static(self):
+        """static func
+
+        データの統計情報を表示する
+
+        """
         self.print_log("row: {}, colmun: {}".format(self.row_data.shape[0], self.row_data.shape[1]))
         self.print_log(self.row_data.head())
 
-        features = Features(self.row_data.columns)
+        self.features = Features(self.row_data.columns)
+
+        # 平均の計算
+        mean_df = self.row_data.mean()
+        mean_df.plot(legend=False, kind='hist', title="各列の平均のヒストグラム")
 
 def main():
     datasets = Datasets()
