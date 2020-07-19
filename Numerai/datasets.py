@@ -135,9 +135,13 @@ class Datasets(object):
             data_path = base_path.format(dataset_names[0], "training")
 
         self.print_log(data_path)
-        self.row_data = pd.read_csv(data_path)
 
-        return self.row_data
+        if test:
+            self.test_data = pd.read_csv(data_path)
+            return self.test_data
+        else:
+            self.training_data = pd.read_csv(data_path)
+            return self.training_data
 
     def static(self):
         """static func
@@ -145,13 +149,13 @@ class Datasets(object):
         データの統計情報を表示する
 
         """
-        self.print_log("row: {}, colmun: {}".format(self.row_data.shape[0], self.row_data.shape[1]))
-        self.print_log(self.row_data.head())
+        self.print_log("row: {}, colmun: {}".format(self.training_data.shape[0], self.training_data.shape[1]))
+        self.print_log(self.training_data.head())
 
-        self.features = Features(self.row_data.columns)
+        self.features = Features(self.training_data.columns)
 
         # 平均の計算
-        mean_df = self.row_data.mean()
+        mean_df = self.training_data.mean()
         mean_df.plot(legend=False, kind='hist', title="各列の平均のヒストグラム")
 
 def main():
