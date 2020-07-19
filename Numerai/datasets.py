@@ -81,6 +81,77 @@ class Features(object):
 
         print_log(self.counts)
 
+class PathManager(object):
+    """PathManager class
+
+    パス、ディレクトリ、ファイルの名称決定処理
+
+    Attributes:
+        test_name_tag (str): テストデータの名称
+        training_name_tag (str): トレーニングデータの名称
+    """
+    test_name_tag = "tournament"
+    training_name_tag = "training"
+
+    def __init__(self, main_dir):
+        self.main_dir = main_dir
+
+    def make_path(self, test):
+        """make_path func
+
+        データセットのパスを作成
+
+        Args:
+            test (bool): テストデータかどうか
+
+        Returns:
+            str: データセットのパス
+
+        """
+        files = os.listdir(path="{}/".format(self.main_dir))
+        dataset_names = [f for f in files if os.path.isdir(os.path.join(self.main_dir, f))]
+        sorted(dataset_names)
+        base_path = os.path.join(self.main_dir, "{}/numerai_{}_data.csv")
+        if test:
+            data_path = base_path.format(dataset_names[0], self.test_name_tag)
+        else:
+            data_path = base_path.format(dataset_names[0], self.training_name_tag)
+
+        return data_path
+
+    def make_sample_dir(self):
+        """make_sample_dir func
+
+        サンプルデータのディレクトリの作成
+
+        Returns:
+            str: サンプルデータのディレクトリ
+        """
+        self.sample_dir = os.path.join(self.dir_, "samples")
+        os.path.makedirs(save_dir, exist_ok=True)
+
+        return self.sample_dir
+
+    def make_sample_path(self, test):
+        """make_sample_dir func
+
+        サンプルデータのディレクトリの作成
+
+        Args:
+            test (bool): テストデータかどうか
+
+        Returns:
+            str: サンプルデータのディレクトリ
+            str: サンプルデータのファイルパス
+        """
+        sample_dir = self.make_sample_dir()
+        if test:
+            file_name = "sample_{}.csv".format(file_nameself.test_name_tag)
+        else:
+            file_name = "sample_{}.csv".format(file_nameself.training_name_tag)
+
+        self.sample_path = os.path.join(sample_dir, file_name)
+        return sample_dir, self.sample_path
 
 class Datasets(object):
     """Datasets class
@@ -100,6 +171,7 @@ class Datasets(object):
         """
         self.napi = numerapi.NumerAPI(verbosity="info")
         self.dir_ = dir_
+        self.path_manager = PathManager(dir_)
 
         os.makedirs(dir_, exist_ok=True)
 
@@ -125,15 +197,8 @@ class Datasets(object):
         Return:
             pandas.core.frame.DataFrame: 読み込んだデータ
         """
-        files = os.listdir(path="{}/".format(self.dir_))
-        dataset_names = [f for f in files if os.path.isdir(os.path.join(self.dir_, f))]
-        sorted(dataset_names)
-        base_path = os.path.join(self.dir_, "{}/numerai_{}_data.csv")
-        if test:
-            data_path = base_path.format(dataset_names[0], "tournament")
-        else:
-            data_path = base_path.format(dataset_names[0], "training")
 
+        data_path = self.path_manager.make_path(test)
         self.print_log(data_path)
 
         if test:
@@ -157,6 +222,33 @@ class Datasets(object):
         # 平均の計算
         mean_df = self.training_data.mean()
         mean_df.plot(legend=False, kind='hist', title="各列の平均のヒストグラム")
+
+    def make_sample(self, test=False, sample_num=100):
+        """make_sample func
+
+        サンプルデータを作成する
+
+        Args:
+            test (bool): テストデータかどうか
+            sample_num (int): データの何行目までをサンプルデータとするか
+
+        Return:
+            pandas.core.frame.DataFrame: 作成したサンプルデータ
+        """
+        try:
+            if test:
+                sample_data = self.training_data[:sample_num]
+            else:
+                sample_data = self.test_data[:sample_num]
+        except NameError:
+            self.print_log("データがないので、load します。")
+        else:
+            self.print_log("サンプルデータ作成成功")
+
+        save_dir, save_path = self.path_manager.make_sample_path(test=test)
+        sample_data.to_csv(save_path)
+
+        return sample_data
 
 def main():
     datasets = Datasets()
