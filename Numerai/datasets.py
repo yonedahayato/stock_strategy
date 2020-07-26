@@ -202,10 +202,10 @@ class Datasets(object):
         self.print_log(data_path)
 
         if test:
-            self.test_data = pd.read_csv(data_path)
+            self.test_data = pd.read_csv(data_path, dtype='float16')
             return self.test_data
         else:
-            self.training_data = pd.read_csv(data_path)
+            self.training_data = pd.read_csv(data_path, dtype='float16')
             return self.training_data
 
     def static(self):
