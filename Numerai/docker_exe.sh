@@ -8,5 +8,5 @@ HOST_JUPYTER_PORT=8888
 docker run -it --rm \
            -v $PWD:/home/numerai \
            -v ${DATASET_DIR}:/home/numerai/dataset \
-           -p HOST_JUPYTER_PORT:8888 \
+           -p ${HOST_JUPYTER_PORT}g:8888 \
            ${IMAGE_NAME} /bin/bash
