@@ -1,3 +1,14 @@
+# Stock Strategy
+- 投資戦略のためのスクリプト
+
+# 内容
+- データの収集
+- データのアップロード / ダウンロード
+- 購入 / 売却明羅の決定
+
+---
+
+# 使用方法
 # get code list
 
 ## get code list nikkei 225
