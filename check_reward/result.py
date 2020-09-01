@@ -8,7 +8,7 @@ save_result_path = os.path.dirname(os.path.abspath(__file__))
 p_dirnam = os.path.dirname(save_result_path)
 
 sys.path.append(p_dirnam+"/helper")
-sys.path.append(p_dirnam+"/get_stock_data/google_cloud_storage/google/cloud_storage")
+sys.path.append(p_dirnam+"/get_stock_info/google_cloud_storage/google/cloud_storage")
 
 import log
 logger = log.logger
@@ -31,7 +31,7 @@ class Result:
         self.make_format()
 
     def make_format(self):
-        now_str = dt.now().strftime("%Y_%m_%d_%H_%M_%S")
+        now_str = dt.now().strftime("%Y-%m-%d-%H-%M-%S")
         self.format = {"result_code_list": [],
                         "method": "",
                         "creat_time": now_str,

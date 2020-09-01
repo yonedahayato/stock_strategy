@@ -20,7 +20,7 @@ from get_new_stock_code import GetCodeList
 from get_stock_data import GetStockData
 import log
 import just_now
-from save_result import Save_Result
+from result import Result
 from setting import HISTRICAL_DATA_PATH
 from move_average import StockStrategy, MoveAverage, args
 

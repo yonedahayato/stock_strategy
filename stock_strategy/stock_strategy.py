@@ -31,7 +31,10 @@ import just_now
 jst_now = just_now.jst_now
 from push_line import push_line
 from result import Result
-from setting import HISTRICAL_DATA_PATH
+from setting import (
+    HISTRICAL_DATA_PATH,
+    GOOGLE_REPORT_URL
+)
 from uploader import Uploader
 
 DOWNLOAD_METHODES = ["LOCAL", "CLOUD", "API"]
@@ -42,6 +45,8 @@ parser.add_argument("--back_test_return_date",
                     help = "どのくらいback test の使用するか(0の場合はback testには使用せず、全てのデータを使用)",
                     default=0,
                     type=int)
+
+args = parser.parse_args()
 
 class StockStrategy:
     def __init__(self, debug=False, back_test_return_date=0,
@@ -181,7 +186,8 @@ class StockStrategy:
                 uploader.upload(local_path=graph_image_path,
                                 gcp_path="result/image/{}".format(image_basename), public=True)
 
-            push_line(str(code), image_path = graph_image_path)
+            else:
+                push_line(str(code), image_path = graph_image_path)
             draw_graph.remove()
 
     def execute(self):
@@ -248,7 +254,7 @@ class StockStrategy:
 
         try:
             json_result = self.save_result()
-            push_line(json_result)
+            push_line(GOOGLE_REPORT_URL)
         except:
             err_msg = msg.format("fail to save result select code.")
             logger.error(err_msg)
