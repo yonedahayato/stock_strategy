@@ -5,8 +5,11 @@
 */cron_setting.txt
 /draw_graph/graphs/*.png
 .python-version
-
+helper/keys/*
 
 __pycache__
 log
 result
+.DS_store
+*.zip
+*.log

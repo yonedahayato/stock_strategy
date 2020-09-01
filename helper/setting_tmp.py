@@ -41,3 +41,9 @@ QUANDL_API_KEY = ""
 
 # oanda API kye
 OANDA_API_KEY = ""
+
+# GCS keys
+API_KEY_JSON_PATH = ""
+
+# Google データポータルのURL
+GOOGLE_REPORT_URL = ""
