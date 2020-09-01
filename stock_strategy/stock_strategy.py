@@ -4,12 +4,15 @@ import datetime
 from datetime import datetime as dt
 import os
 import pandas as pd
+from statistics import mean
 import sys
+import time
 
 abspath = os.path.dirname(os.path.abspath(__file__))
 p_path = os.path.dirname(abspath)
 sys.path.append(p_path + "/get_stock_info")
 sys.path.append(p_path + "/get_stock_info/google_cloud_storage")
+sys.path.append(p_path + "/get_stock_info/google_cloud_storage/google/cloud_storage")
 sys.path.append(p_path + "/helper")
 sys.path.append(abspath + "/helper")
 sys.path.append(p_path + "/check_reward")
@@ -26,10 +29,13 @@ import log
 logger = log.logger
 import just_now
 jst_now = just_now.jst_now
-from peak import PeakInfo
 from push_line import push_line
-from save_result import Save_Result
-from setting import HISTRICAL_DATA_PATH
+from result import Result
+from setting import (
+    HISTRICAL_DATA_PATH,
+    GOOGLE_REPORT_URL
+)
+from uploader import Uploader
 
 DOWNLOAD_METHODES = ["LOCAL", "CLOUD", "API"]
 CODE_LIST = ["1st_all", "1st_225"]
@@ -43,7 +49,7 @@ parser.add_argument("--back_test_return_date",
 args = parser.parse_args()
 
 class StockStrategy:
-    def __init__(self, debug=False, back_test_return_date=args.back_test_return_date,
+    def __init__(self, debug=False, back_test_return_date=0,
                  method_name="method_name", multiprocess=False,
                  download_method="LOCAL", code_list = "1st_225"):
         self.msg_tmpl = "[Stock_Storategy:{}]: "
@@ -116,17 +122,19 @@ class StockStrategy:
         return stock_data_df.index
 
     def save_result(self):
-        sr = Save_Result()
+        result = Result()
 
-        sr.add_info("result_code_list", self.result_codes)
-        sr.add_info("method", self.method_name)
+        result.add_info("result_code_list", self.result_codes)
+        result.add_info("method", self.method_name)
 
         stock_data_df_index = self.get_stock_data_index()
-        sr.add_info("data_range_start_to_compute", stock_data_df_index[0])
-        sr.add_info("data_range_end_to_compute", stock_data_df_index[-1])
-        sr.add_info("back_test_return_date", self.back_test_return_date)
+        result.add_info("data_range_start_to_compute", stock_data_df_index[0])
+        result.add_info("data_range_end_to_compute", stock_data_df_index[-1])
+        result.add_info("back_test_return_date", self.back_test_return_date)
 
-        json_result = sr.save()
+        result.add_info("elapsed_time_average", mean(self.elapsed_times))
+
+        json_result = result.save()
         return json_result
 
     def check_select_code(self):
@@ -160,7 +168,7 @@ class StockStrategy:
 
         return self.result_codes
 
-    def draw_graph(self):
+    def draw_graph(self, to_GCS=True):
         for cnt, code in enumerate(self.result_codes):
             logger.info("draw graph {}".format(code))
 
@@ -172,7 +180,14 @@ class StockStrategy:
 
             graph_image_path = draw_graph.draw()
 
-            push_line(str(code), image_path = graph_image_path)
+            if to_GCS:
+                image_basename = os.path.basename(graph_image_path)
+                uploader = Uploader(bucket_name="yoneda-stock-strategy")
+                uploader.upload(local_path=graph_image_path,
+                                gcp_path="result/image/{}".format(image_basename), public=True)
+
+            else:
+                push_line(str(code), image_path = graph_image_path)
             draw_graph.remove()
 
     def execute(self):
@@ -189,6 +204,7 @@ class StockStrategy:
             logger.info(msg.format("success to get code list."))
 
         if not self.multiprocess:
+            self.elapsed_times = []
             for code_cnt, code in enumerate(code_list):
                 logger.info(msg.format("code {}, {} / {}".format(code, code_cnt+1, len(code_list))))
 
@@ -203,7 +219,11 @@ class StockStrategy:
                     logger.info(msg.format("success to get stock histlical data."))
 
                 try:
+                    start_time = time.time()
                     self.select_code(code, stock_data_df)
+                    elapsed_time = time.time() - start_time
+                    self.elapsed_times.append(elapsed_time)
+                    logger.info("elapsed_time: {}".format(elapsed_time))
                 except:
                     err_msg = msg.format("fail to select code.")
                     logger.error(err_msg)
@@ -234,7 +254,7 @@ class StockStrategy:
 
         try:
             json_result = self.save_result()
-            push_line(json_result)
+            push_line(GOOGLE_REPORT_URL)
         except:
             err_msg = msg.format("fail to save result select code.")
             logger.error(err_msg)

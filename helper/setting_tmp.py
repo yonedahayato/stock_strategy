@@ -19,12 +19,13 @@ TOSHO_1ST_LIST_URL = "http://www.jpx.co.jp/markets/statistics-equities/misc/01.h
 NIKKEI_225_LIST_URL = "https://indexes.nikkei.co.jp/nkave/index/component?idx=nk225"
 
 # range date to get stock data
-HISTRICAL_DATA_RANGE_START = pd.Timestamp("20160101")
-HISTRICAL_DATA_RANGE_END = pd.Timestamp("20180101")
+HISTRICAL_DATA_RANGE_START = pd.Timestamp("20100101")
+HISTRICAL_DATA_RANGE_END = pd.Timestamp("20190308")
 HISTRICAL_DATA_RANGE_END_NOW = pd.Timestamp(NOW_STR_IN_SETTING)
 
 # path save and get histrical data to local
 HISTRICAL_DATA_PATH = p_dirname + "/get_stock_info/stock_data/{code}.csv"
+HISTRICAL_EXCHANGE_DATA_PATH = p_dirname + "/get_stock_info/get_exchange_data/exchange_data/{name}.csv"
 
 # path save result
 RESULT_PATH = p_dirname + "/check_reward/result/selected_code"
@@ -37,3 +38,12 @@ LINE_NOTIFY_TOKEN = ""
 
 # quandl API key
 QUANDL_API_KEY = ""
+
+# oanda API kye
+OANDA_API_KEY = ""
+
+# GCS keys
+API_KEY_JSON_PATH = ""
+
+# Google データポータルのURL
+GOOGLE_REPORT_URL = ""

@@ -1,0 +1,3 @@
+[submodule "get_stock_info/google_cloud_storage/google"]
+	path = get_stock_info/google_cloud_storage/google
+	url = https://github.com/yonedahayato/google.git
