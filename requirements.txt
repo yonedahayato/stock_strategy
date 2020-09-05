@@ -1,13 +1,15 @@
 google-cloud-storage
 joblib
 jsm
+keras
 logzero
 lxml
 matplotlib
 mpl_finance
 numpy
-pandas==0.20.3
+pandas
 Quandl
 requests
 sklearn
+tensorflow==2.1.0
 xlrd
