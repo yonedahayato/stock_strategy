@@ -1,8 +1,12 @@
 echo "select stock code"
 
 echo "docker build"
-# docker build -t select_stock_code_lib -f dockerfile/select_stock_code/Dockerfile_lib .
-docker build -t select_stock_code -f dockerfile/select_stock_code/Dockerfile .
+LIB_IMAGE_NAME=select_stock_code_lib
+IMAGE_NAME=select_stock_code
+
+# docker rmi ${LIB_IMAGE_NAME}
+docker build -t ${LIB_IMAGE_NAME} -f dockerfile/select_stock_code/Dockerfile_lib .
+docker build -t ${IMAGE_NAME} -f dockerfile/select_stock_code/Dockerfile .
 
 echo "make log directory"
 if [ ! -d "helper/log" ]; then
@@ -21,11 +25,14 @@ DOWNLOAD_DIR=$SCRIPT_DIR/get_stock_info/stock_data
 LOG_DIR=$SCRIPT_DIR/helper/log
 SELECT_CODE_DIR=$SCRIPT_DIR/check_reward/result/selected_code
 GRAPH_DIR=$SCRIPT_DIR/draw_graph/graphs
+TEST_DIR=$SCRIPT_DIR/test
 
+export SCRIPT_DIR=$SCRIPT_DIR
 export DOWNLOAD_DIR=$DOWNLOAD_DIR
 export LOG_DIR=$LOG_DIR
 export SELECT_CODE_DIR=$SELECT_CODE_DIR
 export GRAPH_DIR=$GRAPH_DIR
+export TEST_DIR=$TEST_DIR
 
 echo "DOWNLOAD_DIR: " $DOWNLOAD_DIR
 echo "LOG_DIR: " $LOG_DIR
@@ -36,9 +43,10 @@ export COMPOSE_FILE=dockerfile/docker-compose.select_stock_code.yml
 
 echo "docker compose up"
 # docker run -it --rm get_stock_data python get_stock_info/get_stock_data.py
-docker-compose up
+docker-compose run select_stock_code /bin/bash
+# docker-compose up
 
 # remove docker image
 # docker rmi select_stock_code_lib
 docker-compose down -v
-# docker rmi select_stock_code
+# docker rmi ${IMAGE_NAME}
