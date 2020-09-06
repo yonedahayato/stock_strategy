@@ -9,6 +9,7 @@ mpl_finance
 numpy
 pandas
 Quandl
+pytest
 requests
 sklearn
 tensorflow==2.1.0

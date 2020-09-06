@@ -46,12 +46,31 @@ parser.add_argument("--back_test_return_date",
                     default=0,
                     type=int)
 
-args = parser.parse_args()
 
-class StockStrategy:
+class StockStrategy(object):
+    """StockStrategy class
+
+    stock strategy のベースのクラス
+
+    """
+
     def __init__(self, debug=False, back_test_return_date=0,
                  method_name="method_name", multiprocess=False,
                  download_method="LOCAL", code_list = "1st_225"):
+
+        """__init__ func
+
+        パラメータの設置
+
+        Args:
+            debug(bool): デバッグモードかどうか
+            back_test_return_date(int): バックテストに使うデータが直近何日までのデータか
+            method_name(str): 手法の名前
+            multiprocess(bool): 並列処理を行うかどうか
+            download_method(str): 使用するデータをどのように取得するかどうか
+            code_list(str): 使用するデータの種類
+
+        """
         self.msg_tmpl = "[Stock_Storategy:{}]: "
 
         self.debug = debug
@@ -65,6 +84,14 @@ class StockStrategy:
         self.code_list = code_list
 
     def get_code_list(self):
+        """get_code_list func
+
+        コードリストの取得
+
+        Returns:
+            list: コードリスト
+
+        """
         if self.code_list == "1st_all":
             gettter = GetCodeList()
 
@@ -80,6 +107,14 @@ class StockStrategy:
         return self.new_code_list
 
     def get_stock_data(self, code):
+        """get_stock_data func
+
+        ヒストリカルデータの取得
+
+        Args:
+            code(xxx): コード番号
+
+        """
         msg = self.msg_tmpl.format("get_stock_data") + "{}"
 
         if self.download_method == "CLOUD":
@@ -100,11 +135,21 @@ class StockStrategy:
         return stock_data_df
 
     def select_code(self, code, stock_data_df):
-        # example #
-        # stock code number : i
-        # stock data length : n
-        # close value : C[i]
-        # selected code list = argmax_{i} ( (C[n-1] - C[n-2]) / C[n-2] )
+        """select_code func
+
+        購買銘柄かどうかの判断
+
+        Args:
+            code(xxx): 対象銘柄コード
+            stock_data_df(pandas.DataFrame): ヒストリカルデータ
+
+        Note:
+            # example #
+            # stock code number : i
+            # stock data length : n
+            # close value : C[i]
+            # selected code list = argmax_{i} ( (C[n-1] - C[n-2]) / C[n-2] )
+        """
 
         if len(self.result_codes) == 0:
             self.result_codes.append(int(code))
@@ -117,12 +162,36 @@ class StockStrategy:
                 self.result_codes = [int(code)]
 
     def get_stock_data_index(self):
+        """get_stock_data_index func
+
+        使用したデータセットの期間を取得
+
+        Returns:
+            pandas.Series: 使用したデータの期間
+
+        Note:
+            get_code_list の実行が前提
+            new_code_list が必要
+
+        """
         code = self.new_code_list[0]
         stock_data_df = self.get_stock_data(code)
         return stock_data_df.index
 
     def save_result(self):
-        result = Result()
+        """save_result func
+
+        結果の保存
+
+        Returns:
+            Result: 結果情報
+
+        Note:
+            elapsed_times がなければエラー
+
+        """
+        to_GCS = not self.debug
+        result = Result(to_GCS=to_GCS)
 
         result.add_info("result_code_list", self.result_codes)
         result.add_info("method", self.method_name)
@@ -168,7 +237,17 @@ class StockStrategy:
 
         return self.result_codes
 
-    def draw_graph(self, to_GCS=True):
+    def draw_graph(self, to_GCS=True, remove=True):
+        """draw_graph func
+
+        購買決定した銘柄のヒストリカルデータをグラフ化
+        その他、付随情報も記載
+
+        Args:
+            to_GCS(bool): GCSに送信するかどうか
+            remove(bool): 作成した画像を削除するかどうか
+
+        """
         for cnt, code in enumerate(self.result_codes):
             logger.info("draw graph {}".format(code))
 
@@ -180,7 +259,10 @@ class StockStrategy:
 
             graph_image_path = draw_graph.draw()
 
-            if to_GCS:
+            if self.debug:
+                logger.info("debug mode なので、作成したグラフの保存、ラインへの通知を行いません")
+
+            elif to_GCS:
                 image_basename = os.path.basename(graph_image_path)
                 uploader = Uploader(bucket_name="yoneda-stock-strategy")
                 uploader.upload(local_path=graph_image_path,
@@ -188,9 +270,33 @@ class StockStrategy:
 
             else:
                 push_line(str(code), image_path = graph_image_path)
-            draw_graph.remove()
+
+            if remove:
+                logger.info("作成したグラフを削除します")
+                draw_graph.remove()
+            else:
+                logger.info("作成したグラフを削除せず、残します: {}".format(draw_graph.save_path))
 
     def execute(self):
+        """execute func
+
+        処理フロー
+            1. コードリストの取得
+            2. 銘柄ごとに処理
+                a. ヒストリカルデータの取得
+                b. 購入銘柄かどうかの判断
+            3. 購入銘柄の結果リストを表示
+            4. 購入銘柄の結果を保存
+            5. グラフとして描画
+
+
+        Returns:
+            list[str]: 購買銘柄の結果リスト
+
+        Note:
+            - 2020/09/06 : 並列化(multiprocess)はできてなさそう
+
+        """
         msg = self.msg_tmpl.format("exect") + "{}"
 
         try:
@@ -254,7 +360,10 @@ class StockStrategy:
 
         try:
             json_result = self.save_result()
-            push_line(GOOGLE_REPORT_URL)
+            if self.debug:
+                logger.info("debug mode のため、結果を通知しません")
+            else:
+                push_line(GOOGLE_REPORT_URL)
         except:
             err_msg = msg.format("fail to save result select code.")
             logger.error(err_msg)
@@ -264,7 +373,7 @@ class StockStrategy:
             logger.info(msg.format("success to save result select code."))
 
         try:
-            self.draw_graph()
+            self.draw_graph(to_GCS=not self.debug)
         except:
             err_msg = msg.format("fail to draw graph.")
             logger.error(err_msg)
