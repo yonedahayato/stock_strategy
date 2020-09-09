@@ -16,6 +16,7 @@ from data_downloader import Data_Downloader
 from result import Result
 import setting
 from stock_strategy import StockStrategy
+from move_average import MoveAverage
 
 # log file
 from log import (

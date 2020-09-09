@@ -1,4 +1,6 @@
+import copy
 import os
+import pandas as pd
 import pytest
 import sys
 
@@ -11,7 +13,10 @@ from test_libs import (
     logger,
     setting,
     StockStrategy,
+    MoveAverage,
 )
+
+TEST_CODE = "1332"
 
 class TestStockStrategy(object):
     """TestStockStrategy class
@@ -22,7 +27,7 @@ class TestStockStrategy(object):
         TEST_CODE(str): テストするコード番号
 
     """
-    TEST_CODE = "1332"
+    TEST_CODE = TEST_CODE
 
     def setup_method(self):
         print("\nsetup now ...\n")
@@ -85,3 +90,45 @@ class TestStockStrategy(object):
         stock_strategy = StockStrategy(debug=True, back_test_return_date=5,
                                        method_name="method_is_test")
         stock_strategy.execute()
+
+class TestMoveAverage(object):
+    """TestMoveAverage clss
+
+    MoveAverage のテスト
+
+    """
+    back_test_return_date = 5
+    TEST_CODE = TEST_CODE
+
+    def setup_method(self):
+        self.move_average_window_75 = MoveAverage(debug=True, back_test_return_date=self.back_test_return_date,
+                            method_name="MoveAverage_window=75", multiprocess=False, window=75)
+
+
+    @pytest.mark.skip(reason='一時敵にスキップ')
+    def test_move_average_window_75(self):
+        """test_move_average func
+
+        move_average のテスト
+        window = 75
+
+        """
+
+        self.move_average_window_75.execute()
+
+    def test_one_code(self):
+        """test_one_code func
+
+        ひとつのコードで実行
+        window = 75
+
+        """
+        stock_data_df = self.move_average_window_75.get_stock_data(self.TEST_CODE)
+        move_average_df = self.move_average_window_75.get_move_average(stock_data_df)
+        move_average_diff_df = move_average_df.diff(periods=1)
+
+        max_rows = 100
+        with pd.option_context('display.max_rows', max_rows):
+            print(move_average_diff_df[:max_rows])
+
+        self.move_average_window_75.select_code(self.TEST_CODE, stock_data_df)
