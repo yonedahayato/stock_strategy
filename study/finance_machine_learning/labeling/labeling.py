@@ -4,7 +4,21 @@
 
 """
 
+import numpy as np
+import os
 import pandas as pd
+import sys
+
+ABSPATH = os.path.abspath(__file__)
+BASEDIR = os.path.dirname(ABSPATH)
+PARENTDIR = os.path.dirname(BASEDIR)
+
+sys.path.append(PARENTDIR)
+
+from multiprocessing_vector.multiprocessing_vector import (
+    mp_pandas_obj,
+)
+
 
 def get_daily_vol(close, span0=100):
     """get_daily_vol func
@@ -64,6 +78,9 @@ def apply_ptsl_on_t1(close, events, ptsl, moleculte):
             [1]: 下部バリアの幅を設定するためにtrgtに乗算する係数、0の場合、下部バリアはない
         moleculte(list): シングルスレットによって処理されるイベントインデックスのサブセットを含むリスト
 
+    Note:
+        おそらくコールバック関数 (molecule が引数であるので)
+
     """
 
     # t1 (イベント終了)前に行われた場合は、ストップロス / 利食いを実施
@@ -82,9 +99,9 @@ def apply_ptsl_on_t1(close, events, ptsl, moleculte):
     else:
         sl = pd.Series(index=events.index) # NaNs
 
-    for loc, t1 in events_tmp["ti"].fillna(close.index(-1)).iteritems():
-        df0 = close[loc, t1] # 価格経路
-        df0 = (df / close[loc] -1 ) * events_tmp.at[loc, "side"] # リターン
+    for loc, t1 in events_tmp["t1"].fillna(close.index[-1]).iteritems():
+        df0 = close[loc:t1] # 価格経路
+        df0 = (df0 / close[loc] -1 ) * events_tmp.at[loc, "side"] # リターン
 
         # ストップロスの最短タイミング
         out.loc[loc, "sl"] = df0[df0 < sl[loc]].index.min()
@@ -127,7 +144,7 @@ def get_events(close, t_events, ptsl, trgt, min_ret, num_threads, t1=False, side
         t1 = pd.Series(pd.NaT, index = t_events)
 
     # 3: イベントオブジェクトを作成し、t1にストップロスを適用
-    if size is None:
+    if side is None:
         # side = pd.Seeries(1.0, index=trgt.index)
         new_side, new_ptsl = pd.Series(1.0, index=trgt.index), [ptsl[0], ptsl[0]]
     else:
@@ -141,7 +158,7 @@ def get_events(close, t_events, ptsl, trgt, min_ret, num_threads, t1=False, side
 
     # pd.min は nan を無視する
     events["t1"] = df0.dropna(how = "all").min(axis=1)
-    if size is None:
+    if side is None:
         events = events.drop("side", axis=1)
 
     return events
@@ -182,7 +199,7 @@ def get_bins(events, close):
     """
     # 1: イベント発生時の価格
     events_tmp = events.dropna(subset=["t1"])
-    px = events_tmp.index.union(events_tmp["t1"].values).drop_dulplicates()
+    px = events_tmp.index.union(events_tmp["t1"].values).drop_duplicates()
     px = close.reindex(px, method="bfill")
 
     # 2: out オブジェクトを生成
