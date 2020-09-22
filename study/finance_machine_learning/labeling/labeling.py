@@ -20,7 +20,7 @@ from multiprocessing_vector.multiprocessing_vector import (
 )
 
 
-def get_daily_vol(close, span0=100):
+def get_daily_vol(close, span0=100, num_days=1):
     """get_daily_vol func
 
     日次ボラティリティ推定
@@ -46,7 +46,7 @@ def get_daily_vol(close, span0=100):
 
     """
     # 日次ボラティリティ、close (株価系列)に従いインデックス再作成)
-    one_day = pd.Timedelta(days=1)
+    one_day = pd.Timedelta(days=num_days)
 
     datetime_index = close.index
     datetime_index_before_one_day = datetime_index - one_day
@@ -111,11 +111,12 @@ def apply_ptsl_on_t1(close, events, ptsl, moleculte):
     return out
 
 
-def get_events(close, t_events, ptsl, trgt, min_ret, num_threads, t1=False, side=None):
+def get_events(close, t_events, ptsl, trgt, min_ret, num_threads, t1=False, side=None, num_days=10):
     """get_events func
 
     最初のバリアに触れる時間を見つける関数
     スニペット 3.2
+    スニペット 3.4
     スニペット 3.6
 
     Args:
@@ -136,12 +137,20 @@ def get_events(close, t_events, ptsl, trgt, min_ret, num_threads, t1=False, side
 
     """
     # 1: ターゲットの定義
-    trgt = trgt.loc[t_events]
+    try:
+        trgt = trgt.loc[t_events]
+    except:
+        trgt = trgt.loc[t_events[1:]]
     trgt = trgt[trgt > min_ret] # min_ret
 
     # 2: t1(最大保有期間)の定義
     if t1 is False:
         t1 = pd.Series(pd.NaT, index = t_events)
+    else:
+        # スニペット 3.4
+        t1 = close.index.searchsorted(t_events + pd.Timedelta(days = num_days))
+        t1 = t1[t1 < close.shape[0]]
+        t1 = pd.Series(close.index[t1], index = t_events[:t1.shape[0]]) # 終了時にNaNs
 
     # 3: イベントオブジェクトを作成し、t1にストップロスを適用
     if side is None:
