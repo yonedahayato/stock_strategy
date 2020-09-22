@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import pytest
 import sys
 
 ABSPATH = os.path.abspath(__file__)
@@ -12,7 +13,12 @@ sys.path.append(PPARENTDIR)
 from stock_strategy.stock_strategy import StockStrategy
 
 from financial_data_structure.financial_data_structure import (
+    download_sample_data,
+    read_csvs,
+    reset_data,
+    get_rolled_series,
     get_t_events,
+    BITCOIN_DATA_URL,
 )
 
 from labeling.labeling import (
@@ -33,6 +39,55 @@ from multiprocessing_vector.multiprocessing_vector import (
     mp_pandas_obj,
 )
 
+TEST_CODE = 1332
+
+class TestFinancialDataStructure(object):
+    """TestFinancialDataStructure
+
+    financial_data_structure のテスト
+
+    """
+    SAMPLE_DATES = ["20181127", "20181128", "20181129"]
+    SAMPLE_SYMBOL = "XBTUSD"
+    TEST_CODE = TEST_CODE
+
+    def setup_class(self):
+        """setup class func
+
+        class 単位での前処理
+        主にデータのロード
+
+        """
+
+        stock_strategy = StockStrategy()
+        self.data_df = stock_strategy.get_stock_data(code = self.TEST_CODE)
+
+    @pytest.mark.skip(reason='毎回データセットをダウンロードすると時間かかるので使用するときのみ実行する')
+    def test_download_sample_data(self):
+        """test_download_sample_data func
+
+        download_sample_data のテスト
+
+        """
+        print("test_download_sample_data")
+        for sample_date in self.SAMPLE_DATES:
+            download_sample_data(sample_date)
+
+    @pytest.mark.skip(reason="毎回データ読み込むと時間かかるので一度だけ実行確認できればよい")
+    def test_read_samples(self):
+        """test_read_samples func
+
+        read_samples のテスト
+
+        """
+        csvs = ["./sample_{}.csv.gz".format(sample_date) for sample_date in self.SAMPLE_DATES]
+        samples_df = read_csvs(csvs)
+        print(samples_df)
+
+    def test_get_t_events(self):
+        t_events = get_t_events(self.data_df["Close"], 30)
+        print("\nt_events\n", t_events)
+
 class TestLabeling(object):
     """TestLabeling class
 
@@ -43,7 +98,8 @@ class TestLabeling(object):
 
     """
 
-    TEST_CODE = 1332
+    TEST_CODE = TEST_CODE
+
     def setup_method(self):
         """setup_method
 
@@ -61,58 +117,77 @@ class TestLabeling(object):
         """
         close_df = self.data_df["Close"]
         daily_vol_df = get_daily_vol(close_df)
-        print("daily_vol_df", daily_vol_df)
+        print("\ndaily_vol_df\n", daily_vol_df)
 
-    def test_get_events(self):
+    def test_get_events_and_get_bins_and_drop_labels(self):
         """test_get_events func
 
-        get_events のテスト
+        get_events, get_bins, drop_labels のテスト
+
+        Note:
+            get_t_events, t_events:
+                前日との変化分を計算
+                閾値以上の変化をしている日付を取得
+            daily_vol_df, get_daily_vol:
+                変化率を計算
+            get_events, events:
+                最初にバリアに接触する時間の取得
+            bins, get_bins:
+                サイズとサイドのラベル付け
 
         """
         close_df = self.data_df["Close"]
-        t_events = get_t_events(close_df, h=10)
-        print("t_events", t_events)
-        events = get_events(close = close_df, t_events=t_events, ptsl=[0.1, 0.1], trgt=close_df, min_ret=100, num_threads=1)
-        print("events", events)
+        num_days = 5
 
-    def test_get_bins(self):
-        """test_get_bins
+        t_events = get_t_events(close_df, h=30)
+        daily_vol_df = get_daily_vol(close_df, num_days=num_days)
 
-        get_bins のテスト
+        print("\nt_events\n", t_events)
+        print("\ndaily_vol_df\n", daily_vol_df)
+        print(daily_vol_df.index)
+        print("\nclose\n", close_df)
+        print(close_df.index)
 
-        """
-        close_df = self.data_df["Close"]
-        t_events = get_t_events(close_df, h=10)
-        events = get_events(close = close_df, t_events=t_events, ptsl=[0.1, 0.1], trgt=close_df, min_ret=100, num_threads=1)
+        events = get_events(close = close_df, t_events=t_events, ptsl=[0.1, 0.1], \
+                            trgt=daily_vol_df, min_ret=0.03, num_threads=1, num_days=num_days,\
+                            t1=True)
+        print("events\n", events)
         bins = get_bins(events, close_df)
-        print("bins", bins)
-
-    def test_drop_labels(self):
-        """test_drop_labels func
-
-        drop_labels のテスト
-
-        """
-        close_df = self.data_df["Close"]
-        t_events = get_t_events(close_df, h=10)
-        events = get_events(close = close_df, t_events=t_events, ptsl=[0.1, 0.1], trgt=close_df, min_ret=100, num_threads=1)
-        bins = get_bins(events, close_df)
-
-        events = drop_labels(bins)
+        print("\nbins\n", bins)
+        bins = drop_labels(bins)
+        print("\nbins after drop\n", bins)
 
 class TestSampleWeighting(object):
     """TestSampleWeighting class
 
     sample_weighting のテスト
 
+    Attributes:
+        TEST_CODE(int): テストに使用する銘柄
+
     """
+
+    TEST_CODE = TEST_CODE
+
+    def setup_method(self):
+        stock_strategy = StockStrategy()
+        self.data_df = stock_strategy.get_stock_data(code = self.TEST_CODE)
+
+        self.close_df = self.data_df["Close"]
+        t_events = get_t_events(self.close_df, h=10)
+        self.events = get_events(close = self.close_df, t_events=t_events, ptsl=[0.1, 0.1], trgt=self.close_df, min_ret=100, num_threads=1)
+
     def test_mp_num_co_events(self):
         """test_mp_num_co_events
 
         mp_num_co_events のテスト
 
         """
-        raise Exception("これから書きます")
+        num_co_events = mp_pandas_obj(func = mp_num_co_events,
+                                      pd_obj = ("molecule", self.events.index),
+                                      num_threads = 1,
+                                      close_idx = self.close_df,
+                                      t1 = self.events["t1"])
 
 def my_func(molecule):
     return molecule
