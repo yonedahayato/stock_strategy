@@ -141,7 +141,10 @@ def get_t_events(g_raw, h):
         h(xxx): 閾値
 
     Note:
-        xxx
+        前日との差分を計算(diff)
+        差分ごとに以下の計算処理実行
+            s_pos, s_neg の計算
+            閾値との比較をして、該当した場合日付を保存(t_events.append)
 
     """
     t_events, s_pos, s_neg = [], 0, 0
