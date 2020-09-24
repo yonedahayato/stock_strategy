@@ -1,3 +1,4 @@
+import numpy as np
 import os
 import pandas as pd
 import pytest
@@ -31,12 +32,20 @@ from labeling.labeling import (
 from sample_weighting.sample_weighting import (
     mp_num_co_events,
     mp_sample_tw,
+    get_ind_matrix,
+    get_avg_uniqueness,
+    seq_bootstrap,
+    aux_mc,
+    get_rnd_t1,
+    mp_sample_w,
 )
 
 from multiprocessing_vector.multiprocessing_vector import (
     lin_parts,
     nested_parts,
     mp_pandas_obj,
+    process_jobs,
+    process_jobs_single,
 )
 
 TEST_CODE = 1332
@@ -169,25 +178,112 @@ class TestSampleWeighting(object):
 
     TEST_CODE = TEST_CODE
 
-    def setup_method(self):
+    def setup_class(self):
         stock_strategy = StockStrategy()
         self.data_df = stock_strategy.get_stock_data(code = self.TEST_CODE)
 
-        self.close_df = self.data_df["Close"]
-        t_events = get_t_events(self.close_df, h=10)
-        self.events = get_events(close = self.close_df, t_events=t_events, ptsl=[0.1, 0.1], trgt=self.close_df, min_ret=100, num_threads=1)
+        close_df = self.data_df["Close"]
+        self.close_df = close_df
 
-    def test_mp_num_co_events(self):
+        num_days = 5
+
+        t_events = get_t_events(close_df, h=30)
+        daily_vol_df = get_daily_vol(close_df, num_days=num_days)
+
+        events = get_events(close = close_df, t_events=t_events, ptsl=[0.1, 0.1], \
+                            trgt=daily_vol_df, min_ret=0.03, num_threads=1, num_days=num_days,\
+                            t1=True)
+        bins = get_bins(events, close_df)
+        bins = drop_labels(bins)
+
+        self.events = events
+        print("\nevents\n", events)
+        self.bins = bins
+
+    def test_mp_num_co_events_and_mp_sample_w(self):
         """test_mp_num_co_events
 
-        mp_num_co_events のテスト
+        mp_num_co_events, mp_sample_w のテスト
+        スニペット 4.2 ラベルの平均性の推定
+
+        mp_sample_wのテスト
+        スニペット 4.10 絶対リターンの帰属による標本ウェイトの決定
 
         """
+        # スニペット 4.2 ラベルの平均性の推定
         num_co_events = mp_pandas_obj(func = mp_num_co_events,
                                       pd_obj = ("molecule", self.events.index),
                                       num_threads = 1,
-                                      close_idx = self.close_df,
+                                      close_idx = self.close_df.index,
                                       t1 = self.events["t1"])
+        print("\nnum_co_events\n", num_co_events)
+
+        num_co_events = num_co_events.loc[~num_co_events.index.duplicated(keep="last")]
+        num_co_events = num_co_events.reindex(self.close_df.index).fillna(0)
+
+        self.bins["tw"] = mp_pandas_obj(mp_sample_tw, ("molecule", self.events.index), num_threads=1, \
+                                        t1=self.events["t1"], num_co_events=num_co_events)
+
+        print("\nbins after 4.2\n", self.bins)
+
+        # スニペット 4.10 絶対リターンの帰属による標本ウェイトの決定
+        self.bins["w"] = mp_pandas_obj(mp_sample_w, ("molecule", self.events.index), num_threads=1, \
+                                       t1=self.events["t1"], num_co_events=num_co_events, close = self.close_df)
+        self.bins["w"] *= self.bins.shape[0] / self.bins["w"].sum()
+
+        print("\nbins after 4.10\n", self.bins)
+
+
+    def test_bootstrap(self):
+        """test_bootstrap func
+
+        逐次ブートストラップの例
+        スニペット 4.6
+
+        Note:
+            通常の抽出方法との比較
+        """
+        t1 = pd.Series([2, 3, 5], index=[0, 2, 4])  # 特徴量の観測値をそれぞれに対する t0, t1
+        bar_ix = range(t1.max() + 1)                # バーのインデックス
+
+        for time in range(3):
+            print("=== {}回目の比較 ===".format(time + 1))
+            ind_matrix = get_ind_matrix(bar_ix, t1)
+            phi = np.random.choice(ind_matrix.columns, size=ind_matrix.shape[1])
+            print("phi", phi)
+            print("Standard uniqueness:", get_avg_uniqueness(ind_matrix[phi]).mean())
+
+            phi = seq_bootstrap(ind_matrix)
+            print("phi", phi)
+            print("Sequential uniqueness:", get_avg_uniqueness(ind_matrix[phi]).mean())
+
+    def test_bootstrap_mc(self):
+        """ test_bootstrap_mc func
+
+        aux_mc, get_rnd_t1 のテスト
+        マルチスレッド化したモンテカルロ法
+        スニペット 4.9
+
+        """
+        num_obs = 10
+        num_bars = 100
+        max_h = 5
+
+        num_iters = 100
+        num_threads = 1
+
+        jobs = []
+        for i in range(int(num_iters)):
+            job = {"func": aux_mc, "num_obs": num_obs, "num_bars": num_bars, "max_h": max_h}
+            jobs.append(job)
+
+        if num_threads == 1:
+            out = process_jobs_single(jobs)
+        else:
+            pass
+
+        print(pd.DataFrame(out).describe())
+
 
 def my_func(molecule):
     return molecule
