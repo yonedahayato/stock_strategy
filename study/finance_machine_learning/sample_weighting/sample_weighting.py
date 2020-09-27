@@ -240,6 +240,6 @@ def get_time_decay(tw, c_if_last_w=1.0):
     const = 1.0 - slope * c_if_w.iloc[-1]
     c_if_w = const + slope * c_if_w
     c_if_w[c_if_w < 0] = 0
-    print("const, slope: "const, slope)
+    print("const, slope: ", const, slope)
 
     return c_if_w

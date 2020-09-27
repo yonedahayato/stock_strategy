@@ -40,6 +40,10 @@ from sample_weighting.sample_weighting import (
     mp_sample_w,
 )
 
+from fractional_difference.fractional_difference import (
+    plot_weights,
+)
+
 from multiprocessing_vector.multiprocessing_vector import (
     lin_parts,
     nested_parts,
@@ -283,6 +287,21 @@ class TestSampleWeighting(object):
             pass
 
         print(pd.DataFrame(out).describe())
+
+class TestFractionalDifference(object):
+    """TestFractionalDifference class
+
+    fractional_difference のテスト
+    section5
+
+    """
+    def test_plot_weights(self):
+        """test_plot_weights func
+
+        plot_weights のテスト
+
+        """
+        plot_weights(d_range=[0, 1], n_plots=11, size=6)
 
 
 def my_func(molecule):
