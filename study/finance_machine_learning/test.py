@@ -44,6 +44,11 @@ from fractional_difference.fractional_difference import (
     plot_weights,
 )
 
+from ensemble.ensemble import (
+    bagging_accuracy,
+    set_RF,
+)
+
 from multiprocessing_vector.multiprocessing_vector import (
     lin_parts,
     nested_parts,
@@ -303,6 +308,28 @@ class TestFractionalDifference(object):
         """
         plot_weights(d_range=[0, 1], n_plots=11, size=6)
 
+class TestEnsemble(object):
+    """TestEnsemble class
+
+    ensemble のテスト
+    section6
+
+    """
+    def test_bagging_accuracy(self):
+        """test_bagging_accuracy func
+
+        bagging_accuracy のテスト
+
+        """
+        bagging_accuracy()
+
+    def test_set_RF(self):
+        """test_set_RF func
+
+        set_RF のテスト
+
+        """
+        set_RF(10)
 
 def my_func(molecule):
     return molecule
