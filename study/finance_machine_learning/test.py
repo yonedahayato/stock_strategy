@@ -1,3 +1,4 @@
+import itertools
 import numpy as np
 import os
 import pandas as pd
@@ -47,6 +48,11 @@ from fractional_difference.fractional_difference import (
 from ensemble.ensemble import (
     bagging_accuracy,
     set_RF,
+)
+
+from feature_importance.feature_importance import (
+    get_test_data,
+    feat_importance,
 )
 
 from multiprocessing_vector.multiprocessing_vector import (
@@ -330,6 +336,60 @@ class TestEnsemble(object):
 
         """
         set_RF(10)
+
+class TestFeatureImportance(object):
+    """TestFeatureImportance class
+
+    feature_importance のテスト
+    section 8
+
+    """
+    def test_get_test_data(self):
+        """test_get_test_data
+
+        get_test_data のテスト
+
+        """
+        get_test_data()
+
+    def test_feat_importance(self):
+        """test_feat_importance func
+
+        feat_importance のテスト
+
+        """
+        trns_x, cont = get_test_data()
+        feat_importance(trns_x, cont)
+
+    def test_func(self, n_estimators=5, cv=10):
+        """test_func func
+
+        全要素の呼び出し
+        スニペット 8.9
+
+        Note:
+            人工データにおける特徴量重要度関数のパフォーマンスを推定する
+            ノイズ比率、すなわちノイズ特徴量 = n_features - (n_informative + n_redundant) である
+
+        """
+        trns_x, cont = get_test_data()
+        args_feat_importance = {
+            "min_w_leaf": [0.0], "scoring": ["accuracy"], "method": ["MDI", "MDA", "SFI"],
+            "max_samples": [1.0]
+        }
+        jobs = (dict(zip(args_feat_importance, i) ) for i in itertools.product(*args_feat_importance.values()))
+        out = []
+        args_main = {
+            "path_out": "./", "n_estimators": n_estimators, "tag": "test_func", "cv": cv
+        }
+
+        for job in jobs:
+            job["sim_num"] = "{method}_{scoring}_{min_w_leaf}_{max_samples}".format(
+                             method=job["method"], scoring=job["scoring"], min_w_leaf=job["min_w_leaf"], max_samples=job["max_samples"]
+                             )
+            print(job["sim_num"])
+            args_main.update(job)
+            imp, oob, oos = feat_importance(trns_x=trns_x, cont=cont, **args_main)
 
 def my_func(molecule):
     return molecule
