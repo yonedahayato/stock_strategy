@@ -1,3 +1,9 @@
+"""ensemble.py
+
+    Section6
+
+"""
+
 # from scipy.misc import comb
 from scipy.special import comb
 from sklearn.ensemble import BaggingClassifier
