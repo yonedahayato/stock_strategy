@@ -21,28 +21,22 @@ from financial_data_structure.financial_data_structure import (
     get_rolled_series,
     get_t_events,
     BITCOIN_DATA_URL,
+    DollarBar,
 )
 
 from labeling.labeling import (
-    get_daily_vol,
-    get_events,
-    get_bins,
-    drop_labels,
+    Labeling,
 )
 
 from sample_weighting.sample_weighting import (
-    mp_num_co_events,
-    mp_sample_tw,
-    get_ind_matrix,
-    get_avg_uniqueness,
-    seq_bootstrap,
-    aux_mc,
-    get_rnd_t1,
-    mp_sample_w,
+    SampleWeighting,
 )
 
 from fractional_difference.fractional_difference import (
     plot_weights,
+    frac_diff,
+    frac_diff_FFD,
+    FractionlDifference,
 )
 
 from ensemble.ensemble import (
@@ -64,6 +58,36 @@ from multiprocessing_vector.multiprocessing_vector import (
 )
 
 TEST_CODE = 1332
+
+class TestOriginalData(object):
+    """TestOriginalData class
+
+    オリジナルのデータセットで検証
+
+    """
+    TEST_CODE = TEST_CODE
+
+    def test_original_data(self):
+        stock_strategy = StockStrategy()
+        self.data_df = stock_strategy.get_stock_data(code = self.TEST_CODE)
+
+        close_df = self.data_df["Close"]
+        self.close_df = close_df
+
+        # section 3
+        labeling = Labeling(code=self.TEST_CODE)
+        # self.bins, self.events = labeling.labeling(close_df, save=True)
+        self.bins, self.events = labeling.load()
+        labeling.set_row_data(close_df)
+
+        # section 4
+        self.sample_weighting = SampleWeighting(labeling)
+        # self.bins_sampled = self.sample_weighting.sample_weighting(save=True)
+        self.bins_sampled = self.sample_weighting.load()
+
+        # secion 5
+        self.fractional_difference = FractionlDifference()
+        self.frac_diff_df = self.fractional_difference.fractional_difference(self.data_df)
 
 class TestFinancialDataStructure(object):
     """TestFinancialDataStructure
@@ -112,6 +136,16 @@ class TestFinancialDataStructure(object):
         t_events = get_t_events(self.data_df["Close"], 30)
         print("\nt_events\n", t_events)
 
+    def test_dollar_bar(self):
+        """
+
+        DollarBar のテスト
+
+        """
+        print("\nDollarBar")
+        dollar_bar = DollarBar()
+        dollar_bar.make_dollar_bar()
+
 class TestLabeling(object):
     """TestLabeling class
 
@@ -140,7 +174,7 @@ class TestLabeling(object):
 
         """
         close_df = self.data_df["Close"]
-        daily_vol_df = get_daily_vol(close_df)
+        daily_vol_df = Labeling.get_daily_vol(close_df)
         print("\ndaily_vol_df\n", daily_vol_df)
 
     def test_get_events_and_get_bins_and_drop_labels(self):
@@ -164,7 +198,7 @@ class TestLabeling(object):
         num_days = 5
 
         t_events = get_t_events(close_df, h=30)
-        daily_vol_df = get_daily_vol(close_df, num_days=num_days)
+        daily_vol_df = Labeling.get_daily_vol(close_df, num_days=num_days)
 
         print("\nt_events\n", t_events)
         print("\ndaily_vol_df\n", daily_vol_df)
@@ -172,14 +206,23 @@ class TestLabeling(object):
         print("\nclose\n", close_df)
         print(close_df.index)
 
-        events = get_events(close = close_df, t_events=t_events, ptsl=[0.1, 0.1], \
+        events = Labeling.get_events(close = close_df, t_events=t_events, ptsl=[0.1, 0.1], \
                             trgt=daily_vol_df, min_ret=0.03, num_threads=1, num_days=num_days,\
                             t1=True)
         print("events\n", events)
-        bins = get_bins(events, close_df)
+        bins = Labeling.get_bins(events, close_df)
         print("\nbins\n", bins)
-        bins = drop_labels(bins)
+        bins = Labeling.drop_labels(bins)
         print("\nbins after drop\n", bins)
+
+    def test_labeling(self):
+        """test_labeling func
+
+        """
+        labeling = Labeling(code=self.TEST_CODE)
+        close_df = self.data_df["Close"]
+
+        labeling.labeling(close_df, save=True)
 
 class TestSampleWeighting(object):
     """TestSampleWeighting class
@@ -200,20 +243,10 @@ class TestSampleWeighting(object):
         close_df = self.data_df["Close"]
         self.close_df = close_df
 
-        num_days = 5
+        labeling = Labeling(code=self.TEST_CODE)
+        self.bins, self.events = labeling.labeling(close_df, save=True)
 
-        t_events = get_t_events(close_df, h=30)
-        daily_vol_df = get_daily_vol(close_df, num_days=num_days)
-
-        events = get_events(close = close_df, t_events=t_events, ptsl=[0.1, 0.1], \
-                            trgt=daily_vol_df, min_ret=0.03, num_threads=1, num_days=num_days,\
-                            t1=True)
-        bins = get_bins(events, close_df)
-        bins = drop_labels(bins)
-
-        self.events = events
-        print("\nevents\n", events)
-        self.bins = bins
+        self.sample_weighting = SampleWeighting(labeling)
 
     def test_mp_num_co_events_and_mp_sample_w(self):
         """test_mp_num_co_events
@@ -224,9 +257,13 @@ class TestSampleWeighting(object):
         mp_sample_wのテスト
         スニペット 4.10 絶対リターンの帰属による標本ウェイトの決定
 
+        Note:
+            ラベルの独自性を計算(mp_num_co_events)
+            ラベルの平均独自性を計算(mp_sample_tw)
+
         """
         # スニペット 4.2 ラベルの平均性の推定
-        num_co_events = mp_pandas_obj(func = mp_num_co_events,
+        num_co_events = mp_pandas_obj(func = SampleWeighting.mp_num_co_events,
                                       pd_obj = ("molecule", self.events.index),
                                       num_threads = 1,
                                       close_idx = self.close_df.index,
@@ -236,18 +273,17 @@ class TestSampleWeighting(object):
         num_co_events = num_co_events.loc[~num_co_events.index.duplicated(keep="last")]
         num_co_events = num_co_events.reindex(self.close_df.index).fillna(0)
 
-        self.bins["tw"] = mp_pandas_obj(mp_sample_tw, ("molecule", self.events.index), num_threads=1, \
+        self.bins["tw"] = mp_pandas_obj(SampleWeighting.mp_sample_tw, ("molecule", self.events.index), num_threads=1, \
                                         t1=self.events["t1"], num_co_events=num_co_events)
 
         print("\nbins after 4.2\n", self.bins)
 
         # スニペット 4.10 絶対リターンの帰属による標本ウェイトの決定
-        self.bins["w"] = mp_pandas_obj(mp_sample_w, ("molecule", self.events.index), num_threads=1, \
+        self.bins["w"] = mp_pandas_obj(SampleWeighting.mp_sample_w, ("molecule", self.events.index), num_threads=1, \
                                        t1=self.events["t1"], num_co_events=num_co_events, close = self.close_df)
         self.bins["w"] *= self.bins.shape[0] / self.bins["w"].sum()
 
         print("\nbins after 4.10\n", self.bins)
-
 
     def test_bootstrap(self):
         """test_bootstrap func
@@ -263,14 +299,14 @@ class TestSampleWeighting(object):
 
         for time in range(3):
             print("=== {}回目の比較 ===".format(time + 1))
-            ind_matrix = get_ind_matrix(bar_ix, t1)
+            ind_matrix = SampleWeighting.get_ind_matrix(bar_ix, t1)
             phi = np.random.choice(ind_matrix.columns, size=ind_matrix.shape[1])
             print("phi", phi)
-            print("Standard uniqueness:", get_avg_uniqueness(ind_matrix[phi]).mean())
+            print("Standard uniqueness:", SampleWeighting.get_avg_uniqueness(ind_matrix[phi]).mean())
 
-            phi = seq_bootstrap(ind_matrix)
+            phi = SampleWeighting.seq_bootstrap(ind_matrix)
             print("phi", phi)
-            print("Sequential uniqueness:", get_avg_uniqueness(ind_matrix[phi]).mean())
+            print("Sequential uniqueness:", SampleWeighting.get_avg_uniqueness(ind_matrix[phi]).mean())
 
     def test_bootstrap_mc(self):
         """ test_bootstrap_mc func
@@ -284,12 +320,12 @@ class TestSampleWeighting(object):
         num_bars = 100
         max_h = 5
 
-        num_iters = 100
+        num_iters = 10
         num_threads = 1
 
         jobs = []
         for i in range(int(num_iters)):
-            job = {"func": aux_mc, "num_obs": num_obs, "num_bars": num_bars, "max_h": max_h}
+            job = {"func": SampleWeighting.aux_mc, "num_obs": num_obs, "num_bars": num_bars, "max_h": max_h}
             jobs.append(job)
 
         if num_threads == 1:
@@ -299,6 +335,15 @@ class TestSampleWeighting(object):
 
         print(pd.DataFrame(out).describe())
 
+    def test_sample_weighting(self):
+        """test_sample_weighting func
+
+        SampleWeighting のテスト
+
+        """
+        self.sample_weighting.sample_weighting()
+        self.sample_weighting.sample_weighting()
+
 class TestFractionalDifference(object):
     """TestFractionalDifference class
 
@@ -306,6 +351,25 @@ class TestFractionalDifference(object):
     section5
 
     """
+    TEST_CODE = TEST_CODE
+    D = 0.5
+
+    def setup_class(self):
+        stock_strategy = StockStrategy()
+        self.data_df = stock_strategy.get_stock_data(code = self.TEST_CODE)
+
+        close_df = self.data_df["Close"]
+        self.close_df = close_df
+
+        labeling = Labeling(code=self.TEST_CODE)
+        # self.bins, self.events = labeling.labeling(close_df, save=True)
+        self.bins, self.events = labeling.load()
+        labeling.set_row_data(close_df)
+
+        self.sample_weighting = SampleWeighting(labeling)
+        # self.sample_weighting.sample_weighting(save=True)
+        self.bins_sampled = self.sample_weighting.load()
+
     def test_plot_weights(self):
         """test_plot_weights func
 
@@ -313,6 +377,24 @@ class TestFractionalDifference(object):
 
         """
         plot_weights(d_range=[0, 1], n_plots=11, size=6)
+
+    def test_frac_diff(self):
+        """test_frac_diff func
+
+        frac_diff のテスト
+
+        """
+        frac_diff_df = frac_diff(self.data_df, self.D)
+        print("frac_diff_df", frac_diff_df)
+
+    def test_frac_diff_FFD(self):
+        """test_frac_diff_FFD func
+
+        frac_diff_FFD のテスト
+
+        """
+        frac_diff_FFD_df = frac_diff_FFD(self.data_df, self.D)
+        print("frac_diff_FFD", frac_diff_FFD_df)
 
 class TestEnsemble(object):
     """TestEnsemble class
