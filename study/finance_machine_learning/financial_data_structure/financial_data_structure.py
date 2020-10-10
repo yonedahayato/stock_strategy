@@ -5,9 +5,12 @@
 """
 import datetime
 import numpy as np
+from mlfinlab.data_structures import standard_data_structures
+import os
 import pandas as pd
 import requests
 import urllib.request
+from urllib import request
 
 BITCOIN_DATA_URL = "https://s3-eu-west-1.amazonaws.com/public.bitmex.com/data/trade/{}.csv.gz"
 TIMESTAMP_FORMAT = "%Y%m%d%H%M%S%f"
@@ -137,8 +140,8 @@ def get_t_events(g_raw, h):
     スニペット 2.4
 
     Args:
-        g_raw(Series): フィルタ処理さたる原時系列
-        h(xxx): 閾値
+        g_raw(Series): フィルタ処理される原時系列
+        h(float): 閾値
 
     Note:
         前日との差分を計算(diff)
@@ -160,3 +163,75 @@ def get_t_events(g_raw, h):
             s_pos = 0
             t_events.append(i)
     return pd.DatetimeIndex(t_events)
+
+class DollarBar(object):
+    """DollarBar class
+
+    ドルバーを作成するサンプルコード
+
+    Note:
+        参考 : https://kabukimining.hateblo.jp/entry/FinanceDollarBar
+
+    """
+    date = "20200401"
+    symbol="XBTUSD"
+    baseurl = 'https://s3-eu-west-1.amazonaws.com/public.bitmex.com/data/trade/'
+    filepath = './dollar_{}.csv.gz'.format(date)
+    threshold = 4000000
+
+    def download_dataset(self):
+        """download func
+
+        データのダウンロード
+
+        Note:
+            ['timestamp', 'symbol', 'side', 'size', 'price', 'tickDirection',
+             'trdMatchID', 'grossValue', 'homeNotional', 'foreignNotional']
+
+        """
+        if not os.path.exists(self.filepath):
+            request.urlretrieve(self.baseurl + '{}.csv.gz'.format(self.date), self.filepath)
+
+    def make_candles(self, df, symbol):
+        """make_candles func
+
+        Args:
+            symbol(str): 銘柄名
+        Note:
+            参考: https://note.com/nagi7692/n/ne674d117d1b6?magazine_key=m0b2a506bf904
+        """
+
+        df = df.query('symbol == "{}"'.format(symbol))
+
+        df.drop(["symbol", "side", 'tickDirection', 'trdMatchID', 'grossValue', 'homeNotional', 'foreignNotional'], axis=1, inplace=True)
+        df = df.sort_index()
+        df['timestamp'] = pd.to_datetime(df['timestamp'], format="%Y-%m-%dD%H:%M:%S.%f")
+        df = df.rename(columns={'timestamp': 'date_time', "size": "volume"})
+        df = df[["date_time", "price", "volume"]]
+
+        return df
+
+    def make_dollar_bar(self):
+        """make_dollar_bar func
+
+        Note:
+            参考 : https://kabukimining.hateblo.jp/entry/FinanceDollarBar
+
+        """
+        self.download_dataset()
+        row_data_df = pd.read_csv(self.filepath)
+        print("data_df shape", row_data_df.shape)
+        print("data_df columns", row_data_df.columns)
+        print("data_df index", row_data_df.index)
+
+        data_df = self.make_candles(row_data_df, self.symbol)
+
+        print("data_df head\n", data_df.head())
+
+        # dollar = standard_data_structures.get_dollar_bars(data_df, \
+        #          threshold=self.threshold, batch_size=1000000, verbose=True, \
+        #          to_csv=True, output_path=file_title)
+        dollar = standard_data_structures.get_dollar_bars(data_df, \
+                 threshold=self.threshold, batch_size=1000000, verbose=True,)
+        print("dollar", dollar.shape)
+        print("dollar head\n", dollar.head())
