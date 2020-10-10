@@ -1,10 +1,12 @@
 google-cloud-storage
+investpy
 joblib
 jsm
 keras
 logzero
 lxml
 matplotlib
+mlfinlab
 mpl_finance
 numpy
 pandas
@@ -15,3 +17,4 @@ sklearn
 tensorflow==2.1.0
 tables
 xlrd
+YahooFinanceSpider
