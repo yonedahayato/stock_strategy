@@ -7,6 +7,7 @@ p_path = os.path.dirname(abspath)
 sys.path.append(p_path + "/check_reward")
 sys.path.append(p_path + "/get_stock_info/google_cloud_storage")
 sys.path.append(p_path + "/get_stock_info/google_cloud_storage/google/cloud_storage")
+sys.path.append(p_path + "/get_stock_info")
 sys.path.append(p_path + "/helper")
 sys.path.append(p_path + "/stock_strategy")
 
@@ -17,6 +18,13 @@ from result import Result
 import setting
 from stock_strategy import StockStrategy
 from move_average import MoveAverage
+from get_new_stock_code import (
+    GetCodeList,
+    GetCodeListNikkei225,
+)
+from get_stock_data import (
+    GetStockData,
+)
 
 # log file
 from log import (
