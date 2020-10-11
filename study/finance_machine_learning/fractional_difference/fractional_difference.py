@@ -15,7 +15,14 @@ class FractionlDifference(object):
     分数次差分の処理をまとめる
 
     """
-    def fractional_difference(self, data_df, FFD=True, save=False):
+
+    def __init__(self, sample_weighting):
+        self.sample_weighting = sample_weighting
+
+        self.events = sample_weighting.events
+        self.bins_sampled = sample_weighting.bins_sampled
+
+    def fractional_difference(self, data_df, FFD=True, save=False, sample=True):
         """
         分数次差分の処理を実行する
 
@@ -23,6 +30,7 @@ class FractionlDifference(object):
             data_df(pandas.DataFrame): 入力
             FFD(bool): FFDを使用するかどうか
             save(bool): 結果を保存するかどうか
+            sample(bool): bins_sampled を利用して抽出するかどうか
 
         Returns:
             pandas.DataFrame:結果
@@ -37,10 +45,33 @@ class FractionlDifference(object):
             print("標準的な分数次差分（拡大ウインドウ）を利用します")
             frac_diff_df = frac_diff(data_df, d)
 
-        print("frac_diff_df", frac_diff_df)
+        if sample:
+            frac_diff_df = self.sampling(frac_diff_df)
 
-        return frac_diff_df
+        self.frac_diff_df = frac_diff_df
+        return frac_diff_df, self.bins_sampled
 
+    def sampling(self, frac_diff_df):
+        """sampling func
+
+        bins_sampled を利用して抽出する
+
+        """
+        # カラム名の取得
+        events_col = self.events.columns
+        bins_sampled_col = self.bins_sampled.columns
+        frac_diff_col = frac_diff_df.columns
+
+        # 連結と削除
+        concat_df = pd.concat([self.events, self.bins_sampled, frac_diff_df], axis=1)
+        concat_df = concat_df.dropna(how='any')
+
+        # 分割
+        frac_diff_sampled_df = concat_df.loc[:, frac_diff_col]
+        self.bins_sampled = concat_df.loc[:, bins_sampled_col]
+        self.events = concat_df.loc[:, events_col]
+
+        return frac_diff_sampled_df
 
 
 def get_weights(d, size):
@@ -173,16 +204,12 @@ def frac_diff_FFD(series, d, thres=1e-4):
 
     """
     w = get_weights_FFD(d, thres)
-    print("w shape", w.shape)
     width = len(w) - 1
     df = {}
 
     for name in series.columns:
-        print("columns name: {}".format(name))
         series_f = series[[name]].fillna(method="ffill").dropna()
         df_tmp = pd.Series()
-
-        print("width, series_f.shape[0]", width, series_f.shape[0])
 
         for iloc1 in range(width, series_f.shape[0]):
             loc0 = series_f.index[iloc1 - width]

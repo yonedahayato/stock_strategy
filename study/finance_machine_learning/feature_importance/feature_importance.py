@@ -3,6 +3,7 @@
     Section8
 
 """
+import itertools
 import numpy as np
 import os
 import pandas as pd
@@ -26,6 +27,32 @@ from cross_validation.cross_validation import (
 from multiprocessing_vector.multiprocessing_vector import (
     mp_pandas_obj,
 )
+
+class FeatureImportance(object):
+    def __init__(self, fractional_difference):
+        self.fractional_difference = fractional_difference
+
+    def feature_importance(self, n_estimators=5, cv=10):
+        trns_x = self.fractional_difference.frac_diff_df
+        cont = pd.concat([self.fractional_difference.bins_sampled, \
+                          self.fractional_difference.events], axis=1)
+
+        args_feat_importance = {
+            "min_w_leaf": [0.0], "scoring": ["accuracy"], "method": ["MDI", "MDA", "SFI"],
+            "max_samples": [1.0]
+        }
+        jobs = (dict(zip(args_feat_importance, i) ) for i in itertools.product(*args_feat_importance.values()))
+        out = []
+        args_main = {
+            "path_out": "./", "n_estimators": n_estimators, "tag": "test_func", "cv": cv
+        }
+
+        for job in jobs:
+            job["sim_num"] = "{method}_{scoring}_{min_w_leaf}_{max_samples}".format(
+                             method=job["method"], scoring=job["scoring"], min_w_leaf=job["min_w_leaf"], max_samples=job["max_samples"]
+                             )
+            args_main.update(job)
+            imp, oob, oos = feat_importance(trns_x=trns_x, cont=cont, **args_main)
 
 def feat_imp_MDI(fit, feat_names):
     """feature_imo_MDI func
@@ -146,6 +173,7 @@ def get_test_data(n_features=40, n_informative=10, n_redundant=10, n_samples=500
     Returns:
         pd.DataFrame: 特徴量データセット
         pd.DataFrame: ラベルデータセット
+            ['bin', 'w', 't1']
     """
     trns_x, cont = make_classification(n_samples=n_samples, n_features=n_features, \
                                        n_informative=n_informative, n_redundant=n_redundant, \

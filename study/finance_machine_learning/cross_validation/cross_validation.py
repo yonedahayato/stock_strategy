@@ -11,6 +11,19 @@ from sklearn.model_selection import KFold
 
 BaseKFold = KFold
 
+class CrossValidation(object):
+    def __init__(self, ensemble, fractional_difference):
+        self.ensemble = ensemble
+        self.fractional_difference = fractional_difference
+
+    def cross_validation(self):
+        trns_x = self.fractional_difference.frac_diff_df
+        cont = self.fractional_difference.bins_sampled
+        t1 = self.fractional_difference.events["t1"]
+
+        score = cv_score(clf=self.ensemble.main_clf, X=trns_x, y=cont["bin"], sample_weight=cont["w"], t1=t1)
+        return score
+
 def get_train_times(t1, test_times):
     """get_train_times func
 
@@ -76,7 +89,7 @@ class PurgedKFold(BaseKFold):
         テストデータセットは連続的(shuffle=False)で、間に訓練データがないとする
 
     """
-    def __init__(self, n_splits=3, t1=None, pct_embargo=0.0):
+    def __init__(self, n_splits=3, t1=None, pct_embargo=0.1):
         """__init__ func
 
         t1 の型確認
@@ -126,7 +139,7 @@ class PurgedKFold(BaseKFold):
 
             yield train_indices, test_indices
 
-def cv_score(clf, X, y, sample_weight, scoring="neg_log_loss", t1=None, cv=None, cv_gen=None, pct_embargo=None):
+def cv_score(clf, X, y, sample_weight, scoring="neg_log_loss", t1=None, cv=3, cv_gen=None, pct_embargo=0.1):
     """cv_score func
 
     PurgedKFold クラスの使用
@@ -146,7 +159,7 @@ def cv_score(clf, X, y, sample_weight, scoring="neg_log_loss", t1=None, cv=None,
 
         if scoring == "neg_log_loss":
             prob = fit.predict_proba(X.iloc[test, :])
-            socre_tmp = -log_loss(y.iloc[test], prob, sample_weight=sample_weight.iloc[test].values)
+            score_tmp = -log_loss(y.iloc[test], prob, sample_weight=sample_weight.iloc[test].values)
         else:
             pred = fit.predict(X.iloc[test, :])
             score_tmp = accuracy_score(y.iloc[test], pred, sample_weight=sample_weight.iloc[test].values)
