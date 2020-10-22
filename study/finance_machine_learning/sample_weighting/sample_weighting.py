@@ -12,14 +12,26 @@ import sys
 ABSPATH = os.path.abspath(__file__)
 BASEDIR = os.path.dirname(ABSPATH)
 PARENTDIR = os.path.dirname(BASEDIR)
+PPARENTDIR = os.path.dirname(PARENTDIR)
+PPPARENTDIR = os.path.dirname(PPARENTDIR)
 
 sys.path.append(PARENTDIR)
+sys.path.append(PPPARENTDIR)
 
 from multiprocessing_vector.multiprocessing_vector import (
     mp_pandas_obj,
     process_jobs_single,
 )
 
+from helper.log import logger
+
+from utils import (
+    FilePath
+)
+
+file_path = FilePath()
+
+delta = 0.001
 
 class SampleWeighting(object):
     """SampleWeighting class
@@ -34,7 +46,7 @@ class SampleWeighting(object):
         self.num_threads = 1
         self.code = labeling.code
 
-        self.bins_save_filename = "{}_labels_bins_sampled.csv".format(self.code)
+        self.bins_save_filename = file_path.get_path(code=self.code, file_type="labels_sampled")
 
     def sample_weighting(self, check_mc=False, save=False):
         """sample_weighting func
@@ -92,7 +104,7 @@ class SampleWeighting(object):
 
         phi = list(set(sorted(phi)))
         self.bins_sampled = self.bins.iloc[phi, :]
-        print("サンプル前 -> サンプル後: {} -> {}".format(len(self.bins), len(self.bins_sampled)))
+        logger.info("サンプル前 -> サンプル後: {} -> {}".format(len(self.bins), len(self.bins_sampled)))
 
         if save:
             print("結果を保存します")
@@ -250,12 +262,15 @@ class SampleWeighting(object):
             ind_matrix(pandas.DataFrame): インディケータ行列
 
         Returns:
-            xxx(xxx)
+            pandas.Series: 平均独自性
         """
 
         c = ind_matrix.sum(axis=1)      # 同時発生性
+        c += delta
         u = ind_matrix.div(c, axis=0)   # 独自性
-        avg_u = u[u > 0.0].mean()       # 平均独自性
+
+        # 平均独自性
+        avg_u = u[u >= 0.0].mean()
 
         return avg_u
 
@@ -283,6 +298,11 @@ class SampleWeighting(object):
                 avg_u.loc[i] = SampleWeighting.get_avg_uniqueness(ind_matrix_tmp).iloc[-1]
 
             prob = avg_u / avg_u.sum() # 抽出確率
+
+            if prob.isnull().any():
+                print(avg_u)
+                raise Exception("prob の計算ができません")
+
             phi += [np.random.choice(ind_matrix.columns, p=prob)]
 
         return phi
