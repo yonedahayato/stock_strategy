@@ -1,4 +1,5 @@
 /get_stock_info/stock_data/*.csv
+/get_stock_info/stock_data/*.pkl
 /get_stock_info/get_exchange_data/exchange_data/*.csv
 /get_stock_info/stock_data_backup*
 */setting.py
