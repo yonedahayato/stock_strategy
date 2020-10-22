@@ -4,15 +4,44 @@
 
 """
 
+import os
+import pandas as pd
 # from scipy.misc import comb
 from scipy.special import comb
 from sklearn.ensemble import BaggingClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
+import sys
 
-class Ensemble(object):
-    def __init__(self, fractional_difference):
+ABSPATH = os.path.abspath(__file__)
+BASEDIR = os.path.dirname(ABSPATH)
+PARENTDIR = os.path.dirname(BASEDIR)
+
+sys.path.append(PARENTDIR)
+
+from utils import (
+    ProcessingBase,
+)
+
+class Ensemble(ProcessingBase):
+    """
+
+    アンサンブルの処理についてまとめる
+
+    """
+    def __init__(self, fractional_difference=None, fractional_difference_datasets=None):
+        """__init__ func
+
+        引数を格納する
+
+        Note:
+            fractional_difference object または、fractional_difference_datasets class
+            のどちらかを引数として取得できれば、処理を行うことができる
+            どちらも入力された場合は、fractional_difference_datasets に対して実行する
+
+        """
         self.fractional_difference = fractional_difference
+        self.fractional_difference_datasets = fractional_difference_datasets
 
     def ensemble(self, avg_u):
         self.set_RF(avg_u)
@@ -41,8 +70,19 @@ class Ensemble(object):
         self.main_clf = clf2
 
     def fit(self):
-        trns_x = self.fractional_difference.frac_diff_df
-        cont = self.fractional_difference.bins_sampled
+        """fit func
+
+        データを取得して、学習処理を行う
+
+        """
+        if self.fractional_difference_datasets is None:
+            trns_x = self.fractional_difference.frac_diff_df
+            cont = self.fractional_difference.bins_sampled
+        else:
+            trns_x = self.fractional_difference_datasets.frac_diff_concated_df
+            cont = self.fractional_difference_datasets.bins_sampled_concated_df
+
+        self.logger.info("学習データ : {}".format(trns_x.shape))
 
         fit0 = self.clf0.fit(X=trns_x, y=cont["bin"], sample_weight=cont["w"].values)
         fit1 = self.clf1.fit(X=trns_x, y=cont["bin"], sample_weight=cont["w"].values)
