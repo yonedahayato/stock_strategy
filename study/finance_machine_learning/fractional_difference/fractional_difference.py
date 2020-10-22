@@ -7,12 +7,68 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import os
 import pandas as pd
+import sys
 
-class FractionlDifference(object):
-    """FractionlDifference class
+ABSPATH = os.path.abspath(__file__)
+BASEDIR = os.path.dirname(ABSPATH)
+PARENTDIR = os.path.dirname(BASEDIR)
+
+sys.path.append(PARENTDIR)
+
+from utils import (
+    ProcessingBase,
+)
+
+class FractionalDifferenceDatasets(ProcessingBase):
+    """FractionalDifferenceDatasets class
+
+    FractionalDifference class のデータ（銘柄単位のデータ）をまとめるためのクラス
+
+    """
+    fractional_difference_list = []
+
+    def concat(self, fractional_difference_list=None, save=True):
+        """concat func
+
+        FractionalDifference class のデータ（銘柄単位のデータ）を連結する
+
+        """
+        if fractional_difference_list is None:
+            fractional_difference_list = self.fractional_difference_list
+
+        frac_diff_concated = []
+        bins_sampled_concated = []
+        for fractional_difference in fractional_difference_list:
+            if isinstance(fractional_difference, FractionalDifference):
+                frac_diff_concated.append(fractional_difference.frac_diff_df)
+                bins_sampled_concated.append(fractional_difference.bins_sampled)
+            else:
+                self.logger.warning("入力されているクラスが異常です")
+
+        self.frac_diff_concated_df = pd.concat(frac_diff_concated)
+        self.bins_sampled_concated_df = pd.concat(bins_sampled_concated)
+
+        return self.frac_diff_concated_df, self.bins_sampled_concated_df
+
+    def append(self, fractional_difference):
+        if isinstance(fractional_difference, FractionalDifference):
+            self.fractional_difference_list.append(fractional_difference)
+        else:
+            self.logger.warning("入力されているクラスが異常です")
+
+    def is_fractional_difference(self, object_):
+
+        return isinstance(object_, FractionalDifference)
+
+class FractionalDifference(ProcessingBase):
+    """FractionalDifference class
 
     分数次差分の処理をまとめる
+
+    Note:
+        銘柄単位の情報を保持、もしくは計算する
 
     """
 
@@ -21,6 +77,7 @@ class FractionlDifference(object):
 
         self.events = sample_weighting.events
         self.bins_sampled = sample_weighting.bins_sampled
+        self.code = sample_weighting.code
 
     def fractional_difference(self, data_df, FFD=True, save=False, sample=True):
         """
@@ -39,14 +96,18 @@ class FractionlDifference(object):
         d = 0.5
 
         if FFD:
-            print("固定幅ウインドウ分数次差分(FFD)を利用します")
+            self.logger.info("固定幅ウインドウ分数次差分(FFD)を利用します")
             frac_diff_df = frac_diff_FFD(data_df, d)
         else:
-            print("標準的な分数次差分（拡大ウインドウ）を利用します")
+            self.logger.info("標準的な分数次差分（拡大ウインドウ）を利用します")
             frac_diff_df = frac_diff(data_df, d)
 
         if sample:
             frac_diff_df = self.sampling(frac_diff_df)
+
+        if save:
+            file_path = self.file_path.get_path(code=self.code, file_type="frac_diff_data", ext="pkl")
+            frac_diff_df.to_pickle(file_path)
 
         self.frac_diff_df = frac_diff_df
         return frac_diff_df, self.bins_sampled
@@ -54,7 +115,7 @@ class FractionlDifference(object):
     def sampling(self, frac_diff_df):
         """sampling func
 
-        bins_sampled を利用して抽出する
+        bins_sampled の情報からサンプリングされたデータのみを抽出する
 
         """
         # カラム名の取得
@@ -72,6 +133,13 @@ class FractionlDifference(object):
         self.events = concat_df.loc[:, events_col]
 
         return frac_diff_sampled_df
+
+    def load(self):
+        file_path = self.file_path.get_path(code=self.code, file_type="frac_diff_data", ext="pkl")
+        self.frac_diff_df = pd.read_pickle(file_path)
+        self.frac_diff_df = self.sampling(self.frac_diff_df)
+
+        return self.frac_diff_df, self.bins_sampled
 
 
 def get_weights(d, size):
