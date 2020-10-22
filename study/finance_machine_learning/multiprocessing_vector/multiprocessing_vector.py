@@ -6,9 +6,21 @@
 import datetime as dt
 import numpy as np
 import multiprocessing as mp
+import os
 import pandas as pd
 import sys
 import time
+
+ABSPATH = os.path.abspath(__file__)
+BASEDIR = os.path.dirname(ABSPATH)
+PARENTDIR = os.path.dirname(BASEDIR)
+PPARENTDIR = os.path.dirname(PARENTDIR)
+PPPARENTDIR = os.path.dirname(PPARENTDIR)
+
+sys.path.append(PARENTDIR)
+sys.path.append(PPPARENTDIR)
+
+from helper.log import logger
 
 def lin_parts(num_atoms, num_threads):
     """lin_parts func
@@ -184,6 +196,10 @@ def mp_pandas_obj(func, pd_obj, num_threads=24, mp_batches=1, lin_mols=True, **k
         out = process_jobs_single(jobs)
     else:
         out = process_jobs(jobs, num_threads=num_threads)
+
+    if len(out) == 0:
+        logger.warn("結果の件数が0です。確認してください。")
+        return out
 
     if isinstance(out[0], pd.DataFrame):
         df0 = pd.DataFrame()
