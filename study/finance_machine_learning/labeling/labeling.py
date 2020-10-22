@@ -12,8 +12,11 @@ import sys
 ABSPATH = os.path.abspath(__file__)
 BASEDIR = os.path.dirname(ABSPATH)
 PARENTDIR = os.path.dirname(BASEDIR)
+PPARENTDIR = os.path.dirname(PARENTDIR)
+PPPARENTDIR = os.path.dirname(PPARENTDIR)
 
 sys.path.append(PARENTDIR)
+sys.path.append(PPPARENTDIR)
 
 from financial_data_structure.financial_data_structure import (
     get_t_events,
@@ -21,6 +24,13 @@ from financial_data_structure.financial_data_structure import (
 from multiprocessing_vector.multiprocessing_vector import (
     mp_pandas_obj,
 )
+
+from helper.log import logger
+from utils import (
+    FilePath,
+)
+
+file_path = FilePath()
 
 class Labeling(object):
     """Labeling class
@@ -33,8 +43,86 @@ class Labeling(object):
         self.bins = pd.DataFrame()
         self.events = pd.DataFrame()
 
-        self.bins_save_filename = "{}_labels_bins.csv".format(self.code)
-        self.events_save_filename = "{}_labels_events.csv".format(self.code)
+        self.bins_save_filename = file_path.get_path(code=code, file_type="labels_bins")
+        self.events_save_filename = file_path.get_path(code=code, file_type="labels_events")
+
+    def labeling(self, close_df, num_days=5, save=False, min_pct=0.05):
+        """labeling func
+
+        ラベリングの処理を実行する
+
+        Args:
+            close_df(pandas.DataFrame): 価格情報
+            num_days(int): xxx
+            save(bool): 保存するかどうか
+            min_pct(float): drop_labels で使用
+
+        Note:
+            1. 変化分が大きいシグナルを検出(t_events, get_t_events)、CUSUMサンプリング
+            2. 変化率を計算(daily_vol_df, get_daily_vol)
+            3. トリプルバリア法により、ラベルづけ可能なシグナルを検出(events, get_events)
+            4. ラベルを決定(get_bin)
+            5. 重複ラベルを削除(drop_labels)
+
+        """
+        logger.info("close_df len: {}".format(len(close_df)))
+        t_events = get_t_events(close_df, h=30)
+        daily_vol_df = self.get_daily_vol(close_df, num_days=num_days)
+        logger.info("t_events len: {}".format(len(t_events)))
+
+        events = self.get_events(close = close_df, t_events=t_events, ptsl=[0.1, 0.1], \
+                                 trgt=daily_vol_df, min_ret=0.03, num_threads=1, num_days=num_days,\
+                                 t1=True)
+        logger.info("events len: {}".format(len(events)))
+        bins = self.get_bins(events, close_df)
+        bins = self.drop_labels(bins, min_pct=min_pct)
+
+        if save:
+            print("label file を保存します。")
+            bins.to_csv(self.bins_save_filename)
+            events.to_csv(self.events_save_filename)
+
+        self.close_df = close_df
+        self.bins = bins
+        self.events = events
+
+        return bins, events
+
+    def load(self, csv_path=None):
+        """load func
+
+        csv からラベルを読み込む
+
+        """
+
+        self.bins = pd.read_csv(self.bins_save_filename, index_col=0)
+        self.events = pd.read_csv(self.events_save_filename, index_col=0)
+
+        self.bins.index = pd.to_datetime(self.bins.index)
+        self.events.index = pd.to_datetime(self.events.index)
+        self.events['t1'] = pd.to_datetime(self.events['t1'])
+
+        return self.bins, self.events
+
+    def get_labels(self):
+        """get_labels func
+
+        作成したラベルを取得する
+
+        Returns:
+            pandas.DataFrame: bins
+            pandas.DataFrame: events
+
+        Raises:
+            Exception: ラベルが作成できていない場合
+
+        """
+        if self.bins.empty or self.events.empty:
+            raise Exception("ラベリングができてないため、取得できません")
+        return self.bins, self.events
+
+    def set_row_data(self, close_df):
+        self.close_df = close_df
 
     @staticmethod
     def get_daily_vol(close, span0=100, num_days=1):
@@ -152,12 +240,22 @@ class Labeling(object):
                 t1: 最初のバリアに触れたときのタイムスタンプ
                 trgt: 水平バリアを生成するために使用されたターゲット
 
+        Raises:
+            ラベルの数が０件の場合
+
         """
         # 1: ターゲットの定義
-        try:
-            trgt = trgt.loc[t_events]
-        except:
-            trgt = trgt.loc[t_events[1:]]
+        index_cnt = 0
+        while True:
+            try:
+                trgt = trgt.loc[t_events[index_cnt:]]
+                break
+            except Exception as e:
+                index_cnt += 1
+
+            if index_cnt > len(t_events):
+                break
+
         trgt = trgt[trgt > min_ret] # min_ret
 
         # 2: t1(最大保有期間)の定義
@@ -181,6 +279,9 @@ class Labeling(object):
 
         df0 = mp_pandas_obj(func=Labeling.apply_ptsl_on_t1, pd_obj = ("moleculte", events.index), num_threads = num_threads, \
                             close = close, events = events, ptsl = new_ptsl)
+
+        if len(df0) == 0:
+            raise Exception("ラベルの数が0。これ以上処理を進めることができない")
 
         # pd.min は nan を無視する
         events["t1"] = df0.dropna(how = "all").min(axis=1)
@@ -256,86 +357,15 @@ class Labeling(object):
 
         """
         # ウェイトを適用し、不十分なレベルを削除する例
+        cnt = 0
         while True:
             df0 = events["bin"].value_counts(normalize=True)
             if df0.min() > min_pct or df0.shape[0] < 3:
                 break
+            else:
+                if cnt % 1000 == 0:
+                    min_pct /= 2
+
             print("dropped label", df0.argmin(), df0.min())
             events = events[events["bin"] != df0.argmin()]
         return events
-
-    def labeling(self, close_df, num_days=5, save=False):
-        """labeling func
-
-        ラベリングの処理を実行する
-
-        Args:
-            close_df(pandas.DataFrame): 価格情報
-            num_days(int): xxx
-
-        Note:
-            1. 変化分が大きいシグナルを検出(t_events, get_t_events)、CUSUMサンプリング
-            2. 変化率を計算(daily_vol_df, get_daily_vol)
-            3. トリプルバリア法により、ラベルづけ可能なシグナルを検出(events, get_events)
-            4. ラベルを決定(get_bin)
-            5. 重複ラベルを削除(drop_labels)
-
-        """
-        print("\nclose_df len: ", len(close_df))
-        t_events = get_t_events(close_df, h=30)
-        daily_vol_df = self.get_daily_vol(close_df, num_days=num_days)
-        print("t_events len: ", len(t_events))
-
-        events = self.get_events(close = close_df, t_events=t_events, ptsl=[0.1, 0.1], \
-                                 trgt=daily_vol_df, min_ret=0.03, num_threads=1, num_days=num_days,\
-                                 t1=True)
-        print("events len: ", len(events))
-        bins = self.get_bins(events, close_df)
-        bins = self.drop_labels(bins)
-
-        if save:
-            print("label file を保存します。")
-            bins.to_csv(self.bins_save_filename)
-            events.to_csv(self.events_save_filename)
-
-        self.close_df = close_df
-        self.bins = bins
-        self.events = events
-
-        return bins, events
-
-    def load(self, csv_path=None):
-        """load func
-
-        csv からラベルを読み込む
-
-        """
-
-        self.bins = pd.read_csv(self.bins_save_filename, index_col=0)
-        self.events = pd.read_csv(self.events_save_filename, index_col=0)
-
-        self.bins.index = pd.to_datetime(self.bins.index)
-        self.events.index = pd.to_datetime(self.events.index)
-        self.events['t1'] = pd.to_datetime(self.events['t1'])
-
-        return self.bins, self.events
-
-    def get_labels(self):
-        """get_labels func
-
-        作成したラベルを取得する
-
-        Returns:
-            pandas.DataFrame: bins
-            pandas.DataFrame: events
-
-        Raises:
-            Exception: ラベルが作成できていない場合
-
-        """
-        if self.bins.empty or self.events.empty:
-            raise Exception("ラベリングができてないため、取得できません")
-        return self.bins, self.events
-
-    def set_row_data(self, close_df):
-        self.close_df = close_df
