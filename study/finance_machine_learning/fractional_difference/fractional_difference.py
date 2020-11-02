@@ -40,15 +40,19 @@ class FractionalDifferenceDatasets(ProcessingBase):
 
         frac_diff_concated = []
         bins_sampled_concated = []
+        events_concated = []
         for fractional_difference in fractional_difference_list:
             if isinstance(fractional_difference, FractionalDifference):
                 frac_diff_concated.append(fractional_difference.frac_diff_df)
                 bins_sampled_concated.append(fractional_difference.bins_sampled)
+                events_concated.append(fractional_difference.events)
+
             else:
                 self.logger.warning("入力されているクラスが異常です")
 
         self.frac_diff_concated_df = pd.concat(frac_diff_concated)
         self.bins_sampled_concated_df = pd.concat(bins_sampled_concated)
+        self.events_concated_df = pd.concat(events_concated)
 
         return self.frac_diff_concated_df, self.bins_sampled_concated_df
 
