@@ -28,7 +28,12 @@ class Ensemble(ProcessingBase):
 
     アンサンブルの処理についてまとめる
 
+    Attributes:
+        main_clf(xxx): fit 関数で実行されるオブジェクト
+
     """
+    main_clf = None
+
     def __init__(self, fractional_difference=None, fractional_difference_datasets=None):
         """__init__ func
 
