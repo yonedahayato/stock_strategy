@@ -30,6 +30,10 @@ from ensemble.ensemble import (
     Ensemble,
 )
 
+from cross_validation.cross_validation import (
+    CrossValidation,
+)
+
 from helper.log import logger
 
 class FinanceMachineLearning(StockStrategy):
@@ -38,6 +42,8 @@ class FinanceMachineLearning(StockStrategy):
     この書籍の処理を取りまとめる
 
     """
+    debug_code_num = 30
+
     def __init__(self, method_name="fincance_machine_learning", **kargs):
         super().__init__(method_name=method_name, **kargs)
         self.code_list = self.get_code_list()
@@ -75,7 +81,7 @@ class FinanceMachineLearning(StockStrategy):
         """
         self.codes_curated = []
         for cnt, code in enumerate(self.code_list):
-            if cnt > 10 and self.debug:
+            if cnt > self.debug_code_num and self.debug:
                 break
 
             logger.info("=== {} ===".format(code))
@@ -180,8 +186,14 @@ class FinanceMachineLearning(StockStrategy):
         frac_diff_concated_df, bins_sampled_concated_df = fractional_difference_datasets.concat()
 
         if cv:
-            pass
+            logger.info("CV を使用")
+            ensemble = Ensemble(fractional_difference_datasets = fractional_difference_datasets)
+            cross_validation = CrossValidation(ensemble, fractional_difference_datasets = fractional_difference_datasets)
+            score = cross_validation.cross_validation()
+            logger.info("cv のスコア: {}".format(score))
+
         else:
+            logger.info("CV を不使用")
             avg_u = 10
             ensemble = Ensemble(fractional_difference_datasets = fractional_difference_datasets)
             ensemble.ensemble(avg_u)
@@ -281,4 +293,4 @@ class FinanceMachineLearning(StockStrategy):
 
         self.codes_analyzed = self.code_list
         logger.info("training")
-        self.train(cv=False)
+        self.train(cv=True)
