@@ -5,23 +5,82 @@
 """
 
 import numpy as np
+import os
 import pandas as pd
 from sklearn.metrics import log_loss, accuracy_score
 from sklearn.model_selection import KFold
+import sys
+
+ABSPATH = os.path.abspath(__file__)
+BASEDIR = os.path.dirname(ABSPATH)
+PARENTDIR = os.path.dirname(BASEDIR)
+
+sys.path.append(PARENTDIR)
+
+from utils import (
+    ProcessingBase,
+)
 
 BaseKFold = KFold
 
-class CrossValidation(object):
-    def __init__(self, ensemble, fractional_difference):
+class CrossValidation(ProcessingBase):
+    """
+
+    Cross Validation の処理についてまとめる
+
+    """
+    def __init__(self, ensemble, fractional_difference=None, fractional_difference_datasets=None):
+        """__init__ func
+
+        引数を格納する
+
+        Note:
+            fractional_difference object または、fractional_difference_datasets class
+            のどちらかを引数として取得できれば、処理を行うことができる
+            どちらも入力された場合は、fractional_difference_datasets に対して実行する
+
+        """
         self.ensemble = ensemble
         self.fractional_difference = fractional_difference
+        self.fractional_difference_datasets = fractional_difference_datasets
 
-    def cross_validation(self):
-        trns_x = self.fractional_difference.frac_diff_df
-        cont = self.fractional_difference.bins_sampled
-        t1 = self.fractional_difference.events["t1"]
+    def cross_validation(self, purged=False):
+        """cross_validation func
 
-        score = cv_score(clf=self.ensemble.main_clf, X=trns_x, y=cont["bin"], sample_weight=cont["w"], t1=t1)
+        Cross Validation の処理を実行する
+
+        Args:
+            purged(bool): パージを適用したCVを行うかどうか
+
+        """
+        if self.fractional_difference_datasets is None:
+            trns_x = self.fractional_difference.frac_diff_df
+            cont = self.fractional_difference.bins_sampled
+            t1 = self.fractional_difference.events["t1"]
+
+        else:
+            trns_x = self.fractional_difference_datasets.frac_diff_concated_df
+            cont = self.fractional_difference_datasets.bins_sampled_concated_df
+            t1 = self.fractional_difference_datasets.events_concated_df["t1"]
+
+        self.logger.info("cont.describe(): {}".format(cont.describe()))
+        hist, bin_edges = np.histogram(cont["bin"])
+        self.logger.info("hist: {}".format(hist))
+        self.logger.info("bin_edges: {}".format(bin_edges))
+
+        if self.ensemble.main_clf is None:
+            avg_u = 10
+            self.ensemble.set_RF(avg_u)
+
+        if purged:
+            pass
+        else:
+            self.logger.warn("パージを行わないCVを行います。")
+            cv = 2
+            cv_gen = KFold(n_splits=cv, shuffle=False, random_state=None)
+
+        score = cv_score(clf=self.ensemble.main_clf, X=trns_x, y=cont["bin"], sample_weight=cont["w"], t1=t1, \
+                         cv_gen=cv_gen)
         return score
 
 def get_train_times(t1, test_times):
@@ -104,7 +163,7 @@ class PurgedKFold(BaseKFold):
         if not isinstance(t1, pd.Series):
             raise ValueError("Label Through Dates must be a pd.Series")
 
-        super(PurgedKFold, self).__init__(n_splits, shuffle=False, random_state=None)
+        super().__init__(n_splits, shuffle=False, random_state=None)
 
         self.t1 = t1
         self.pct_embargo = pct_embargo
@@ -144,6 +203,15 @@ def cv_score(clf, X, y, sample_weight, scoring="neg_log_loss", t1=None, cv=3, cv
 
     PurgedKFold クラスの使用
     スニペット 7.4
+
+    Note:
+        label の値は {-1, 0, 1}のどれか
+        しかし、0のデータ数が少なく、学習データに含まれていない場合があり、
+        その場合は、テストデータで初めて出てきた0に対し、loss の計算ができなくエラーが出る場合がある
+        学習データとテストデータでの逆のケースもでもエラーが生じる
+
+        対策
+            データセット数を増やす
 
     """
     if scoring not in ["neg_log_loss", "accuracy"]:
