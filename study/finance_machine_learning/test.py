@@ -36,18 +36,26 @@ from fractional_difference.fractional_difference import (
     plot_weights,
     frac_diff,
     frac_diff_FFD,
-    FractionlDifference,
+    FractionalDifference,
 )
 
 from ensemble.ensemble import (
     bagging_accuracy,
-    set_RF,
+    Ensemble,
+)
+
+from cross_validation.cross_validation import (
+    CrossValidation,
+    cv_score,
 )
 
 from feature_importance.feature_importance import (
     get_test_data,
     feat_importance,
+    FeatureImportance,
 )
+
+from back_test_of_artificial_data.back_test_of_artificial_data import main as back_test_of_artificial_data_main
 
 from multiprocessing_vector.multiprocessing_vector import (
     lin_parts,
@@ -56,6 +64,8 @@ from multiprocessing_vector.multiprocessing_vector import (
     process_jobs,
     process_jobs_single,
 )
+
+from .finance_machine_learning import FinanceMachineLearning
 
 TEST_CODE = 1332
 
@@ -68,26 +78,57 @@ class TestOriginalData(object):
     TEST_CODE = TEST_CODE
 
     def test_original_data(self):
+        """test_original_data func
+
+        あるテスト銘柄でのテスト
+
+        """
         stock_strategy = StockStrategy()
         self.data_df = stock_strategy.get_stock_data(code = self.TEST_CODE)
 
         close_df = self.data_df["Close"]
         self.close_df = close_df
+        save = False
 
         # section 3
         labeling = Labeling(code=self.TEST_CODE)
-        # self.bins, self.events = labeling.labeling(close_df, save=True)
-        self.bins, self.events = labeling.load()
+        self.bins, self.events = labeling.labeling(close_df, save=save)
+        # self.bins, self.events = labeling.load()
         labeling.set_row_data(close_df)
 
         # section 4
-        self.sample_weighting = SampleWeighting(labeling)
-        # self.bins_sampled = self.sample_weighting.sample_weighting(save=True)
-        self.bins_sampled = self.sample_weighting.load()
+        sample_weighting = SampleWeighting(labeling)
+        self.bins_sampled = sample_weighting.sample_weighting(save=save)
+        # self.bins_sampled = sample_weighting.load()
 
         # secion 5
-        self.fractional_difference = FractionlDifference()
-        self.frac_diff_df = self.fractional_difference.fractional_difference(self.data_df)
+        fractional_difference = FractionalDifference(sample_weighting)
+        self.frac_diff_df, self.bins_sampled = \
+            fractional_difference.fractional_difference(self.data_df, sample=True, save=save)
+
+        # section 6
+        avg_u = 10
+        ensemble = Ensemble(fractional_difference)
+        ensemble.ensemble(avg_u)
+
+        # section 7
+        cross_validation = CrossValidation(ensemble, fractional_difference)
+        score = cross_validation.cross_validation()
+        print("score", score)
+
+        # section 8
+        feature_importance = FeatureImportance(fractional_difference)
+        feature_importance.feature_importance()
+
+    def test_original_dataset(self):
+        """test_original_dataset func
+
+        複数のテスト銘柄でのテスト
+        FinanceMachineLearning の実行の確認も含む
+
+        """
+        finance_machine_learning = FinanceMachineLearning(debug=True)
+        finance_machine_learning.main()
 
 class TestFinancialDataStructure(object):
     """TestFinancialDataStructure
@@ -403,6 +444,27 @@ class TestEnsemble(object):
     section6
 
     """
+    TEST_CODE = TEST_CODE
+
+    def setup_class(self):
+        stock_strategy = StockStrategy()
+        self.data_df = stock_strategy.get_stock_data(code = self.TEST_CODE)
+
+        close_df = self.data_df["Close"]
+        self.close_df = close_df
+
+        labeling = Labeling(code=self.TEST_CODE)
+        # self.bins, self.events = labeling.labeling(close_df, save=True)
+        self.bins, self.events = labeling.load()
+        labeling.set_row_data(close_df)
+
+        self.sample_weighting = SampleWeighting(labeling)
+        # self.sample_weighting.sample_weighting(save=True)
+        self.bins_sampled = self.sample_weighting.load()
+
+        self.fractional_difference = FractionalDifference(self.bins_sampled)
+        self.frac_diff_df, self.bins_sampled = self.fractional_difference.fractional_difference(self.data_df, sample=True)
+
     def test_bagging_accuracy(self):
         """test_bagging_accuracy func
 
@@ -411,13 +473,16 @@ class TestEnsemble(object):
         """
         bagging_accuracy()
 
-    def test_set_RF(self):
+    def test_set_RF_and_fit(self):
         """test_set_RF func
 
-        set_RF のテスト
+        set_RF, fit のテスト
 
         """
-        set_RF(10)
+        avg_u = 10
+        ensemble = Ensemble()
+        ensemble.set_RF(avg_u)
+        ensemble.fit(trns_x = self.frac_diff_df, cont=self.bins_sampled)
 
 class TestFeatureImportance(object):
     """TestFeatureImportance class
@@ -472,6 +537,11 @@ class TestFeatureImportance(object):
             print(job["sim_num"])
             args_main.update(job)
             imp, oob, oos = feat_importance(trns_x=trns_x, cont=cont, **args_main)
+
+class TestBackTestOfArtificialData(object):
+    def test_back_test_of_artificial_data(self):
+        back_test_of_artificial_data_main()
+
 
 def my_func(molecule):
     return molecule
