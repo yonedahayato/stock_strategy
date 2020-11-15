@@ -54,6 +54,8 @@ class StockStrategy(object):
 
     """
 
+    debug_code_num = 10
+
     def __init__(self, debug=False, back_test_return_date=0,
                  method_name="method_name", multiprocess=False,
                  download_method="LOCAL", code_list = "1st_225"):
@@ -102,7 +104,7 @@ class StockStrategy(object):
         self.new_code_list = list(self.new_code_list["コード"])
 
         if self.debug:
-            self.new_code_list = self.new_code_list[:10]
+            self.new_code_list = self.new_code_list[:self.debug_code_num]
 
         return self.new_code_list
 

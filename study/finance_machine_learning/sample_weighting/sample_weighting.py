@@ -110,6 +110,8 @@ class SampleWeighting(object):
             print("結果を保存します")
             self.bins_sampled.to_csv(self.bins_save_filename)
 
+        return self.bins_sampled
+
     def load(self, csv_path=None):
         """load func
 

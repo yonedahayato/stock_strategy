@@ -77,11 +77,21 @@ class FractionalDifference(ProcessingBase):
     """
 
     def __init__(self, sample_weighting):
+        """__init__ func
+
+        sample_weighting の情報を格納して、情報を取得する
+        sample_weighting がない場合でも処理可能
+
+        """
         self.sample_weighting = sample_weighting
 
-        self.events = sample_weighting.events
-        self.bins_sampled = sample_weighting.bins_sampled
-        self.code = sample_weighting.code
+        if sample_weighting is None:
+            self.bins_sampled = None
+        else:
+            self.events = sample_weighting.events
+            self.bins_sampled = sample_weighting.bins_sampled
+            self.code = sample_weighting.code
+
 
     def fractional_difference(self, data_df, FFD=True, save=False, sample=True):
         """

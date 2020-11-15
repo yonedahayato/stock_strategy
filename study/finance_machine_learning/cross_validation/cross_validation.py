@@ -81,7 +81,7 @@ class CrossValidation(ProcessingBase):
 
         score = cv_score(clf=self.ensemble.main_clf, X=trns_x, y=cont["bin"], sample_weight=cont["w"], t1=t1, \
                          cv_gen=cv_gen)
-        return score
+        return score, self.ensemble
 
 def get_train_times(t1, test_times):
     """get_train_times func

@@ -36,6 +36,11 @@ from cross_validation.cross_validation import (
 
 from helper.log import logger
 
+from backtest.my_backtests import (
+    MyBacktests,
+    BacktestStrategy,
+)
+
 class FinanceMachineLearning(StockStrategy):
     """FinanceMachineLearning class
 
@@ -189,7 +194,8 @@ class FinanceMachineLearning(StockStrategy):
             logger.info("CV を使用")
             ensemble = Ensemble(fractional_difference_datasets = fractional_difference_datasets)
             cross_validation = CrossValidation(ensemble, fractional_difference_datasets = fractional_difference_datasets)
-            score = cross_validation.cross_validation()
+
+            score, ensemble = cross_validation.cross_validation()
             logger.info("cv のスコア: {}".format(score))
 
         else:
@@ -197,6 +203,8 @@ class FinanceMachineLearning(StockStrategy):
             avg_u = 10
             ensemble = Ensemble(fractional_difference_datasets = fractional_difference_datasets)
             ensemble.ensemble(avg_u)
+
+        self.ensemble = ensemble
 
     def load_data(self, data_name, code):
         """load_data func
@@ -274,23 +282,162 @@ class FinanceMachineLearning(StockStrategy):
 
         return
 
-
-    def predict(self):
+    def predict(self, data):
         """predict my_func
 
         推定に関する処理をまとめる
 
         """
-        pass
+        pred = self.ensemble.main_clf.predict(data)
+        return pred
+
+    def make_backtest(self, frac_diff_df):
+        """make backtest
+
+        backtest用の strategy class を作成する
+
+        Returns:
+            MyBacktestStrategy
+
+        """
+        def predict_backtest(data):
+            return self.predict(data)
+
+        ensemble = self.ensemble
+
+        class MyBacktestStrategy(BacktestStrategy):
+            """MyBacktestStrategy class
+
+            backtest に使用する Strategy class
+
+            """
+            price_delta = .004
+
+            def init(self):
+                self.ensemble = ensemble
+                self.predicts = []
+                self.frac_diff_df = frac_diff_df
+
+            def next(self):
+                try:
+                    frac_diff_df = self.analyze_feature()
+                    if frac_diff_df.empty:
+                        return
+                except KeyError:
+                    return
+                except Exception as e:
+                    logger.error("特徴量の取得に失敗")
+                    logger.exception(e)
+                    return
+                # else:
+                #     logger.info("特徴量抽出に成功")
+
+                # pred = predict_backtest(self.data.df.iloc[[-1], :])
+                pred = predict_backtest(frac_diff_df)
+                pred = pred[0]
+                self.predicts.append(pred)
+
+                upper, lower = self.data.Close[-1] * (1 + np.r_[1, -1]*self.price_delta)
+
+                if pred == 1.0 and not self.position.is_long:
+                    # logger.debug("buy")
+                    self.buy(tp=upper, sl=lower)
+                elif pred == -1.0 and not self.position.is_short:
+                    # logger.debug("sell")
+                    self.sell(tp=lower, sl=upper)
+
+            def analyze_feature(self, get_only=True):
+                """analyze_feature func
+
+                生データから特徴量の抽出する処理
+                差分の計算など、時系列ごとの処理をしていると時間がかかってしまう処理などは、
+                全時系列で処理する手段をとる
+
+                Args:
+                    get_only(bool):
+                        計算はせず、すでに計算されたデータから
+                        最前の時系列データを取得して返すかどうか
+
+                """
+                if get_only:
+                    current_time = self.data.index[-1]
+                    frac_diff_df = self.frac_diff_df.loc[[current_time], :]
+
+                else:
+                    fractional_difference = FractionalDifference(sample_weighting = None)
+                    frac_diff_df, bins_sampled = \
+                        fractional_difference.fractional_difference(self.data.df, sample=False, save=False)
+                    frac_diff_df = frac_diff_df.iloc[[-1], :]
+
+                return frac_diff_df
+
+        return MyBacktestStrategy
+
+    def backtest(self):
+        """backtest func
+
+        バックテストに関する処理をまとめる
+
+        """
+
+        results = {}
+        for code in self.codes_analyzed:
+            logger.info("=== {} ===".format(code))
+            my_backtests = MyBacktests()
+
+            try:
+                self.load_data(code=code, data_name="feature_extracted")
+            except Exception as e:
+                logger.error("ロード処理に失敗")
+                logger.exception(e)
+                continue
+            else:
+                logger.info("ロード処理に成功")
+
+            try:
+                self.fractional_difference = FractionalDifference(sample_weighting = None)
+                frac_diff_df, bins_sampled = \
+                    self.fractional_difference.fractional_difference(self.data_df, sample=False, save=False)
+            except Exception as e:
+                logger.error("特徴量抽出に失敗")
+                logger.exception(e)
+            else:
+                logger.info("特徴量抽出に成功")
+
+            MyBacktestStrategy = self.make_backtest(frac_diff_df)
+
+            try:
+                my_backtests.execute(self.data_df, MyBacktestStrategy)
+            except Exception as e:
+                logger.error("バックテストに失敗")
+                logger.exception(e)
+                continue
+            else:
+                logger.info("バックテストに成功")
+                results[code] = my_backtests
+
+        for code, result in results.items():
+            logger.info("=== {} ===".format(code))
+
+            logger.debug("=== stats ===")
+            logger.debug(result.stats)
+            logger.debug("=== equity_curve ===")
+            with pd.option_context('display.max_rows', 501):
+                logger.debug(result.stats["_equity_curve"])
+            logger.debug("=== trades ===")
+            logger.debug("\n{}".format(result.stats["_trades"]))
+            logger.debug("=== predicts ===")
+            logger.debug("\n{}".format(result.stats._strategy.predicts))
 
     def main(self):
-        # logger.info("curate_dataset")
-        # self.curate_dataset()
+        logger.info("curate_dataset")
+        self.curate_dataset(save=False)
 
-        # self.codes_curated = self.code_list
-        # logger.info("analyze_feature")
-        # self.analyze_feature()
+        self.codes_curated = self.code_list
+        logger.info("analyze_feature")
+        self.analyze_feature()
 
         self.codes_analyzed = self.code_list
         logger.info("training")
         self.train(cv=True)
+        self.backtest()
