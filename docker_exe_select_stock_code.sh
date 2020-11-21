@@ -5,6 +5,7 @@ LIB_IMAGE_NAME=select_stock_code_lib
 IMAGE_NAME=select_stock_code
 
 # docker rmi ${LIB_IMAGE_NAME}
+# docker rmi ${IMAGE_NAME}
 docker build -t ${LIB_IMAGE_NAME} -f dockerfile/select_stock_code/Dockerfile_lib .
 docker build -t ${IMAGE_NAME} -f dockerfile/select_stock_code/Dockerfile .
 
@@ -43,7 +44,7 @@ export COMPOSE_FILE=dockerfile/docker-compose.select_stock_code.yml
 
 echo "docker compose up"
 # docker run -it --rm get_stock_data python get_stock_info/get_stock_data.py
-docker-compose run select_stock_code /bin/bash
+docker-compose run --service-ports select_stock_code /bin/bash
 # docker-compose up
 
 # remove docker image
