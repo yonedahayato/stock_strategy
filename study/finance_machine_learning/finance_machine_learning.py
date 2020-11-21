@@ -339,12 +339,17 @@ class FinanceMachineLearning(StockStrategy):
 
                 upper, lower = self.data.Close[-1] * (1 + np.r_[1, -1]*self.price_delta)
 
+                logger.debug("log, short: {}, {}".format(self.position.is_long, self.position.is_short))
                 if pred == 1.0 and not self.position.is_long:
-                    # logger.debug("buy")
-                    self.buy(tp=upper, sl=lower)
+                    logger.debug("buy")
+                    # self.buy(tp=upper, sl=lower)
+                    self.position.close()
+                    self.buy()
                 elif pred == -1.0 and not self.position.is_short:
-                    # logger.debug("sell")
-                    self.sell(tp=lower, sl=upper)
+                    logger.debug("sell")
+                    # self.sell(tp=lower, sl=upper)
+                    self.position.close()
+                    self.sell()
 
             def analyze_feature(self, get_only=True):
                 """analyze_feature func
@@ -380,7 +385,7 @@ class FinanceMachineLearning(StockStrategy):
 
         """
 
-        results = {}
+        self.backtest_results = {}
         for code in self.codes_analyzed:
             logger.info("=== {} ===".format(code))
             my_backtests = MyBacktests()
@@ -414,28 +419,31 @@ class FinanceMachineLearning(StockStrategy):
                 continue
             else:
                 logger.info("バックテストに成功")
-                results[code] = my_backtests
+                self.backtest_results[code] = my_backtests
 
-        for code, result in results.items():
+        for code, result in self.backtest_results.items():
             logger.info("=== {} ===".format(code))
 
-            logger.debug("=== stats ===")
-            logger.debug(result.stats)
-            logger.debug("=== equity_curve ===")
-            with pd.option_context('display.max_rows', 501):
-                logger.debug(result.stats["_equity_curve"])
-            logger.debug("=== trades ===")
-            logger.debug("\n{}".format(result.stats["_trades"]))
-            logger.debug("=== predicts ===")
-            logger.debug("\n{}".format(result.stats._strategy.predicts))
+            # logger.debug("=== stats ===")
+            # logger.debug(result.stats)
+            # logger.debug("=== equity_curve ===")
+            # with pd.option_context('display.max_rows', 501):
+            #     logger.debug(result.stats["_equity_curve"])
+            # logger.debug("=== trades ===")
+            # logger.debug("\n{}".format(result.stats["_trades"]))
+            # logger.debug("=== predicts ===")
+            # logger.debug("\n{}".format(result.stats._strategy.predicts))
+            # result.bt.plot()
+
+            logger.debug(result.get_TWRR())
 
     def main(self):
-        logger.info("curate_dataset")
-        self.curate_dataset(save=False)
+        # logger.info("curate_dataset")
+        # self.curate_dataset(save=False)
 
-        self.codes_curated = self.code_list
-        logger.info("analyze_feature")
-        self.analyze_feature()
+        # self.codes_curated = self.code_list
+        # logger.info("analyze_feature")
+        # self.analyze_feature()
 
         self.codes_analyzed = self.code_list
         logger.info("training")

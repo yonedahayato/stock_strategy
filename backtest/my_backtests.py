@@ -55,11 +55,19 @@ class MyBacktests(object):
         時間加重収益率(TWRR : Time-Weighted Rate of Return) を計算
 
         """
-        market_value = []
+        if self.stats["_trades"].empty:
+            return 0
+
+        entry_value = self.stats["_trades"]["EntryPrice"].values
+        exit_value = self.stats["_trades"]["ExitPrice"].values
         returns = []
 
-        for i in range(len(market_value) - 1):
-            return_ = (market_value[i+1] - market_value[i]) / market_value[i]
+        for index, row in self.stats["_trades"].iterrows():
+            if row["Size"] > 0:
+                side = 1
+            else:
+                side = -1
+            return_ = (row["ExitPrice"] - row["EntryPrice"]) / row["EntryPrice"] * side
             returns.append(return_)
 
         TWRR = 1
