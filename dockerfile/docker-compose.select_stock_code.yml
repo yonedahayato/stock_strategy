@@ -14,6 +14,8 @@ services:
       - ${SELECT_CODE_DIR}:/select_stock_code/check_reward/result/selected_code
       - ${GRAPH_DIR}:/select_stock_code/draw_graph/graphs
       - ${TEST_DIR}:/select_stock_code/test
+    ports:
+      - "8888:8888"
     deploy:
       resources:
         limits:
