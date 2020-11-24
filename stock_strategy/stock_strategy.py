@@ -114,7 +114,11 @@ class StockStrategy(object):
         ヒストリカルデータの取得
 
         Args:
-            code(xxx): コード番号
+            code(str): コード番号
+
+        Note:
+            LOCALの場合:
+                csv からファイルを読み取る
 
         """
         msg = self.msg_tmpl.format("get_stock_data") + "{}"

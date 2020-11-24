@@ -161,7 +161,7 @@ class GetStockData:
         print("price_df", price_df)
         return None
 
-    def get_stock_data_investpy(self, code, freq='D', start=None, end="last", periods=30):
+    def get_stock_data_investpy(self, code, freq='D', start="04/01/2016", end="last", periods=30):
         """
 
         2020/10/04
@@ -171,6 +171,9 @@ class GetStockData:
 
         """
 
+        if end == "last":
+            end = pd.Timestamp.now()
+
         timestamps_format = '%d/%m/%Y'
         if isinstance(start, pd._libs.tslibs.timestamps.Timestamp):
             start = start.strftime(timestamps_format)
@@ -178,6 +181,7 @@ class GetStockData:
             end = end.strftime(timestamps_format)
 
         data_df = investpy.get_stock_historical_data(stock=code, country='japan', from_date=start, to_date=end)
+        data_df = data_df.loc[:, ["Open", "High", "Low", "Close", "Volume"]]
 
         return data_df
 

@@ -11,7 +11,10 @@ PPARENTDIR = os.path.dirname(PARENTDIR)
 
 sys.path.append(PPARENTDIR)
 
-from stock_strategy.stock_strategy import StockStrategy
+from stock_strategy.stock_strategy import (
+    StockStrategy,
+    HISTRICAL_DATA_PATH,
+)
 
 from labeling.labeling import (
     Labeling,
@@ -41,6 +44,8 @@ from backtest.my_backtests import (
     BacktestStrategy,
 )
 
+from get_stock_info.get_stock_data import GetStockData
+
 class FinanceMachineLearning(StockStrategy):
     """FinanceMachineLearning class
 
@@ -67,7 +72,12 @@ class FinanceMachineLearning(StockStrategy):
             debug の時の処理をこの関数で定義
 
         """
-        data_df = super().get_stock_data(code=code)
+        try:
+            data_df = super().get_stock_data(code=code)
+        except FileNotFoundError:
+            get_stock_data = GetStockData()
+            data_df = get_stock_data.get_stock_data_investpy(code=code)
+            data_df.to_csv(HISTRICAL_DATA_PATH.format(code=code))
         if self.debug:
             test_data_num = 500
             data_df = data_df.iloc[:test_data_num, :]
@@ -339,14 +349,14 @@ class FinanceMachineLearning(StockStrategy):
 
                 upper, lower = self.data.Close[-1] * (1 + np.r_[1, -1]*self.price_delta)
 
-                logger.debug("log, short: {}, {}".format(self.position.is_long, self.position.is_short))
+                # logger.debug("log, short: {}, {}".format(self.position.is_long, self.position.is_short))
                 if pred == 1.0 and not self.position.is_long:
-                    logger.debug("buy")
+                    # logger.debug("buy")
                     # self.buy(tp=upper, sl=lower)
                     self.position.close()
                     self.buy()
                 elif pred == -1.0 and not self.position.is_short:
-                    logger.debug("sell")
+                    # logger.debug("sell")
                     # self.sell(tp=lower, sl=upper)
                     self.position.close()
                     self.sell()
@@ -438,14 +448,14 @@ class FinanceMachineLearning(StockStrategy):
             logger.debug(result.get_TWRR())
 
     def main(self):
-        # logger.info("curate_dataset")
-        # self.curate_dataset(save=False)
+        logger.info("curate_dataset")
+        self.curate_dataset(save=True)
 
         # self.codes_curated = self.code_list
-        # logger.info("analyze_feature")
-        # self.analyze_feature()
+        logger.info("analyze_feature")
+        self.analyze_feature(save=True)
 
-        self.codes_analyzed = self.code_list
+        # self.codes_analyzed = self.code_list
         logger.info("training")
         self.train(cv=True)
         self.backtest()

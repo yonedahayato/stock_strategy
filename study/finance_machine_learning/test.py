@@ -120,7 +120,7 @@ class TestOriginalData(object):
         feature_importance = FeatureImportance(fractional_difference)
         feature_importance.feature_importance()
 
-    def test_original_dataset(self):
+    def test_original_dataset_debug(self):
         """test_original_dataset func
 
         複数のテスト銘柄でのテスト
@@ -128,6 +128,16 @@ class TestOriginalData(object):
 
         """
         finance_machine_learning = FinanceMachineLearning(debug=True)
+        finance_machine_learning.main()
+
+    def test_original_dataset_debug(self):
+        """test_original_dataset func
+
+        複数のテスト銘柄でのテスト
+        FinanceMachineLearning の実行の確認も含む
+
+        """
+        finance_machine_learning = FinanceMachineLearning(debug=False)
         finance_machine_learning.main()
 
 class TestFinancialDataStructure(object):
