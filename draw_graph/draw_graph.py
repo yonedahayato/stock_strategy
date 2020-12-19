@@ -1,4 +1,5 @@
 import copy
+from decimal import Decimal, ROUND_HALF_UP
 import matplotlib
 import numpy as np
 import os
@@ -65,6 +66,18 @@ class DrawGraph:
         return save_path
 
     def draw_chlcv(self, plt):
+        """draw_chlcv func
+
+        Open, High, Low, Close, Volume の値を取り出し描画する
+
+        Args:
+            plt(module): 描画するためのモジュール
+
+        Returns:
+            module:                                 描画した情報
+            matplotlib.figure.Figure:               描画した情報
+            matplotlib.axes._subplots.AxesSubplot   描画した情報
+        """
         data_df = copy.deepcopy(self.data_df)
         data_df = data_df.iloc[-self.graph_length:]
         data_df.columns = ["Open", "High", "Low", "Close", "Adj_Close", "Volume"]
@@ -81,8 +94,54 @@ class DrawGraph:
         place[-2] = place[-2] - 1.0
         ax.set_xticks(place)
 
-        labels = [(data_df.index[int(x)] if x < data_df.shape[0] else x) for x in ax.get_xticks()]+[data_df.index[-1]]
-        ax.set_xticklabels(labels, rotation=30)
+        labels_length = len(ax.get_xticks())
+
+        def cal_index(x):
+            """cal_index func
+
+            新たなindexを計算
+
+            Args:
+                x(int): もともとのindex
+
+            Returns:
+                float: 新たなindex
+
+            """
+            return x / (labels_length-1) * len(data_df)
+
+        def my_round(f):
+            """my_round func
+
+            四捨五入関数
+
+            Args:
+                f(float): 四捨五入計算後の入力
+
+            Returns:
+                int: 四捨五入計算後の出力
+
+            """
+            return int(Decimal(str(f)).quantize(Decimal('0'), rounding=ROUND_HALF_UP))
+
+        def get_date_index(i):
+            """get_date_index
+
+            index として使用する日付を取得
+
+            Args:
+                i(int); index
+
+            Returns:
+                str: 日付のindex
+
+            """
+            return data_df.index[i]
+
+        new_labels = [data_df.index[0]] + \
+                     [get_date_index(my_round(cal_index(x))) for x in range(1, labels_length - 1)] + \
+                     [data_df.index[-1]]
+        ax.set_xticklabels(new_labels, rotation=30)
 
         ax.set_xlim([-1, data_df.shape[0]+1])
         ax.set_ylabel("Price")

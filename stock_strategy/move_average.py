@@ -24,7 +24,7 @@ import log
 import just_now
 from result import Result
 from setting import HISTRICAL_DATA_PATH
-from stock_strategy import StockStrategy, args
+from stock_strategy import StockStrategy, parser
 
 jst_now = just_now.jst_now
 
@@ -32,6 +32,14 @@ logger = log.logger
 
 
 class MoveAverage(StockStrategy):
+    """MoveAverage class
+
+    MoveAverage
+
+    Note:
+        移動平均を利用した手法
+
+    """
     def __init__(self, debug=True, back_test_return_date=5, \
                 method_name="move_average", multiprocess=False, window=75):
 
@@ -59,6 +67,14 @@ class MoveAverage(StockStrategy):
         return rm_df
 
     def select_code(self, code, stock_data_df):
+        """select_code func
+
+        処理の流れ
+            1. 移動平均を計算 (get_move_average)
+            2. 移動平均の変換(増減)を計算 (diff)
+            3. 直近の移動平均の変換が0以上である場合 (>0) 購買銘柄とする
+
+        """
         move_average_df = self.get_move_average(stock_data_df)
         move_average_diff_df = move_average_df.diff(periods=1)
 
@@ -70,6 +86,7 @@ class MoveAverage(StockStrategy):
             self.result_codes.append(code)
 
 def main():
+    args = parser.parse_args()
     back_test_return_date = args.back_test_return_date
     move_average_window_75 = MoveAverage(debug=False, back_test_return_date=back_test_return_date,
                         method_name="MoveAverage_window=75", multiprocess=False, window=75)

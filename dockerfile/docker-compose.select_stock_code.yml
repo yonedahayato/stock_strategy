@@ -8,10 +8,14 @@ services:
       LOG_DIR: log_dir
       SELECT_CODE_DIR: select_code_dir
     volumes:
+      - ${SCRIPT_DIR}:/select_stock_code
       - ${DOWNLOAD_DIR}:/select_stock_code/get_stock_info/stock_data
       - ${LOG_DIR}:/select_stock_code/helper/log
       - ${SELECT_CODE_DIR}:/select_stock_code/check_reward/result/selected_code
       - ${GRAPH_DIR}:/select_stock_code/draw_graph/graphs
+      - ${TEST_DIR}:/select_stock_code/test
+    ports:
+      - "8888:8888"
     deploy:
       resources:
         limits:
