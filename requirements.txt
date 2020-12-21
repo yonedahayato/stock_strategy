@@ -1,6 +1,9 @@
+backtesting
+cryptocompare
 google-cloud-storage
 investpy
 joblib
+jupyter
 jsm
 keras
 logzero
@@ -10,12 +13,11 @@ mlfinlab
 mpl_finance
 numpy
 pandas
-Quandl
 pytest
+Quandl
 requests
 sklearn
 tensorflow==2.1.0
 tables
 xlrd
 YahooFinanceSpider
-backtesting
