@@ -1,5 +1,6 @@
 import csv
 import datetime
+import investpy
 import jsm
 import numpy as np
 import os
@@ -9,6 +10,7 @@ from pandas.core import common as com
 import quandl
 import re
 import sys
+import YahooFinanceSpider as yfs
 
 abs_dirname = os.path.dirname(os.path.abspath(__file__))
 parent_dirname = path.dirname(abs_dirname)
@@ -23,8 +25,16 @@ logger = log.logger
 api_key = QUANDL_API_KEY
 
 class GetStockData:
+    """GetStockData class
+
+    株価データの取得
+
+    """
+
     def __init__(self, verbose=False):
         self.verbose = verbose
+        self.freq_dict = {'D': yfs.DAILY, 'W': yfs.WEEKLY, 'M': yfs.MONTHLY}
+
 
     def logging_error(self, err_msg=""):
         logger.error(err_msg)
@@ -36,30 +46,30 @@ class GetStockData:
         if self.verbose:
             print(msg)
 
-    def get_stock_data_jsm(self, code, freq='D', start=None, end=None, periods=None):
+    def get_stock_data_jsm(self, code, freq='D', start=None, end="last", periods=30):
         """
-        https://qiita.com/u1and0/items/f6dad2cc2ee730be321c
+        jsm を利用して情報を取得する
         get Japanese stock data using jsm
-        Usage:
-            `get_jstock(6502)`
-            To get TOSHIBA daily from today back to 30days except holiday.
 
-            `get_jstock(6502, 'W', start=pd.Timestamp('2016'), end=pd.Timestamp('2017'))`
-            To get TOSHIBA weekly from 2016-01-01 to 2017-01-01.
+        2020/10/04: jsm での株価の取得できなくなった
 
-            `get_jstock(6502, end=pd.Timestamp('20170201'), periods=50)`
-            To get TOSHIBA daily from 2017-02-01 back to 50days except holiday.
+        Note:
+            https://qiita.com/u1and0/items/f6dad2cc2ee730be321c
+            Usage:
+                `get_jstock(6502)`
+                To get TOSHIBA daily from today back to 30days except holiday.
 
-            `get_jstock(6502, 'M', start='first', end='last')`
-            To get TOSHIBA monthly from 2000-01-01 (the date of start recording) to today.
+                `get_jstock(6502, 'W', start=pd.Timestamp('2016'), end=pd.Timestamp('2017'))`
+                To get TOSHIBA weekly from 2016-01-01 to 2017-01-01.
+
+                `get_jstock(6502, end=pd.Timestamp('20170201'), periods=50)`
+                To get TOSHIBA daily from 2017-02-01 back to 50days except holiday.
+
+                `get_jstock(6502, 'M', start='first', end='last')`
+                To get TOSHIBA monthly from 2000-01-01 (the date of start recording) to today.
 
         """
         msg = "[Get_Stock_Data:get_stock_data_jsm]: {}"
-
-        # Default args
-        if com._count_not_none(start, end, periods) == 0:
-            end = "last"
-            periods = 30
 
         # Switch frequency Dayly, Weekly or Monthl
         freq_dict = {'D': jsm.DAILY, 'W': jsm.WEEKLY, 'M': jsm.MONTHLY}
@@ -108,8 +118,6 @@ class GetStockData:
         * start, periodsが指定されていたら、endを計算する
         * end, periodsが指定されていたら、startを計算する
         """
-        if com._count_not_none(start, end, periods) != 2: # Like a pd.data_range Error
-            self.logging_error("[Get_Stock_Data:set_span]: Must specify two of start, end, or periods")
 
         start = start if start else (pd.Period(end, freq) - periods).start_time
         end = end if end else (pd.Period(start, freq) + Periods).start_time
@@ -131,6 +139,49 @@ class GetStockData:
 
         data_df = pd.DataFrame(data_dict, index=date, columns=columns).sort_index()
         data_df.index.name = "Date"
+
+        return data_df
+
+    def get_stock_data_YahooFinanceSpider(self, code, freq='D', start=None, end="last"):
+        """get_stock_data_YahooFinanceSpider
+
+        2020/10/04
+        YahooFinanceSpider を利用して株価データを取得する
+        参考 : https://pypi.org/project/YahooFinanceSpider/
+
+        Returns:
+            pd.DataFrame: 価格情報
+                Date,Open,High,Low,Close,Adj_Close,Volume
+
+        """
+        print("\ncode", code)
+        crawler = yfs.Crawler()
+        price = crawler.get_price(code, start, end, self.freq_dict[freq])
+        price_df = pd.DataFrame(price)
+        print("price_df", price_df)
+        return None
+
+    def get_stock_data_investpy(self, code, freq='D', start="04/01/2016", end="last", periods=30):
+        """
+
+        2020/10/04
+        investpy を利用して株価データを取得する
+
+        参考 : https://hiroshimaeasy.seesaa.net/article/476503593.html
+
+        """
+
+        if end == "last":
+            end = pd.Timestamp.now()
+
+        timestamps_format = '%d/%m/%Y'
+        if isinstance(start, pd._libs.tslibs.timestamps.Timestamp):
+            start = start.strftime(timestamps_format)
+        if isinstance(end, pd._libs.tslibs.timestamps.Timestamp):
+            end = end.strftime(timestamps_format)
+
+        data_df = investpy.get_stock_historical_data(stock=code, country='japan', from_date=start, to_date=end)
+        data_df = data_df.loc[:, ["Open", "High", "Low", "Close", "Volume"]]
 
         return data_df
 
