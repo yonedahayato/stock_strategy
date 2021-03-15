@@ -1,7 +1,7 @@
 version: "3"
 services:
   get_stock_data:
-    image: get_stock_data_to_local
+    image: get_stock_data_to_local:${VERSION}
     container_name: "get_stock_data_to_local"
     environment:
       LOG_DIR: log_dir
