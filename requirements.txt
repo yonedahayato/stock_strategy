@@ -1,7 +1,7 @@
 backtesting
 cryptocompare
 google-cloud-storage
-investpy
+investpy==1.0.3
 joblib
 jupyter
 jsm
@@ -20,4 +20,4 @@ sklearn
 tensorflow==2.1.0
 tables
 xlrd
-YahooFinanceSpider
+YahooFinanceSpider==0.3
