@@ -43,6 +43,14 @@ async def run(loop, code_list):
 
 
 def GetStockDataesToLocal():
+    """GetStockDataesToLocal func
+
+    Note:
+        処理フロー
+            1. 銘柄リストを取得
+            2. 銘柄ごとにデータを取得
+
+    """
     os.makedirs(os.path.dirname(HISTRICAL_DATA_PATH), exist_ok=True)
 
     gcl_nikkei_225 = GetCodeListNikkei225(verbose=True)
