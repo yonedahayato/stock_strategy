@@ -18,7 +18,11 @@ SCRIPT_DIR=$(cd $(dirname $0); pwd)
 LOG_DIR=$SCRIPT_DIR/helper/log
 export LOG_DIR=$LOG_DIR
 
-. ./dockerfile/get_stock_data/environment.txt
+if [ -e ./dockerfile/get_stock_data/environment.txt ]; then
+  . ./dockerfile/get_stock_data/environment.txt
+else
+  SAVE_DIR=${SCRIPT_DIR}/get_stock_info/stock_data
+fi
 export SAVE_DIR=$SAVE_DIR
 
 echo "LOG_DIR: " $LOG_DIR
