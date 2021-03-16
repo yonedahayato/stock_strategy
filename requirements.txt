@@ -9,7 +9,7 @@ keras
 logzero
 lxml
 matplotlib
-mlfinlab
+# mlfinlab
 mpl_finance
 numpy
 pandas

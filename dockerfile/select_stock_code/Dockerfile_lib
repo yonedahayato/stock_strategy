@@ -1,10 +1,11 @@
 FROM python:3.6-slim
 
+RUN apt-get update
+
 # cron install
 ENV TZ=Asia/Tokyo
 COPY ./cron /etc/cron.d
-RUN apt-get update -y && \
-    apt-get install -y cron
+RUN apt-get install -y cron
 RUN crontab /etc/cron.d/cron_setting_test.txt
 
 # jsm pip install
@@ -17,7 +18,6 @@ RUN pip install -r requires.txt
 # pip install
 WORKDIR /home/setup
 COPY ./requirements.txt .
-RUN apt-get update
 RUN apt-get install -y build-essential libssl-dev libffi-dev python3-dev
 RUN pip install -U pip
 RUN pip install cython
