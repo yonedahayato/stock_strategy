@@ -1,14 +1,20 @@
 FROM python:3.6-slim
 
-# for jsm
-COPY ./requirements_lib /usr/local/lib/python3.6/site-packages
+# cron install
+ENV TZ=Asia/Tokyo
+COPY ./cron /etc/cron.d
+RUN apt-get update -y && \
+    apt-get install -y cron
+RUN crontab /etc/cron.d/cron_setting_test.txt
 
+# jsm pip install
+COPY ./requirements_lib /usr/local/lib/python3.6/site-packages
 WORKDIR /usr/local/lib/python3.6/site-packages
-RUN ls
 RUN tar -zxvf jsm.gz
 WORKDIR /usr/local/lib/python3.6/site-packages/jsm-0.19-py3.6.egg-info
 RUN pip install -r requires.txt
 
+# pip install
 WORKDIR /home/setup
 COPY ./requirements.txt .
 RUN apt-get update

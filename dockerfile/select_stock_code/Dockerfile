@@ -5,4 +5,5 @@ WORKDIR /select_stock_code
 COPY . .
 
 # CMD ./stock_strategy/strategies_back_test.sh
-CMD ./stock_strategy/strategies.sh
+# CMD ./stock_strategy/strategies.sh
+CMD ["cron", "-f"]
