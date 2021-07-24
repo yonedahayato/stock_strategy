@@ -2,14 +2,15 @@ echo "select stock code"
 
 echo "docker build"
 ECR_REPO=gcr.io/gothic-handbook-179013
-VERSION=v.0.2
+LIB_VERSION=v.0.2
+MAIN_VERSION=v.0.2.1
 LIB_IMAGE_NAME=${ECR_REPO}/select_stock_code_lib:${VERSION}
-IMAGE_NAME=${ECR_REPO}/select_stock_code:${VERSION}
+IMAGE_NAME=${ECR_REPO}/select_stock_code:${MAIN_VERSION}
 
 # docker rmi ${LIB_IMAGE_NAME}
 # docker rmi ${IMAGE_NAME}
 docker build -t ${LIB_IMAGE_NAME} -f dockerfile/select_stock_code/Dockerfile_lib .
-docker build -t ${IMAGE_NAME} -f dockerfile/select_stock_code/Dockerfile --build-arg VERSION=${VERSION} .
+docker build -t ${IMAGE_NAME} -f dockerfile/select_stock_code/Dockerfile --build-arg LIB_VERSION=${LIB_VERSION} .
 
 echo "make log directory"
 if [ ! -d "helper/log" ]; then
@@ -36,6 +37,7 @@ export LOG_DIR=$LOG_DIR
 export SELECT_CODE_DIR=$SELECT_CODE_DIR
 export GRAPH_DIR=$GRAPH_DIR
 export TEST_DIR=$TEST_DIR
+export IMAGE_NAME=$IMAGE_NAME
 
 echo "DOWNLOAD_DIR: " $DOWNLOAD_DIR
 echo "LOG_DIR: " $LOG_DIR

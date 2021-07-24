@@ -1,2 +1,2 @@
 #!/bin/bash
-./stock_storategy/strategies.sh
+./stock_strategy/strategies.sh
