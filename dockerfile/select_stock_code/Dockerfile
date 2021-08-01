@@ -6,7 +6,8 @@ WORKDIR /select_stock_code
 
 # cron setting
 COPY ./cron /etc/cron.d
-RUN crontab /etc/cron.d/cron_setting_test.txt
+# RUN crontab /etc/cron.d/cron_setting_test.txt
+RUN crontab /etc/cron.d/cron_setting.txt
 
 COPY . .
 
