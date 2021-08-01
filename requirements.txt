@@ -1,7 +1,7 @@
 backtesting
 cryptocompare
 google-cloud-storage
-investpy==1.0.3
+investpy
 joblib
 jupyter
 jsm
@@ -17,7 +17,7 @@ pytest
 Quandl
 requests
 sklearn
-tensorflow==2.1.0
+tensorflow
 tables
 xlrd
 YahooFinanceSpider==0.3
