@@ -1,4 +1,4 @@
-FROM python:3.6-slim
+FROM python:3.9.6-slim
 
 RUN set -ex && \
     apt update && \
@@ -11,10 +11,10 @@ RUN apt install -y cron
 RUN crontab /etc/cron.d/cron_setting_test.txt
 
 # jsm pip install
-COPY ./requirements_lib /usr/local/lib/python3.6/site-packages
-WORKDIR /usr/local/lib/python3.6/site-packages
+COPY ./requirements_lib /usr/local/lib/python3.9.6/site-packages
+WORKDIR /usr/local/lib/python3.9.6/site-packages
 RUN tar -zxvf jsm.gz
-WORKDIR /usr/local/lib/python3.6/site-packages/jsm-0.19-py3.6.egg-info
+WORKDIR /usr/local/lib/python3.9.6/site-packages/jsm-0.19-py3.6.egg-info
 RUN pip install -r requires.txt
 
 # pip install
