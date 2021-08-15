@@ -1,7 +1,7 @@
 import csv
 import datetime
 import investpy
-import jsm
+# import jsm
 import numpy as np
 import os
 import os.path as path
