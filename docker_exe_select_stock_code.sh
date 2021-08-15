@@ -3,7 +3,7 @@ echo "select stock code"
 echo "docker build"
 ECR_REPO=gcr.io/gothic-handbook-179013
 LIB_VERSION=v.0.4
-MAIN_VERSION=v.0.3.0
+MAIN_VERSION=v.0.4.1
 LIB_IMAGE_NAME=${ECR_REPO}/select_stock_code_lib:${LIB_VERSION}
 IMAGE_NAME=${ECR_REPO}/select_stock_code:${MAIN_VERSION}
 
