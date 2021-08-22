@@ -15,3 +15,4 @@ result
 .DS_store
 *.zip
 *.log
+.ipynb_checkpoints/

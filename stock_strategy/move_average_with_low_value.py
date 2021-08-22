@@ -1,7 +1,6 @@
 import datetime
 from datetime import datetime as dt
 from joblib import Parallel, delayed
-import jsm
 import os
 import pandas as pd
 import random
@@ -22,7 +21,7 @@ import log
 import just_now
 from result import Result
 from setting import HISTRICAL_DATA_PATH
-from move_average import StockStrategy, MoveAverage, args
+from move_average import StockStrategy, MoveAverage, parser
 
 jst_now = just_now.jst_now
 
@@ -85,6 +84,7 @@ class MoveAverageWithLowValue(MoveAverage):
             self.result_codes = [code[0] for code in result_codes_tmp]
 
 def main():
+    args = parser.parse_args()
     back_test_return_date = args.back_test_return_date
     move_average_window_75 = MoveAverageWithLowValue(debug=False, back_test_return_date = back_test_return_date,
                         method_name="MoveAverageWithLowValue_window=75", multiprocess=False, window=75)

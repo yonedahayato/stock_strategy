@@ -80,8 +80,13 @@ class DrawGraph:
         """
         data_df = copy.deepcopy(self.data_df)
         data_df = data_df.iloc[-self.graph_length:]
-        data_df.columns = ["Open", "High", "Low", "Close", "Adj_Close", "Volume"]
-        data_df = data_df[["Open", "High", "Low", "Close", "Volume"]]
+        if len(data_df.columns) == 6:
+            data_df.columns = ["Open", "High", "Low", "Close", "Adj_Close", "Volume"]
+            data_df = data_df[["Open", "High", "Low", "Close", "Volume"]]
+        elif len(data_df.columns) == 5:
+            data_df.columns = ["Open", "High", "Low", "Close", "Volume"]
+        else:
+            raise Exception(f"ヒストリカルデータの描画中、データの形式が異常です. :{data_df.columns}")
 
         fig = plt.figure(figsize=(18, 9))
         fig.subplots_adjust(left=0.045, bottom=0.075, right=0.95, top=0.95, wspace=0.15, hspace=0.15)

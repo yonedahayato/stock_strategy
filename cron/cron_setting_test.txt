@@ -1,0 +1,1 @@
+*/1 * * * * /usr/local/bin/python /select_stock_code/test/cron/cron_test.py >> /var/log/stream.log 2>&1

@@ -1,25 +1,25 @@
-from stock_strategy import (
-    # library
-    argparse,
-    copy,
-    datetime,
-    dt,
-    os,
-    pd,
-    sys,
-
-    # my library
-    StockStrategy,
-
-    # variable
-    args,
-    logger
-)
+import argparse
+import copy
+import datetime
+from datetime import datetime as dt
 import itertools
 import numpy as np
+import os
+import pandas as pd
+import sys
 
-from helper.peak import PeakInfo
-from helper.line import LineInfo
+# abspath = os.path.dirname(os.path.abspath(__file__))
+# p_path = os.path.dirname(abspath)
+# sys.path.append(p_path)
+
+from stock_strategy import (
+    logger,
+    parser,
+    StockStrategy
+)
+
+from helper.trend_line.peak import PeakInfo
+from helper.trend_line.line import LineInfo
 
 
 class TrendLine(StockStrategy):
@@ -242,6 +242,7 @@ class TrendLine(StockStrategy):
 
 
 def main():
+    args = parser.parse_args()
     back_test_return_date = args.back_test_return_date
     # lengthes_limited_between_end_and_latest = [100, 75, 50, 25]
     lengthes_limited_between_end_and_latest = [30]

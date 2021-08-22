@@ -1,4 +1,5 @@
 from datetime import datetime as dt
+from datetime import date
 import json
 import os
 import pandas as pd
@@ -20,6 +21,9 @@ from setting import (
     )
 
 class Result:
+    """Result classmethod
+    結果をまとめるためのクラス
+    """
     def __init__(self, save_path=RESULT_PATH, to_GCS=True):
         msg = "[Save_Result:__init__]: {}"
         self.save_path = save_path
@@ -56,6 +60,9 @@ class Result:
         self.format[key] = value
 
     def save_to_local(self, file_name):
+        """save_to_local func
+        結果をlocal に保存
+        """
         # jsonをcsvに変換
         result_df = self.change_format_to_dataframe()
 
@@ -67,8 +74,8 @@ class Result:
         # json fileをlocalに保存
         json_path = "{}/{}".format(self.save_path, file_name)
         with open(json_path, "w") as file:
-            json.dump(self.format, file, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
-            json_str = json.dumps(self.format, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
+            json.dump(self.format, file, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '), default=json_serial)
+            json_str = json.dumps(self.format, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '), default=json_serial)
 
         self.json_path = json_path
         return json_str, json_path, csv_path
@@ -98,7 +105,7 @@ class Result:
         return json_str
 
     def save(self):
-        msg = "[Save_Result:save]: {}"
+        msg = "[Result:save]: {}"
         try:
             file_name = "{}_{}.json".format(self.format["method"], self.format["creat_time"])
             if self.to_GCS:
@@ -108,7 +115,7 @@ class Result:
             return json_str
 
         except Exception as e:
-            error_msg = "failt to save to json, format: {}, {}".format(self.format, e)
+            error_msg = "json 形式での結果の保存に失敗しました, format: {}, {}".format(self.format, e)
             logger.exception(msg.format(error_msg))
             raise Exception(e)
 
@@ -138,6 +145,15 @@ class Result:
                    "result_code", "image_url"]
         result_df = result_df[columns]
         return result_df
+
+def json_serial(obj):
+    """json_serial func
+    json dump での保存の際の TypeError に対応
+    """
+    if isinstance(obj, (dt, date)):
+        return obj.isoformat()
+    else:
+        raise TypeError ("Type %s not serializable" % type(obj))
 
 def main():
     result = Result()

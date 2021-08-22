@@ -1,0 +1,21 @@
+FROM python:3.6-slim
+
+#タイムゾーンを設定
+ENV TZ=Asia/Tokyo
+
+#設定ファイルをコンテナにコピー
+COPY ./cron /etc/cron.d
+
+#基本的なソフトをインストール
+RUN apt-get update -y && \
+    apt-get install -y cron && \
+    apt-get install -y vim
+
+#設定を読み込む
+RUN crontab /etc/cron.d/cron_setting_test.txt
+
+WORKDIR /home/test
+COPY ./test /home/test
+
+#cronを起動する
+CMD ["cron", "-f"]

@@ -24,8 +24,8 @@ get_stock_data = GetStockData(verbose=True)
 
 def req(code):
     try:
-        data_df = get_stock_data.get_stock_data_jsm(code, "D",
-                    start=HISTRICAL_DATA_RANGE_START, end=HISTRICAL_DATA_RANGE_END_NOW)
+        data_df = get_stock_data.get_stock_data_investpy(code, \
+                  "D", start=HISTRICAL_DATA_RANGE_START, end=HISTRICAL_DATA_RANGE_END_NOW)
         data_df.to_csv(HISTRICAL_DATA_PATH.format(code=code))
 
     except Exception as e:
@@ -43,6 +43,14 @@ async def run(loop, code_list):
 
 
 def GetStockDataesToLocal():
+    """GetStockDataesToLocal func
+
+    Note:
+        処理フロー
+            1. 銘柄リストを取得
+            2. 銘柄ごとにデータを取得
+
+    """
     os.makedirs(os.path.dirname(HISTRICAL_DATA_PATH), exist_ok=True)
 
     gcl_nikkei_225 = GetCodeListNikkei225(verbose=True)

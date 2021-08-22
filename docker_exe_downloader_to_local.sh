@@ -2,7 +2,11 @@
 
 # docker build
 # docker build -t get_stock_data_lib -f dockerfile/get_stock_data/Dockerfile_lib .
-docker build -t get_stock_data_to_local -f dockerfile/get_stock_data/Dockerfile_to_local .
+
+export VERSION=v.0.1
+IMAGE_NAME=get_stock_data_to_local:${VERSION}
+# docker rmi ${IMAGE_NAME}
+docker build -t ${IMAGE_NAME} -f dockerfile/get_stock_data/Dockerfile_to_local .
 
 # log directory
 if [ ! -d "helper/log" ]; then
@@ -14,7 +18,11 @@ SCRIPT_DIR=$(cd $(dirname $0); pwd)
 LOG_DIR=$SCRIPT_DIR/helper/log
 export LOG_DIR=$LOG_DIR
 
-. ./dockerfile/get_stock_data/environment.txt
+if [ -e ./dockerfile/get_stock_data/environment.txt ]; then
+  . ./dockerfile/get_stock_data/environment.txt
+else
+  SAVE_DIR=${SCRIPT_DIR}/get_stock_info/stock_data
+fi
 export SAVE_DIR=$SAVE_DIR
 
 echo "LOG_DIR: " $LOG_DIR
@@ -22,10 +30,9 @@ echo "SAVE_DIR: " $SAVE_DIR
 
 # get stock data
 export COMPOSE_FILE=dockerfile/docker-compose.get_stock_data_to_local.yml
-# docker run -it --rm get_stock_data python get_stock_info/get_stock_data.py
 docker-compose up
+docker-compose down -v
 
 # remove docker image
 # docker rmi get_stock_data_lib
-docker-compose down -v
-docker rmi get_stock_data_to_local
+# docker rmi ${IMAGE_NAME}
