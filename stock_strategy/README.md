@@ -76,20 +76,20 @@
 1. peak をもとめる(large peak)
 1. 直近との距離が${length_limited_between_end_and_latest}以下であるend peak を無視
 1. start peak と end peakを結んだ線（トレンドライン）を作成する
-  1. start peak と end peak の距離を計算
-  1. トレンドラインの傾きを計算
-  1. ラインの集合を作成
-  1. ライン上にある peak でないキャンドルを取得
-  1. ラインの範囲の高値を取得
-  1. 高値とライン上の値を比べる
-  1. 以下の内容を満たすラインをトレンドライン候補とし、取得する
-    1. 「高値がトレンドラインを上回っていない」
-    1. 「ラインの範囲のピーク点とラインの１点の差の絶対値が${value_accept_between_high_value_and_list}を下回る」と「start peak」
-    1. 「start peak」と「end peak」の間にpeakが存在する
-  1. 以下のどれかの内容を満たすトレンドラインをトレンドラインとし、取得する
-    1. 「ルール１」: 「start peak と end peak の間のピークの数が１個もしくは２個」かつ「トレンドラインの長さが${candle_num_start_to_end}以下」
-    1. 「ルール１（直近）」：「start peak と end peak の間のピークの数が１個もしくは２個」
-    1. 「ルール２」：「start peak と end peak の間のピークの数が３個以上」
+    1. start peak と end peak の距離を計算
+    1. トレンドラインの傾きを計算
+    1. ラインの集合を作成
+    1. ライン上にある peak でないキャンドルを取得
+    1. ラインの範囲の高値を取得
+    1. 高値とライン上の値を比べる
+    1. 以下の内容を満たすラインをトレンドライン候補とし、取得する
+        1. 「高値がトレンドラインを上回っていない」
+        1. 「ラインの範囲のピーク点とラインの１点の差の絶対値が${value_accept_between_high_value_and_list}を下回る」と「start peak」
+        1. 「start peak」と「end peak」の間にpeakが存在する
+    1. 以下のどれかの内容を満たすトレンドラインをトレンドラインとし、取得する
+        1. 「ルール１」: 「start peak と end peak の間のピークの数が１個もしくは２個」かつ「トレンドラインの長さが${candle_num_start_to_end}以下」
+        1. 「ルール１（直近）」：「start peak と end peak の間のピークの数が１個もしくは２個」
+        1. 「ルール２」：「start peak と end peak の間のピークの数が３個以上」
 1. エンドピークが一番直近にあるトレンドラインを選択（複数ある場合は短いトレンドラインを選択）
 
 <!-- trend line -->
